@@ -4,6 +4,7 @@
 
 set(SOLUTION_DEPENDENCY_PROJECTS
 	FreeType
+	googletest
 	WinSDK
 	Catch
 )
@@ -158,6 +159,7 @@ function(cmg_install_test target_name target_source_files)
 	
 	target_link_libraries(${target_name}
 		${OPENGL_LIBRARIES}
+		googletest
 		#${CMG_DEP_INSTALL_PATH}/lib/Debug/dinput8.lib
 	)
 	

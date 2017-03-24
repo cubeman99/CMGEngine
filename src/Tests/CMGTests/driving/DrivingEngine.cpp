@@ -5,7 +5,8 @@
 using namespace std;
 
 
-#define ASSETS_PATH "C:/Workspace/C++/Framework Projects/CMGEngine/assets/"
+//#define ASSETS_PATH "C:/Workspace/C++/Framework Projects/CMGEngine/assets/"
+#define ASSETS_PATH "C:/Users/david.jordan/Desktop/CMGEngine/assets/"
 //#define ASSETS_PATH "assets/"
 
 

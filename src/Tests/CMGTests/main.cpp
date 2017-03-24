@@ -5,6 +5,9 @@
 #include "driving/DrivingEngine.h"
 #include <sstream>
 
+#include <gtest/gtest.h>
+
+
 using namespace std;
 
 /*
@@ -109,92 +112,103 @@ std::underlying_type<T_EnumClass>::type enum_val(T_EnumClass e)
 typedef std::underlying_type<EnumClass>::type utype;
 */
 
+
+static void EPXECT_MATRIX_EQ(const Matrix4f& m1, const Matrix4f& m2)
+{
+	EXPECT_FLOAT_EQ(m1.m[0], m2.m[0]);
+	EXPECT_FLOAT_EQ(m1.m[1], m2.m[1]);
+	EXPECT_FLOAT_EQ(m1.m[2], m2.m[2]);
+	EXPECT_FLOAT_EQ(m1.m[3], m2.m[3]);
+	EXPECT_FLOAT_EQ(m1.m[4], m2.m[4]);
+	EXPECT_FLOAT_EQ(m1.m[5], m2.m[5]);
+	EXPECT_FLOAT_EQ(m1.m[6], m2.m[6]);
+	EXPECT_FLOAT_EQ(m1.m[7], m2.m[7]);
+	EXPECT_FLOAT_EQ(m1.m[8], m2.m[8]);
+	EXPECT_FLOAT_EQ(m1.m[9], m2.m[9]);
+	EXPECT_FLOAT_EQ(m1.m[10], m2.m[10]);
+	EXPECT_FLOAT_EQ(m1.m[11], m2.m[11]);
+	EXPECT_FLOAT_EQ(m1.m[12], m2.m[12]);
+	EXPECT_FLOAT_EQ(m1.m[13], m2.m[13]);
+	EXPECT_FLOAT_EQ(m1.m[14], m2.m[14]);
+	EXPECT_FLOAT_EQ(m1.m[15], m2.m[15]);
+}
+
+static void EPXECT_MATRIX_EQ(const Matrix4f& m,
+	float x1, float y1, float z1, float w1,
+	float x2, float y2, float z2, float w2,
+	float x3, float y3, float z3, float w3,
+	float x4, float y4, float z4, float w4)
+{
+	EXPECT_FLOAT_EQ(m.m[0], x1);
+	EXPECT_FLOAT_EQ(m.m[1], x2);
+	EXPECT_FLOAT_EQ(m.m[2], x3);
+	EXPECT_FLOAT_EQ(m.m[3], x4);
+	EXPECT_FLOAT_EQ(m.m[4], y1);
+	EXPECT_FLOAT_EQ(m.m[5], y2);
+	EXPECT_FLOAT_EQ(m.m[6], y3);
+	EXPECT_FLOAT_EQ(m.m[7], y4);
+	EXPECT_FLOAT_EQ(m.m[8], z1);
+	EXPECT_FLOAT_EQ(m.m[9], z2);
+	EXPECT_FLOAT_EQ(m.m[10], z3);
+	EXPECT_FLOAT_EQ(m.m[11], z4);
+	EXPECT_FLOAT_EQ(m.m[12], w1);
+	EXPECT_FLOAT_EQ(m.m[13], w2);
+	EXPECT_FLOAT_EQ(m.m[14], w3);
+	EXPECT_FLOAT_EQ(m.m[15], w4);
+}
+
+
+TEST(Matrix4f, Matrix4f_Transpose)
+{
+	Matrix4f matrix;
+	matrix.Set(1, 2, 3, 4,
+			   5, 6, 7, 8,
+			   9, 10, 11, 12,
+			   13, 14, 15, 16);
+
+	Matrix4f transpose = matrix.GetTranspose();
+	EPXECT_MATRIX_EQ(transpose,
+		1, 5, 9, 13,
+		2, 6, 10, 14,
+		3, 7, 11, 15,
+		4, 8, 12, 16);
+}
+
+
+TEST(Matrix4f, Matrix4f_AffineInverse)
+{
+	Matrix4f affineMatrix =
+		Matrix4f::CreateTranslation(2.5f, -1.1f, 3.8f) *
+		Matrix4f::CreateScale(2.5f);
+
+	Matrix4f affineMatrixInverse = affineMatrix.GetAffineInverse();
+
+	EPXECT_MATRIX_EQ(Matrix4f::IDENTITY, affineMatrixInverse * affineMatrix);
+}
+
+
+TEST(Matrix4f, Matrix4f_Inverse)
+{
+	Matrix4f matrix =
+		Matrix4f::CreateTranslation(2.5f, -1.1f, 3.8f) *
+		Matrix4f::CreateScale(2.5f);
+
+	Matrix4f matrixInverse = matrix.GetInverse();
+
+	EPXECT_MATRIX_EQ(Matrix4f::IDENTITY, matrixInverse * matrix);
+}
+
+
 int main(int argc, char* argv[])
 {
-	/*
-	String fsSource, vsSource;
-	File::OpenAndGetContents(Path(ASSETS_PATH "shaders/test.fs"), fsSource);
-	File::OpenAndGetContents(Path(ASSETS_PATH "shaders/test.vs"), vsSource);
-
-	Shader shader;
-	shader.AddStage(ShaderType::k_vertex_shader, vsSource);
-	shader.AddStage(ShaderType::k_fragment_shader, vsSource);
-	shader.CompileAndLink();
-
-	return 0;*/
-
-	//utype x = static_cast<utype>(EnumClass::k_two);
-	//int x = enum_val(EnumClass::k_one);
-	//int y = enum_val(EnumClass::k_neg_one);
-	
-	//Mesh* mesh = TestMeshes::LoadMesh(Path("C:/Workspace/C++/Framework Projects/CMGEngine/assets/models/ae86.obj"));
-	//delete mesh;
-	/*
-	char slash;
-	int position, texCoord, normal;
-	String str;
-
-	String line = "1/2/4 2//3 41// /212/ //124 124/2123/2313";
-	std::stringstream lineStream(line);
-
-	String token;
-	while (lineStream >> token)
-	{
-		//String token = "/3345/";
-		
-		position = -1;
-		texCoord = -1;
-		normal = -1;
-
-		unsigned int index;
-		unsigned int start;
-		index = token.find_first_of('/', 0);
-		if (index > 0)
-			position = atoi(token.substr(0, index).c_str());
-		start = index + 1;
-		index = token.find_first_of('/', start);
-		if (index > start)
-			texCoord = atoi(token.substr(start, index - start).c_str());
-		start = index + 1;
-		if (start < token.length())
-			normal = atoi(token.substr(start, token.length() - start).c_str());
-		cout << position << " / " << texCoord << " / " << normal << endl;
-	}*/
-
-	//if (start > index + 1)
-		//cout << line.substr(start, start - index - 1) << endl;
-
-	//start = index;
-	//index = line.find_first_of('/', index);
-	//cout << line.substr(start, index - start) << endl;
-	//if (index != std::string::npos)
-
-
-
-
-	//if (lineStream >> position)
-	//	cout << "pos = " << position << endl;
-	//if (lineStream >> slash >> index2)
-	//	printf("i2\n");
-	//lineStream >> str;
-	//if (lineStream >> slash >> index3)
-		//printf("i3\n");
-
-
-	//system("pause");
-	//return 0;
-
-
-
 	//TestApp app;
 	//PhysicsApp app;
 	//app.Initialize("3D Physics Engine", 800, 600);
-		
-	DrivingApp app;
-	app.Initialize("Vehicle Dynamics", 1200, 785);
+	//DrivingApp app;
+	//app.Initialize("Vehicle Dynamics", 1200, 785);
+	//app.Run();
+	//return 0;
 
-
-	app.Run();
-
-	return 0;
+	::testing::InitGoogleTest(&argc, argv);
+	return RUN_ALL_TESTS();
 }

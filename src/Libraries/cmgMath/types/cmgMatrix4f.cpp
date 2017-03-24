@@ -968,7 +968,7 @@ void Matrix4f::Transpose(const Matrix4f& src, Matrix4f& dst)
 void Matrix4f::Invert(const Matrix4f& inMat, Matrix4f& outResult)
 {
 	// TODO: implement Matrix4f inversion.
-	CMG_ASSERT_UNIMPLEMENTED_FUNCTION();
+	//CMG_ASSERT_UNIMPLEMENTED_FUNCTION();
 }
 
 void Matrix4f::InvertAffine(const Matrix4f& inMat, Matrix4f& outResult)
