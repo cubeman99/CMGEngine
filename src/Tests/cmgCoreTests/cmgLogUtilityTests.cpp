@@ -35,11 +35,20 @@ private:
 };
 
 
+struct LogMessage
+{
+	LogLevel		level;
+	std::string		fileName;
+	int				lineNumber;
+	std::string		text;
+};
+
+typedef void (*LogCallback) (const LogMessage& message);
+
 class LogStream
 {
-
 public:
-	LogStream(LogLevel level = LogLevel::DEFAULT, const std::string& fileName = "", int lineNumber = -1) {}
+	LogStream(LogLevel level = LogLevel::DEFAULT, const std::string& fileName = "", int lineNumber = -1, LogCallback callback = NULL) {}
 	~LogStream() {}
 
 	LogStream& operator <<(char x) { return *this; }
@@ -94,10 +103,27 @@ TEST(LogStream, LogStream_Constructor)
 	EXPECT_EQ("", logStream.GetBufferedText());
 }
 
+static LogCallback callbackRan = NULL;
+
+static void LogStream_Destructor_TestCallback(const LogMessage& message)
+{
+	callbackRan = LogStream_Destructor_TestCallback;
+	EXPECT_EQ(LogLevel::WARN, message.level);
+	EXPECT_EQ("test file name", message.fileName);
+	EXPECT_EQ(92, message.lineNumber);
+	EXPECT_EQ("test callback text", message.text);
+}
+
 TEST(LogStream, LogStream_Destructor)
 {
-	// TODO: LogStream_Destructor
-	EXPECT_TRUE(false);
+	// Construct and destruct to test that the log callback actually ran.
+	callbackRan = NULL;
+	{
+		LogStream logStream = LogStream(LogLevel::WARN,
+			"test file name", 92, LogStream_Destructor_TestCallback);
+		logStream << "test callback text";
+	}
+	EXPECT_EQ((LogCallback) LogStream_Destructor_TestCallback, callbackRan);
 }
 
 TEST(LogStream, LogStream_Buffer_String)
@@ -119,18 +145,62 @@ TEST(LogStream, LogStream_Buffer_Concat)
 	EXPECT_EQ("helloworld", logStream.GetBufferedText());
 }
 
+TEST(LogStream, LogStream_Buffer_Char)
+{
+	LogStream logStream;
+	logStream << 'A' << 'B' << 'C';
+	EXPECT_EQ("ABC", logStream.GetBufferedText());
+}
+
+TEST(LogStream, LogStream_Buffer_UnsignedChar)
+{
+	LogStream logStream;
+	logStream << unsigned char('X') << unsigned char('Y') << unsigned char('Z');
+	EXPECT_EQ("XYZ", logStream.GetBufferedText());
+}
+
+TEST(LogStream, LogStream_Buffer_Short)
+{
+	LogStream logStream;
+	logStream << short(-12366);
+	EXPECT_EQ("-12366", logStream.GetBufferedText());
+}
+
+TEST(LogStream, LogStream_Buffer_UnsignedShort)
+{
+	LogStream logStream;
+	logStream << unsigned short(66234);
+	EXPECT_EQ("66234", logStream.GetBufferedText());
+}
+
 TEST(LogStream, LogStream_Buffer_Int)
 {
 	LogStream logStream;
 	logStream << int(12345678);
 	EXPECT_EQ("12345678", logStream.GetBufferedText());
+	logStream << int(-32);
+	EXPECT_EQ("12345678-32", logStream.GetBufferedText());
 }
 
-TEST(LogStream, LogStream_Buffer_Unsigned_Int)
+TEST(LogStream, LogStream_Buffer_UnsignedInt)
 {
 	LogStream logStream;
-	logStream << unsigned int(56);
-	EXPECT_EQ("56", logStream.GetBufferedText());
+	logStream << unsigned int(4294962000);
+	EXPECT_EQ("4294962000", logStream.GetBufferedText());
+}
+
+TEST(LogStream, LogStream_Buffer_Long)
+{
+	LogStream logStream;
+	logStream << long(-2147483648);
+	EXPECT_EQ("-2147483648", logStream.GetBufferedText());
+}
+
+TEST(LogStream, LogStream_Buffer_UnsignedLong)
+{
+	LogStream logStream;
+	logStream << unsigned long(4294967294);
+	EXPECT_EQ("4294967294", logStream.GetBufferedText());
 }
 
 TEST(LogStream, LogStream_Buffer_Float)
@@ -143,11 +213,12 @@ TEST(LogStream, LogStream_Buffer_Float)
 TEST(LogStream, LogStream_Buffer_Double)
 {
 	LogStream logStream;
-	logStream << 12.25;
-	EXPECT_EQ("12.25", logStream.GetBufferedText());
+	logStream << -3.14159265368;
+	EXPECT_EQ("-3.14159265368", logStream.GetBufferedText());
 }
 
 
 //-----------------------------------------------------------------------------
 // LogUtility tests
 //-----------------------------------------------------------------------------
+
