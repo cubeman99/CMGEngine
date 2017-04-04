@@ -18,23 +18,6 @@ enum class LogLevel
 };
 
 
-class LogUtility
-{
-public:
-	LogUtility();
-
-	// getters
-	bool IsTraceEnabled() const;
-	LogLevel GetLogLevel() const;
-
-	// setters
-	void SetLogLevel(LogLevel level);
-	void EnableTrace(bool trace);
-
-private:
-};
-
-
 struct LogMessage
 {
 	LogLevel		level;
@@ -43,7 +26,38 @@ struct LogMessage
 	std::string		text;
 };
 
+
 typedef void (*LogCallback) (const LogMessage& message);
+
+
+class LogUtility
+{
+	friend class LogStream;
+
+public:
+	LogUtility() {}
+
+	// Constants
+	static const LogLevel DEFAULT_LOG_LEVEL;
+	
+	// Getters
+	bool IsTraceEnabled() const { return false; }
+	LogLevel GetLogLevel() const { return LogLevel::OFF; }
+	LogCallback GetCallback() { return NULL; }
+
+	// Setters
+	void SetLogLevel(LogLevel level) {}
+	void EnableTrace(bool trace) {}
+	void SetCallback(LogCallback callback) {}
+
+private:
+
+	void HandleLogMessage(const LogMessage& logMessage);
+};
+
+
+const LogLevel LogUtility::DEFAULT_LOG_LEVEL = LogLevel::WARN;
+
 
 class LogStream
 {
@@ -70,6 +84,12 @@ public:
 
 private:
 };
+
+LogUtility globalLogUtility;
+
+#define CMG_LOG_UTILITY globalLogUtility;
+
+#define CMG_LOG_MSG() LogStream(LogLevel::INFO, __FILE__, __LINE__, globalLogUtility.GetCallback())
 
 
 
@@ -155,8 +175,9 @@ TEST(LogStream, LogStream_Buffer_Char)
 TEST(LogStream, LogStream_Buffer_UnsignedChar)
 {
 	LogStream logStream;
-	logStream << unsigned char('X') << unsigned char('Y') << unsigned char('Z');
-	EXPECT_EQ("XYZ", logStream.GetBufferedText());
+	logStream << unsigned char('X') << unsigned char('Y');
+	logStream << unsigned char('Z') << unsigned char(0x20);
+	EXPECT_EQ("XYZ ", logStream.GetBufferedText());
 }
 
 TEST(LogStream, LogStream_Buffer_Short)
@@ -192,8 +213,8 @@ TEST(LogStream, LogStream_Buffer_UnsignedInt)
 TEST(LogStream, LogStream_Buffer_Long)
 {
 	LogStream logStream;
-	logStream << long(-2147483648);
-	EXPECT_EQ("-2147483648", logStream.GetBufferedText());
+	logStream << long(-21474848);
+	EXPECT_EQ("-21474848", logStream.GetBufferedText());
 }
 
 TEST(LogStream, LogStream_Buffer_UnsignedLong)
@@ -221,4 +242,57 @@ TEST(LogStream, LogStream_Buffer_Double)
 //-----------------------------------------------------------------------------
 // LogUtility tests
 //-----------------------------------------------------------------------------
+
+TEST(LogUtility, Constructor)
+{
+	LogUtility utility;
+	EXPECT_EQ(LogUtility::DEFAULT_LOG_LEVEL, utility.GetLogLevel());
+	EXPECT_EQ(false, utility.IsTraceEnabled());
+}
+
+TEST(LogUtility, GettersAndSetters)
+{
+	LogUtility utility;
+
+	utility.SetLogLevel(LogLevel::FATAL);
+	EXPECT_EQ(LogLevel::FATAL, utility.GetLogLevel());
+	utility.SetLogLevel(LogLevel::INFO);
+	EXPECT_EQ(LogLevel::INFO, utility.GetLogLevel());
+
+	utility.EnableTrace(true);
+	EXPECT_EQ(true, utility.IsTraceEnabled());
+	utility.EnableTrace(false);
+	EXPECT_EQ(false, utility.IsTraceEnabled());
+	
+	utility.SetCallback((LogCallback) NULL);
+	EXPECT_EQ((LogCallback) NULL, utility.GetCallback());
+}
+
+
+
+//-----------------------------------------------------------------------------
+// Log Macro Tests
+//-----------------------------------------------------------------------------
+
+static LogMessage testLogMessage;
+
+static void LogMacros_TestCallback(const LogMessage& message)
+{
+	testLogMessage = message;
+}
+
+TEST(LogMacros, Macro_LOG_MSG)
+{
+	//LogUtility::GetInstance().SetLogLevel(LogLevel::INFO);
+	////LogUtility::GetInstance().EnableTrace(false);
+	//LogUtility::GetInstance().SetCallback(LogMacros_TestCallback);
+
+	// Log a test message.
+	testLogMessage.text = "??";
+	CMG_LOG_MSG() << "hello";
+	EXPECT_EQ(__LINE__ - 1, testLogMessage.lineNumber);
+	EXPECT_EQ(__FILE__, testLogMessage.fileName);
+	EXPECT_EQ(LogLevel::INFO, testLogMessage.level);
+	EXPECT_EQ("hello", testLogMessage.text);
+}
 
