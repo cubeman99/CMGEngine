@@ -20,6 +20,9 @@ set(CMG_CORE_SOURCE_FILES
 	io/cmgPath.h
 	io/cmgPath.cpp
 
+	log/cmgLogging.h
+	log/cmgLogging.cpp
+
 	string/cmgString.h
 	string/cmgString.cpp
 )
