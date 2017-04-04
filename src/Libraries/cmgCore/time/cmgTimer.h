@@ -22,8 +22,8 @@ public:
 
 	inline bool IsRunning() const { return m_isRunning; }
 
-	float GetElapsedSeconds() const;
-	float GetElapsedMilliseconds() const;
+	double GetElapsedSeconds() const;
+	double GetElapsedMilliseconds() const;
 
 
 private:
@@ -42,7 +42,7 @@ public:
 	ProfileSection(const std::string& name);
 	~ProfileSection();
 
-	inline std::string GetName() const { return "?"; }
+	inline std::string GetName() const { return m_name; }
 
 	ProfileSection* GetSubSection(const std::string& sectionName);
 	ProfileSection* operator [](const std::string& sectionName);
@@ -68,6 +68,11 @@ public:
 private:
 	void Print(std::ostream& outStream, int depth);
 
+	Timer m_timer;
+	double m_totalTime;
+	int m_numInvocations;
+	std::string m_name;
+	ProfileSection* m_parentSection;
 	std::vector<ProfileSection*> m_subSections;
 };
 

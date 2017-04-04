@@ -17,14 +17,14 @@ TEST(Timer, Constructor)
 	EXPECT_FALSE(timer.IsRunning());
 	
 	// Make sure no time has elapsed if not started.
-	EXPECT_FLOAT_EQ(0.0f, timer.GetElapsedSeconds());
-	EXPECT_FLOAT_EQ(0.0f, timer.GetElapsedMilliseconds());
+	EXPECT_DOUBLE_EQ(0.0, timer.GetElapsedSeconds());
+	EXPECT_DOUBLE_EQ(0.0, timer.GetElapsedMilliseconds());
 }
 
 TEST(Timer, Start)
 {
 	Timer timer;
-	float t1, t2;
+	double t1, t2;
 
 	// When started, make sure time always goes up.
 
@@ -46,7 +46,7 @@ TEST(Timer, Start)
 TEST(Timer, Stop)
 {
 	Timer timer;
-	float t1, t2;
+	double t1, t2;
 
 	timer.Start();
 	Sleep(50);
@@ -60,7 +60,7 @@ TEST(Timer, Stop)
 	t1 = timer.GetElapsedSeconds();
 	Sleep(100);
 	t2 = timer.GetElapsedSeconds();
-	EXPECT_FLOAT_EQ(t1, t2);
+	EXPECT_DOUBLE_EQ(t1, t2);
 
 }
 
@@ -69,7 +69,7 @@ TEST(Timer, UnitConversions)
 	Timer timer;
 	timer.Start();
 
-	float seconds, milliseconds;
+	double seconds, milliseconds;
 
 	// Make sure seconds is equivilent to milliseconds.
 	// Allow 1 ms of error due to measurements happining
@@ -78,12 +78,12 @@ TEST(Timer, UnitConversions)
 	Sleep(100);
 	seconds = timer.GetElapsedSeconds();
 	milliseconds = timer.GetElapsedMilliseconds();
-	EXPECT_NEAR(seconds * 1000.0f, milliseconds, 1.0f);
+	EXPECT_NEAR(seconds * 1000.0, milliseconds, 1.0);
 
 	Sleep(50);
 	seconds = timer.GetElapsedSeconds();
 	milliseconds = timer.GetElapsedMilliseconds();
-	EXPECT_NEAR(seconds * 1000.0f, milliseconds, 1.0f);
+	EXPECT_NEAR(seconds * 1000.0, milliseconds, 1.0);
 }
 
 
@@ -114,7 +114,7 @@ TEST(ProfileSection, GetSubSection)
 	EXPECT_EQ("child2", child2->GetName());
 	
 	ProfileSection* child1Again = parent.GetSubSection("child1");
-	EXPECT_TRUE(child1Again != child1);
+	EXPECT_TRUE(child1Again == child1);
 }
 
 TEST(ProfileSection, IterateSubSections)
@@ -151,6 +151,7 @@ TEST(ProfileSection, IterateSubSections)
 TEST(ProfileSection, GetParentSection)
 {
 	ProfileSection parent("parent");
+	EXPECT_TRUE(nullptr == parent.GetParentSection());
 
 	ProfileSection* child1 = parent.GetSubSection("child1");
 	EXPECT_TRUE(&parent == child1->GetParentSection());
