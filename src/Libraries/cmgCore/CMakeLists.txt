@@ -25,6 +25,9 @@ set(CMG_CORE_SOURCE_FILES
 
 	string/cmgString.h
 	string/cmgString.cpp
+
+	time/cmgTimer.h
+	time/cmgTimer.cpp
 )
 
 cmg_install_library(cmgCore "${CMG_CORE_SOURCE_FILES}")

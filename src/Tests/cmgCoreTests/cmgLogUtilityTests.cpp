@@ -59,8 +59,8 @@ TEST(LogStream, LogStream_Constructor)
 
 	// Test the constructor with specified values #1.
 	{
-		LogStream logStream(LogLevel::ERROR, "file_name", 42);
-		EXPECT_EQ(LogLevel::ERROR, logStream.GetLevel());
+		LogStream logStream(LogLevel::ERR, "file_name", 42);
+		EXPECT_EQ(LogLevel::ERR, logStream.GetLevel());
 		EXPECT_EQ("file_name", logStream.GetFileName());
 		EXPECT_EQ(42, logStream.GetLineNumber());
 		EXPECT_EQ("", logStream.GetBufferedText());
@@ -227,7 +227,7 @@ TEST(LogModule, LogMacros_LogLevels)
 {
 	cmg::log::SetLogUtility(NULL);
 	EXPECT_EQ(LogLevel::FATAL,	CMG_LOG_FATAL().GetLevel());
-	EXPECT_EQ(LogLevel::ERROR,	CMG_LOG_ERROR().GetLevel());
+	EXPECT_EQ(LogLevel::ERR,	CMG_LOG_ERROR().GetLevel());
 	EXPECT_EQ(LogLevel::WARN,	CMG_LOG_WARN().GetLevel());
 	EXPECT_EQ(LogLevel::INFO,	CMG_LOG_INFO().GetLevel());
 	EXPECT_EQ(LogLevel::NOTICE,	CMG_LOG_NOTICE().GetLevel());
@@ -283,4 +283,5 @@ TEST(LogModule, LogMacros_MessageData)
 
 	cmg::log::SetLogUtilityToDefault();
 }
+
 

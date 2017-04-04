@@ -13,7 +13,7 @@ enum class LogLevel
 {
 	OFF = 0,
 		FATAL,
-		ERROR,
+		ERR,
 		WARN,
 		INFO,
 		NOTICE,
@@ -140,7 +140,7 @@ namespace cmg { namespace log {
 #define CMG_CREATE_LOG_STREAM(_level) LogStream(_level, __FILE__, __LINE__, cmg::log::GetLogUtility())
 
 #define CMG_LOG_FATAL()		CMG_CREATE_LOG_STREAM(LogLevel::FATAL)
-#define CMG_LOG_ERROR()		CMG_CREATE_LOG_STREAM(LogLevel::ERROR)
+#define CMG_LOG_ERROR()		CMG_CREATE_LOG_STREAM(LogLevel::ERR)
 #define CMG_LOG_WARN()		CMG_CREATE_LOG_STREAM(LogLevel::WARN)
 #define CMG_LOG_INFO()		CMG_CREATE_LOG_STREAM(LogLevel::INFO)
 #define CMG_LOG_NOTICE()	CMG_CREATE_LOG_STREAM(LogLevel::NOTICE)
