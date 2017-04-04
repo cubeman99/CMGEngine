@@ -39,19 +39,36 @@ private:
 class ProfileSection
 {
 public:
-	ProfileSection(const std::string& name) {}
+	ProfileSection(const std::string& name);
+	~ProfileSection();
 
-	inline const std::string& GetName() const { return "?"; }
+	inline std::string GetName() const { return "?"; }
 
-	ProfileSection* AddSubSection(const std::string& name)
-	{
-		return nullptr;
-	}
+	ProfileSection* GetSubSection(const std::string& sectionName);
+	ProfileSection* operator [](const std::string& sectionName);
+	ProfileSection* GetParentSection();
 
-	void StartInvocation() {}
-	float StopInvocation() { return -1.0f; }
+	std::vector<ProfileSection*>::iterator subsections_begin();
+	std::vector<ProfileSection*>::iterator subsections_end();
 
+	// Reset this section and all its sub-sections.
+	void Reset();
+
+	// Print profiling info for this section and all its sub-sections.
+	void Print(std::ostream& outStream);
+
+	void StartInvocation();
+	double StopInvocation();
+
+	int GetNumInvocations() const;
+	double GetTotalTime() const;
+	double GetAverageTime() const;
+	double GetAverageTime(double dividend) const;
+	
 private:
+	void Print(std::ostream& outStream, int depth);
+
+	std::vector<ProfileSection*> m_subSections;
 };
 
 
@@ -64,9 +81,10 @@ public:
 	Profiler();
 	~Profiler();
 	
-	void StartInvocation(const std::string& label) {}
-	float StopInvocation(const std::string& label) { return -1.0f; }
-
+	void Reset();
+	
+	ProfileSection* GetSection(const std::string& sectionName);
+	ProfileSection* operator [](const std::string& sectionName);
 
 private:
 

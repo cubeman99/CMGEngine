@@ -59,7 +59,7 @@ static double cmgGetCurrentTime()
 
 
 //-----------------------------------------------------------------------------
-// Timer classs
+// Timer
 //-----------------------------------------------------------------------------
 
 Timer::Timer() :
@@ -102,6 +102,94 @@ float Timer::GetElapsedMilliseconds() const
 }
 
 
+//-----------------------------------------------------------------------------
+// ProfileSection
+//-----------------------------------------------------------------------------
+
+ProfileSection::ProfileSection(const std::string& name)
+{
+}
+
+ProfileSection::~ProfileSection()
+{
+}
+	
+ProfileSection* ProfileSection::GetSubSection(const std::string& sectionName)
+{
+	return nullptr;
+}
+
+
+ProfileSection* ProfileSection::operator [](const std::string& sectionName)
+{
+	return nullptr;
+}
+
+ProfileSection* ProfileSection::GetParentSection()
+{
+	return nullptr;
+}
+
+std::vector<ProfileSection*>::iterator ProfileSection::subsections_begin()
+{
+	return m_subSections.begin();
+}
+
+std::vector<ProfileSection*>::iterator ProfileSection::subsections_end()
+{
+	return m_subSections.end();
+}
+
+void ProfileSection::Reset()
+{
+}
+
+void ProfileSection::Print(std::ostream& outStream)
+{
+
+}
+
+void ProfileSection::StartInvocation()
+{
+}
+
+double ProfileSection::StopInvocation()
+{
+	return 0.0;
+}
+
+int ProfileSection::GetNumInvocations() const
+{
+	return -1;
+}
+
+double ProfileSection::GetTotalTime() const
+{
+	return 0.0;
+}
+
+double ProfileSection::GetAverageTime() const
+{
+	return 0.0;
+}
+
+double ProfileSection::GetAverageTime(double dividend) const
+{
+	return 0.0;
+}
+
+
+void ProfileSection::Print(std::ostream& outStream, int depth)
+{
+
+}
+
+
+
+
+//-----------------------------------------------------------------------------
+// Profiler
+//-----------------------------------------------------------------------------
 
 Profiler::Profiler()
 {
@@ -110,3 +198,18 @@ Profiler::Profiler()
 Profiler::~Profiler()
 {
 }
+	
+void Profiler::Reset()
+{
+}
+
+ProfileSection* Profiler::GetSection(const std::string& sectionName)
+{
+	return nullptr;
+}
+
+ProfileSection* Profiler::operator [](const std::string& sectionName)
+{
+	return nullptr;
+}
+
