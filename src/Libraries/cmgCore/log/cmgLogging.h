@@ -2,6 +2,7 @@
 #define _CMG_CORE_LOG_LOGGING_H
 
 #include <cmgCore/string/cmgString.h>
+#include <sstream>
 
 
 //-----------------------------------------------------------------------------
@@ -53,18 +54,23 @@ public:
 	static const LogLevel DEFAULT_LOG_LEVEL;
 	
 	// Getters
-	inline bool IsTraceEnabled() const { return false; }
-	inline LogLevel GetLogLevel() const { return LogLevel::OFF; }
-	inline LogCallback GetCallback() { return NULL; }
+	inline bool IsTraceEnabled() const { return m_trace; }
+	inline LogLevel GetLogLevel() const { return m_level; }
+	inline LogCallback GetCallback() { return m_callback; }
 
 	// Setters
-	inline void SetLogLevel(LogLevel level) {}
-	inline void EnableTrace(bool trace) {}
-	inline void SetCallback(LogCallback callback) {}
+	inline void SetLogLevel(LogLevel level) { m_level = level; }
+	inline void EnableTrace(bool trace) { m_trace = trace; }
+	inline void SetCallback(LogCallback callback) { m_callback = callback; }
 
 private:
 
-	void HandleLogMessage(const LogMessage& logMessage);
+	void HandleLogMessage(const LogMessage& message);
+
+private:
+	LogCallback m_callback;
+	bool m_trace;
+	LogLevel m_level;
 };
 
 
@@ -78,15 +84,15 @@ public:
 	LogStream(LogLevel level = LogLevel::DEFAULT,
 			const std::string& fileName = "",
 			int lineNumber = -1,
-			LogUtility* logUtility = NULL);
+			LogUtility* logUtility = nullptr);
 	~LogStream();
 	
 	// Getters
-	inline LogLevel GetLevel() const { return LogLevel::FATAL; }
-	inline std::string GetBufferedText() const { return "TODO"; }
-	inline std::string GetFileName() const { return "TODO"; }
-	inline int GetLineNumber() const { return 666; }
-	inline LogUtility* GetLogUtility() const { return NULL; }
+	inline LogLevel GetLevel() const { return m_level; }
+	inline std::string GetBufferedText() const { return m_textStream.str(); }
+	inline std::string GetFileName() const { return m_fileName; }
+	inline int GetLineNumber() const { return m_lineNumber; }
+	inline LogUtility* GetLogUtility() const { return m_logUtility; }
 
 	// Text stream
 	LogStream& operator <<(char x);
@@ -107,6 +113,12 @@ private:
 	LogStream(LogStream& copy) {}
 	LogStream& operator =(LogStream& copy) {}
 
+private:
+	LogUtility* m_logUtility;
+	LogLevel m_level;
+	std::stringstream m_textStream;
+	std::string m_fileName;
+	int m_lineNumber;
 };
 
 

@@ -154,8 +154,8 @@ TEST(LogStream, LogStream_Buffer_Short)
 TEST(LogStream, LogStream_Buffer_UnsignedShort)
 {
 	LogStream logStream;
-	logStream << unsigned short(66234);
-	EXPECT_EQ("66234", logStream.GetBufferedText());
+	logStream << unsigned short(65530);
+	EXPECT_EQ("65530", logStream.GetBufferedText());
 }
 
 TEST(LogStream, LogStream_Buffer_Int)
@@ -170,8 +170,8 @@ TEST(LogStream, LogStream_Buffer_Int)
 TEST(LogStream, LogStream_Buffer_UnsignedInt)
 {
 	LogStream logStream;
-	logStream << unsigned int(4294962000);
-	EXPECT_EQ("4294962000", logStream.GetBufferedText());
+	logStream << unsigned int(4294967295);
+	EXPECT_EQ("4294967295", logStream.GetBufferedText());
 }
 
 TEST(LogStream, LogStream_Buffer_Long)
@@ -198,8 +198,8 @@ TEST(LogStream, LogStream_Buffer_Float)
 TEST(LogStream, LogStream_Buffer_Double)
 {
 	LogStream logStream;
-	logStream << -3.14159265368;
-	EXPECT_EQ("-3.14159265368", logStream.GetBufferedText());
+	logStream << -3.141;
+	EXPECT_EQ("-3.141", logStream.GetBufferedText());
 }
 
 
