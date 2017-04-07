@@ -301,16 +301,3 @@ TEST(ProfileSection, Print)
 	// Print out the profiling info.
 	root.Print(std::cout);
 }
-
-
-
-
-//-----------------------------------------------------------------------------
-// Profiler tests
-//-----------------------------------------------------------------------------
-
-//TEST(Profiler, Constructor)
-//{
-	//Profiler profiler;
-//}
-

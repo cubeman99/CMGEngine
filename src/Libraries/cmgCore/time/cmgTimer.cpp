@@ -234,32 +234,3 @@ void ProfileSection::Print(std::ostream& outStream, int depth)
 		m_subSections[i]->Print(outStream, depth + 1);
 }
 
-
-
-
-//-----------------------------------------------------------------------------
-// Profiler
-//-----------------------------------------------------------------------------
-
-Profiler::Profiler()
-{
-}
-
-Profiler::~Profiler()
-{
-}
-	
-void Profiler::Reset()
-{
-}
-
-ProfileSection* Profiler::GetSection(const std::string& sectionName)
-{
-	return nullptr;
-}
-
-ProfileSection* Profiler::operator [](const std::string& sectionName)
-{
-	return nullptr;
-}
-

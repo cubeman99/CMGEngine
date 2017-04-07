@@ -65,34 +65,18 @@ public:
 	double GetAverageTime() const;
 	double GetAverageTime(double dividend) const;
 	
+
 private:
 	void Print(std::ostream& outStream, int depth);
 
+
+private:
 	Timer m_timer;
 	double m_totalTime;
 	int m_numInvocations;
 	std::string m_name;
 	ProfileSection* m_parentSection;
 	std::vector<ProfileSection*> m_subSections;
-};
-
-
-//-----------------------------------------------------------------------------
-// Profiler
-//-----------------------------------------------------------------------------
-class Profiler
-{
-public:
-	Profiler();
-	~Profiler();
-	
-	void Reset();
-	
-	ProfileSection* GetSection(const std::string& sectionName);
-	ProfileSection* operator [](const std::string& sectionName);
-
-private:
-
 };
 
 

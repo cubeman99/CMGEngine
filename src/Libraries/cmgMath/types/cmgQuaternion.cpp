@@ -496,7 +496,7 @@ Quaternion Quaternion::LookAtRotation(const Vector3f& forward, const Vector3f& u
 		q.y = (m02 - m20) / S; 
 		q.z = (m10 - m01) / S; 
 	}
-	else if ((m00 > m11) & (m00 > m22))
+	else if (m00 > m11 && m00 > m22)
 	{
 		float S = Math::Sqrt(1.0f + m00 - m11 - m22) * 2.0f;
 		q.w = (m21 - m12) / S;
