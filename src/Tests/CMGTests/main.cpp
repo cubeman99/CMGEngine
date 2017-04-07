@@ -202,13 +202,13 @@ TEST(Matrix4f, Matrix4f_Inverse)
 int main(int argc, char* argv[])
 {
 	//TestApp app;
-	//PhysicsApp app;
-	//app.Initialize("3D Physics Engine", 800, 600);
+	PhysicsApp app;
+	app.Initialize("3D Physics Engine", 800, 600);
 	//DrivingApp app;
 	//app.Initialize("Vehicle Dynamics", 1200, 785);
-	//app.Run();
-	//return 0;
+	app.Run();
+	return 0;
 
-	::testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
+	//::testing::InitGoogleTest(&argc, argv);
+	//return RUN_ALL_TESTS();
 }

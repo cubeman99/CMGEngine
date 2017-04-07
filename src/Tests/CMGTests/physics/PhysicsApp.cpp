@@ -182,6 +182,8 @@ void PhysicsApp::OnInitialize()
 	//m_renderParams.EnableDepthBufferWrite(false);
 	//m_renderParams.EnableDepthTest(false);
 	//m_renderParams.EnableNearFarPlaneClipping(false);
+	m_frameTimer.Start();
+
 }
 
 void PhysicsApp::OnQuit()
@@ -202,6 +204,12 @@ void PhysicsApp::OnUpdate(float timeDelta)
 	{
 		Quit();
 		return;
+	}
+
+	if (m_frameTimer.GetElapsedSeconds() >= 1.0f)
+	{
+		m_physicsEngine.GetProfiler()->Print(std::cout);
+		m_frameTimer.Start();
 	}
 
 	bool simulateSingleFrame = false;

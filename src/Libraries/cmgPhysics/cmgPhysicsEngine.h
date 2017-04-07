@@ -5,6 +5,7 @@
 #include <cmgPhysics/cmgContact.h>
 #include <cmgPhysics/cmgRigidBody.h>
 #include <cmgPhysics/cmgCollisionDetector.h>
+#include <cmgCore/time/cmgTimer.h>
 
 
 //-----------------------------------------------------------------------------
@@ -40,6 +41,8 @@ public:
 	inline void SetNumIterations(unsigned int numIterations) { m_numIterations = numIterations; }
 	inline void SetEnableFriction(bool enableFriction) { m_enableFriction = enableFriction; }
 	inline void SetEnableRestitution(bool enableRestitution) { m_enableRestitution = enableRestitution; }
+	
+	inline ProfileSection* GetProfiler() { return &m_profiler; }
 
 
 private:
@@ -53,6 +56,8 @@ private:
 	unsigned int m_idCounter;
 	Vector3f m_gravity; // Global acceleration due to gravity.
 	std::vector<CollisionData> m_collisions;
+
+	ProfileSection m_profiler;
 };
 
 

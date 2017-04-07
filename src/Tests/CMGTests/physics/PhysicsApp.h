@@ -77,6 +77,7 @@ private:
 	Mesh*		m_meshSphere;
 	Mesh*		m_meshCube;
 	
+	Timer m_frameTimer;
 
 	PhysicsEngine m_physicsEngine;
 };

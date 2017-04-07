@@ -227,7 +227,7 @@ void ProfileSection::Print(std::ostream& outStream, int depth)
 	outStream << " ";
 	for (int i = 0; i < depth; ++i)
 		outStream << "  ";
-	outStream << "- " << m_name << " : " << m_totalTime << " ms" << std::endl;
+	outStream << "- " << m_name << " : " << (m_totalTime * 1000.0) << " ms" << std::endl;
 
 	// Print all sub-sections.
 	for (unsigned int i = 0; i < m_subSections.size(); ++i)

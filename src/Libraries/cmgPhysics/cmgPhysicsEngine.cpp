@@ -9,7 +9,8 @@ PhysicsEngine::PhysicsEngine() :
 	m_idCounter(0),
 	m_enableFriction(true),
 	m_enableRestitution(true),
-	m_numIterations(10)
+	m_numIterations(10),
+	m_profiler("Physics")
 {
 	m_gravity = Vector3f::DOWN * 9.81f;
 }
@@ -45,6 +46,14 @@ void PhysicsEngine::ClearBodies()
 
 void PhysicsEngine::Simulate(float timeDelta)
 {
+	ProfileSection* profileIntegration = m_profiler.GetSubSection("Integration");
+	ProfileSection* profileDetection = m_profiler.GetSubSection("Collision Detection");
+	ProfileSection* profilePositionalCorrection = m_profiler.GetSubSection("Positional Correction");
+	ProfileSection* profileResponse = m_profiler.GetSubSection("Collision Response");
+
+	m_profiler.Reset();
+	m_profiler.StartInvocation();
+
 	unsigned int i, j;
 	RigidBody *body;
 	CollisionData collisionData;
@@ -54,7 +63,9 @@ void PhysicsEngine::Simulate(float timeDelta)
 		body = m_bodies[i];
 		body->CalculateDerivedData();
 	}
-	
+
+	profileIntegration->StartInvocation();
+
 	// Integrate forces.
 	for (i = 0; i < m_bodies.size(); ++i)
 	{
@@ -74,8 +85,10 @@ void PhysicsEngine::Simulate(float timeDelta)
 
 		body->CalculateDerivedData();
 	}
+	profileIntegration->StopInvocation();
 
 	// Detect collisions.
+	profileDetection->StartInvocation();
 	m_collisions.clear();
 	for (i = 0; i < m_bodies.size(); ++i)
 	{
@@ -86,8 +99,10 @@ void PhysicsEngine::Simulate(float timeDelta)
 				m_collisions.push_back(collisionData);
 		}
 	}
+	profileDetection->StopInvocation();
 
 	// Iteratively resolve collisions.
+	profileResponse->StartInvocation();
 	for (i = 0; i < m_numIterations; ++i)
 	{
 		for (j = 0; j < m_collisions.size(); ++j)
@@ -103,10 +118,13 @@ void PhysicsEngine::Simulate(float timeDelta)
 			body->ClearAccumulators();
 		}
 	}
-	
+	profileResponse->StopInvocation();
+
 	// Correct positions.
+	profilePositionalCorrection->StartInvocation();
 	for (i = 0; i < m_collisions.size(); ++i)
 		PositionalCorrection(&m_collisions[i]);
+	profilePositionalCorrection->StopInvocation();
 	
 	//for (i = 0; i < m_bodies.size(); ++i)
 	//{
@@ -115,6 +133,8 @@ void PhysicsEngine::Simulate(float timeDelta)
 	//	body->m_angularVelocity += body->m_angularVelocityAccumulator;
 	//	body->ClearAccumulators();
 	//}
+
+	m_profiler.StopInvocation();
 }
 
 void PhysicsEngine::SolveCollision(CollisionData* collision)
