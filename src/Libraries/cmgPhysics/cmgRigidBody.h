@@ -23,6 +23,7 @@ public:
 
 	// Getters
 	inline const Vector3f& GetPosition() const { return m_position; }
+	inline const Vector3f& GetCenterOfMassWorld() const { return m_centerOfMassWorld; }
 	inline const Quaternion& GetOrientation() const { return m_orientation; }
 	inline const Vector3f& GetVelocity() const { return m_velocity; }
 	inline const Vector3f& GetAngularVelocity() const { return m_angularVelocity; }
@@ -72,6 +73,9 @@ public:
 	void CalculateDerivedData();
 	void ClearAccumulators();
 
+	void IntegrateLinear(float dt);
+	void IntegrateAngular(float dt);
+
 	void CalcInertia()
 	{
 		// Rigid body origin must be aligned with the center of mass.
@@ -89,6 +93,10 @@ public:
 			//m_physicsMesh.CalcInverseInertiaTensor(
 				//1.0f / m_inverseMass, m_inverseInertiaTensor);
 		}
+
+		m_centerOfMass.SetZero();
+		if (m_collider != nullptr)
+			m_centerOfMass = m_collider->GetCenterOfMassOffset();
 	}
 
 private:
@@ -108,6 +116,9 @@ public:
 	// Geometry
 	PhysicsMesh		m_physicsMesh;
 	Collider*		m_collider;
+
+	Vector3f		m_centerOfMass;
+	Vector3f		m_centerOfMassWorld;
 
 	// Material properties
 	float			m_inverseMass;

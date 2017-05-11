@@ -89,7 +89,8 @@ void PhysicsApp::OnInitialize()
 	//body->SetCollider(new BoxCollider(Vector3f(0.6f, 0.5f, 0.2f)));
 	//body->SetCollider(new SphereCollider(0.6f));
 	//body->SetCollider(new CylinderCollider(0.6f, 4.0f));
-	body->SetCollider(new ConeCollider(0.6f, 2.0f));
+	//body->SetCollider(new ConeCollider(0.6f, 2.0f));
+	body->SetCollider(new ConeCollider(1.0f, 1.0f));
 	body->SetMass(4.0f);
 	body->SetMass(mass);
 	body->SetInverseMass(0.0f);
@@ -775,7 +776,7 @@ void PhysicsApp::OnRender()
 			glPointSize(3.0f);
 			glBegin(GL_POINTS);
 				glColor4ubv(Color::MAGENTA.data());
-				glVertex3fv(body->GetPosition().data());
+				glVertex3fv(body->GetCenterOfMassWorld().data());
 			glEnd();
 			glEnable(GL_DEPTH_TEST);
 		}

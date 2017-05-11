@@ -393,7 +393,7 @@ void Primitives::InitializeCone()
 		conePositions[i + (coneNumSides * 1)] = Vector3f(x, 0.0f, z);
 		conePositions[i + (coneNumSides * 2)] = Vector3f::UNITY;
 		coneNormals[i + (coneNumSides * 0)] = -Vector3f::UNITY;
-		coneNormals[i + (coneNumSides * 1)] = Vector3f(x2 * cosAngle, cosAngle, z2 * cosAngle);
+		coneNormals[i + (coneNumSides * 1)] = Vector3f(x * cosAngle, cosAngle, z * cosAngle);
 		coneNormals[i + (coneNumSides * 2)] = Vector3f(x2 * cosAngle, cosAngle, z2 * cosAngle);
 
 		if (i >= 2)

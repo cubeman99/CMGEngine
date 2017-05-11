@@ -58,31 +58,29 @@ void PhysicsEngine::Simulate(float timeDelta)
 	RigidBody *body;
 	CollisionData collisionData;
 
+	timeDelta /= (float) m_numIterations;
+
+	unsigned int iteration;
+	for (iteration = 0; iteration < m_numIterations; ++iteration)
+	{
+
 	for (i = 0; i < m_bodies.size(); ++i)
 	{
 		body = m_bodies[i];
 		body->CalculateDerivedData();
 	}
 
+	// Integrate.
 	profileIntegration->StartInvocation();
-
-	// Integrate forces.
 	for (i = 0; i < m_bodies.size(); ++i)
 	{
 		body = m_bodies[i];
+		
 		if (body->m_inverseMass != 0.0f)
 			body->m_velocity += m_gravity * timeDelta;
-	}
-	
-	// Integrate velocities.
-	for (i = 0; i < m_bodies.size(); ++i)
-	{
-		body = m_bodies[i];
-		body->m_position += body->m_velocity * timeDelta;
-		Quaternion w(Vector4f(body->m_angularVelocity, 0.0f));
-		body->m_orientation += (w * body->m_orientation) * (timeDelta * 0.5f);
-		body->m_orientation.Normalize();
 
+		body->IntegrateLinear(timeDelta);
+		body->IntegrateAngular(timeDelta);
 		body->CalculateDerivedData();
 	}
 	profileIntegration->StopInvocation();
@@ -94,29 +92,26 @@ void PhysicsEngine::Simulate(float timeDelta)
 	{
 		for (j = i + 1; j < m_bodies.size(); ++j)
 		{
-			m_collisionDetector.DetectCollision(m_bodies[i], m_bodies[j], &collisionData);
+			m_collisionDetector.DetectCollision(
+				m_bodies[i], m_bodies[j], &collisionData);
 			if (collisionData.numContacts > 0)
 				m_collisions.push_back(collisionData);
 		}
 	}
 	profileDetection->StopInvocation();
 
-	// Iteratively resolve collisions.
+	// Resolve collisions.
 	profileResponse->StartInvocation();
-	for (i = 0; i < m_numIterations; ++i)
+	for (i = 0; i < m_collisions.size(); ++i)
 	{
-		for (j = 0; j < m_collisions.size(); ++j)
-		{
-			SolveCollision(&m_collisions[j]);
-		}
-		
-		for (j = 0; j < m_bodies.size(); ++j)
-		{
-			body = m_bodies[j];
-			body->m_velocity += body->m_velocityAccumulator;
-			body->m_angularVelocity += body->m_angularVelocityAccumulator;
-			body->ClearAccumulators();
-		}
+		SolveCollision(&m_collisions[i]);
+	}
+	for (i = 0; i < m_bodies.size(); ++i)
+	{
+		body = m_bodies[i];
+		body->m_velocity += body->m_velocityAccumulator;
+		body->m_angularVelocity += body->m_angularVelocityAccumulator;
+		body->ClearAccumulators();
 	}
 	profileResponse->StopInvocation();
 
@@ -125,14 +120,7 @@ void PhysicsEngine::Simulate(float timeDelta)
 	for (i = 0; i < m_collisions.size(); ++i)
 		PositionalCorrection(&m_collisions[i]);
 	profilePositionalCorrection->StopInvocation();
-	
-	//for (i = 0; i < m_bodies.size(); ++i)
-	//{
-	//	body = m_bodies[i];
-	//	body->m_velocity += body->m_velocityAccumulator;
-	//	body->m_angularVelocity += body->m_angularVelocityAccumulator;
-	//	body->ClearAccumulators();
-	//}
+	}
 
 	m_profiler.StopInvocation();
 }
@@ -212,8 +200,8 @@ void PhysicsEngine::SolveCollision(CollisionData* collision)
 		impulse = contact.contactToWorld * impulse;
 
 		// Apply equal and opposite impulses to each body.
-		contact.body[0]->ApplyImpulse(-impulse, contact.contactPoint - contact.body[0]->m_position);
-		contact.body[1]->ApplyImpulse(impulse, contact.contactPoint - contact.body[1]->m_position);
+		contact.body[0]->ApplyImpulse(-impulse, contact.contactPoint);
+		contact.body[1]->ApplyImpulse(impulse, contact.contactPoint);
 	}
 }
 

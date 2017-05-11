@@ -114,11 +114,9 @@ struct Polytope
 	Polytope(const Simplex& simplex);
 	~Polytope();
 
-	void AddEdge(SupportPoint* p0, SupportPoint* p1);
 	void AddPoint(const SupportPoint& point);
-
 	void RemoveFace(PolytopeFace* face, PolytopeFace* facePrev);
-
+	void AddEdge(SupportPoint* p0, SupportPoint* p1);
 	PolytopeFace* FindFaceClosestOrigin();
 };
 

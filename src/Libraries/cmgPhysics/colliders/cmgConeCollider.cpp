@@ -46,9 +46,7 @@ Vector3f ConeCollider::GetSupportPoint(const Vector3f& direction) const
 
 	if (point.y >= m_radius / m_sideLength)
 	{
-		point = Vector3f(0.0f, m_height, 0.0f);
-		return m_shapeToWorld.TransformAffine(point);
-		//return (m_shapeToWorld.c3.xyz + (m_shapeToWorld.c1.xyz * m_height));
+		return (m_shapeToWorld.c3.xyz + (m_shapeToWorld.c1.xyz * m_height));
 	}
 	else
 	{

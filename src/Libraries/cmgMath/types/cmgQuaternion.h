@@ -2,8 +2,8 @@
 #define _CMG_QUATERNION_H_
 
 #include <iostream>
+#include <cmgMath/types/cmgVector3f.h>
 
-struct Vector3f;
 struct Vector4f;
 
 
@@ -11,9 +11,12 @@ struct Vector4f;
 // Angles are in radians and counter-clockwise around the axis of rotation.
 struct Quaternion
 {
-	float x, y, z, w;
-
-
+	union
+	{
+		struct { float x, y, z, w; };
+		struct { Vector3f xyz; };
+	};
+	
 	// Constants
 	static const Quaternion IDENTITY;
 

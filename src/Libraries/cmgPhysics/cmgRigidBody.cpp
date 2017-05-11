@@ -14,7 +14,8 @@ RigidBody::RigidBody() :
 	m_dynamicFriction(0.0f),
 	m_velocityAccumulator(0.0f),
 	m_angularVelocityAccumulator(0.0f),
-	m_collider(nullptr)
+	m_collider(nullptr),
+	m_centerOfMass(Vector3f::ZERO)
 {
 }
 
@@ -43,7 +44,7 @@ void RigidBody::SetCollider(Collider* collider)
 void RigidBody::ApplyImpulse(const Vector3f& impulse, const Vector3f& contactPoint)
 {
 	m_velocityAccumulator += impulse * m_inverseMass;
-	m_angularVelocityAccumulator += m_inverseInertiaTensorWorld * contactPoint.Cross(impulse);
+	m_angularVelocityAccumulator += m_inverseInertiaTensorWorld * (contactPoint - m_centerOfMassWorld).Cross(impulse);
 	//m_velocity += impulse * m_inverseMass;
 	//m_angularVelocity += m_inverseInertiaTensorWorld * contactPoint.Cross(impulse);
 }
@@ -54,8 +55,9 @@ void RigidBody::CalculateDerivedData()
 	m_bodyToWorld.SetTranslation(m_position);
 	m_inverseInertiaTensorWorld = m_bodyToWorld.Get3x3() *
 		m_inverseInertiaTensor * m_bodyToWorld.Get3x3().GetTranspose();
-
 	m_worldToBody = m_bodyToWorld.GetAffineInverse();
+
+	m_centerOfMassWorld = m_bodyToWorld.TransformAffine(m_centerOfMass);
 
 	if (m_collider != nullptr)
 		m_collider->CalcDerivedData();
@@ -120,3 +122,54 @@ void RigidBody::ClearAccumulators()
 	m_velocityAccumulator.SetZero();
 	m_angularVelocityAccumulator.SetZero();
 }
+
+
+
+
+void RigidBody::IntegrateLinear(float dt)
+{
+	//m_acceleration = m_inverseMass * m_force;
+	//body->force.set(); // clear force accumulator.
+
+	// First-order integration
+	m_position += m_velocity * dt;
+	//m_velocity += m_acceleration * dt;
+	m_velocity += m_velocityAccumulator;
+}
+
+void RigidBody::IntegrateAngular(float dt)
+{
+	// We need to update these in order to rotate the body around it's center of mass.
+	m_bodyToWorld.InitRotation(m_orientation);
+	m_bodyToWorld.c3.xyz = m_position;
+	m_centerOfMassWorld = m_bodyToWorld.TransformAffine(m_centerOfMass);
+
+	//float angularAcceleration = m_inverseInertiaTensorWorld * m_torque;
+	//m_torque.SetZero(); // clear torque accumulator
+	
+	// First-order angular velocity integration
+	Quaternion angularVelocityQuat;
+	angularVelocityQuat.xyz = m_angularVelocity;
+	angularVelocityQuat.w = 0.0f;
+	m_orientation += (angularVelocityQuat * m_orientation) * (dt * 0.5f);
+	//m_angularVelocity += m_angularAcceleration * dt;
+	m_angularVelocity += m_angularVelocityAccumulator;
+
+	// Rotate the body's origin around its center of mass.
+	Vector3f momentArm = m_position - m_centerOfMassWorld;
+	float wLength = m_angularVelocity.Length();
+	if (wLength > 0.0f && momentArm.LengthSquared() > 0.0f)
+	{
+		Quaternion originRotation = Quaternion(
+			m_angularVelocity / wLength, wLength * dt);
+		m_position -= m_centerOfMassWorld;
+		//m_position = originRotation.RotateVector(m_position);
+		originRotation.RotateVector(m_position);
+		m_position += m_centerOfMassWorld;
+	}
+
+	// corrections
+	m_orientation.Normalize();
+	//m_angularVelocityQuat.set(body->angularVelocity, 0.0f);
+}
+
