@@ -2,8 +2,8 @@
 #define _CMG_VECTOR_3F_H_
 
 #include <iostream>
+#include <cmgMath/types/cmgVector2f.h>
 
-struct Vector2f;
 struct Matrix3f;
 struct Matrix4f;
 struct Quaternion;
@@ -13,8 +13,12 @@ struct Point3i;
 // 3D floating-point vector.
 struct Vector3f
 {
-	float x, y, z;
-
+	union
+	{
+		struct { float x, y, z; };
+		struct { Vector2f xy; };
+		struct { float v[3]; };
+	};
 
 	// Constants.
 	static const Vector3f ZERO;		// (0, 0, 0)

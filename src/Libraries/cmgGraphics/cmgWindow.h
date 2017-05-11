@@ -223,8 +223,10 @@ public:
 	void SetVerticalSync(bool useVSync);
 	void SetVisibility(bool isVisible);
 	void SetMouseVisibility(bool isMouseVisible);
+	void SetMousePosition(int x, int y);
 	void ConfineMouseToWindow(bool confineMouse);
 	void SetFullscreen(bool fullscreen);
+
 	
 	const GraphicsMode&		GetGraphicsMode()	const { return m_graphicsMode; }
 	const WindowSettings&	GetWindowSettings()	const { return m_windowSettings; }

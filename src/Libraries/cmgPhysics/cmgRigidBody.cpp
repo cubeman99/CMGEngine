@@ -13,7 +13,8 @@ RigidBody::RigidBody() :
 	m_staticFriction(0.0f),
 	m_dynamicFriction(0.0f),
 	m_velocityAccumulator(0.0f),
-	m_angularVelocityAccumulator(0.0f)
+	m_angularVelocityAccumulator(0.0f),
+	m_collider(nullptr)
 {
 }
 
@@ -23,6 +24,19 @@ void RigidBody::SetMass(float mass)
 		m_inverseMass = 1.0f / mass;
 	else
 		m_inverseMass = 0.0f;
+}
+
+void RigidBody::SetCollider(Collider* collider)
+{
+	// Remove existing collider.
+	if (m_collider != nullptr)
+	{
+		m_collider->m_body = nullptr;
+		delete m_collider;
+	}
+
+	collider->m_body = this;
+	m_collider = collider;
 }
 
 
@@ -40,6 +54,11 @@ void RigidBody::CalculateDerivedData()
 	m_bodyToWorld.SetTranslation(m_position);
 	m_inverseInertiaTensorWorld = m_bodyToWorld.Get3x3() *
 		m_inverseInertiaTensor * m_bodyToWorld.Get3x3().GetTranspose();
+
+	m_worldToBody = m_bodyToWorld.GetAffineInverse();
+
+	if (m_collider != nullptr)
+		m_collider->CalcDerivedData();
 
 	//m_inverseInertiaTensor.InitScale(1.0f);
 	

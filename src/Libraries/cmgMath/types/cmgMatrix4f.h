@@ -1,8 +1,8 @@
 #ifndef _CMG_MATRIX_4F_H_
 #define _CMG_MATRIX_4F_H_
 
-struct Vector3f;
-struct Vector4f;
+#include <cmgMath/types/cmgVector4f.h>
+
 struct Quaternion;
 struct Matrix3f;
 
@@ -12,7 +12,17 @@ struct Matrix3f;
 // Componets are stored internally in column-major order.
 struct Matrix4f
 {
-	float m[16]; // values stored in column major order.
+	union
+	{
+		struct { float m[16]; };
+		struct { float m00, m01, m02, m03,
+					   m10, m11, m12, m13,
+					   m20, m21, m22, m23,
+					   m30, m31, m32, m33; };
+		struct { Vector4f c[4]; };
+		struct { Vector4f c0; Vector4f c1; Vector4f c2; Vector4f c3; };
+	};
+
 
 	// Constants
 	static const Matrix4f IDENTITY;

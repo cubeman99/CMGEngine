@@ -11,6 +11,7 @@
 #include <cmgGraphics/cmgImageFormat.h>
 #include <cmgGraphics/cmgShader.h>
 #include <cmgGraphics/cmgVertexData.h>
+#include <cmgGraphics/cmgMesh.h>
 
 #include <cmgGraphics/render/cmgRenderParams.h>
 #include <cmgGraphics/render/cmgGraphics2D.h>

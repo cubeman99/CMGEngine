@@ -35,6 +35,7 @@ void PhysicsApp::OnInitialize()
 	chassisSize.z		= 4.200f;
 	chassisSize.y		= 1.340f;
 
+	RigidBody* body;
 
 	// Load meshes.
 	m_meshCube		= Primitives::CreateCube();
@@ -59,50 +60,56 @@ void PhysicsApp::OnInitialize()
 	m_physCube = CollisionBox(Vector3f(0.2f, 0.2f, 0.2f));
 	m_physGround = CollisionBox(Vector3f(4, 0.1f, 4));
 
-	m_testBody1 = new RigidBody();
-	m_testBody1->SetMass(2.0f);
-	m_testBody1->SetOrientation(Quaternion::IDENTITY);
-	//m_testBody1->SetInverseInertiaTensor(Matrix3f::CreateScale(1.0f, 1.0f, 1.0f));
-	m_testBody1->SetPosition(Vector3f(0, 3.0f, 0));
-	//m_testBody1->SetOrientation(Quaternion(Vector3f::UNITY, -Math::HALF_PI));
-	//m_testBody1->SetAngularVelocity(Vector3f(0.0f, 0.0f, 2.0f));
-	//m_testBody1->SetPrimitive(new CollisionBox(Vector3f(0.3f, 0.2f, 0.2f)));
-	//m_testBody1->SetPrimitive(new CollisionBox(Vector3f(0.4f, 0.1f, 0.2f)));
-	//m_testBody1->AddPrimitive(new CollisionBox(Vector3f(0.2f, 0.2f, 0.2f) * 0.2f), Vector3f(0, -0.5f, 0));
-	//m_testBody1->AddPrimitive(new CollisionSphere(0.1f), Vector3f(0, -0.5f, 0));
-	//m_testBody1->AddPrimitive(new CollisionBox(Vector3f(0.2f, 0.2f, 0.2f)), Vector3f(0, -0.5f, 0));
-	//m_testBody1->AddPrimitive(new CollisionBox(Vector3f(0.4f, 0.2f, 0.1f)), Vector3f(0, 0.5f, 0));
+	body = new RigidBody();
+	body->SetMass(2.0f);
+	body->SetOrientation(Quaternion::IDENTITY);
+	//body->SetInverseInertiaTensor(Matrix3f::CreateScale(1.0f, 1.0f, 1.0f));
+	body->SetPosition(Vector3f(0, 3.0f, 0));
+	//body->SetOrientation(Quaternion(Vector3f::UNITY, -Math::HALF_PI));
+	//body->SetAngularVelocity(Vector3f(0.0f, 0.0f, 2.0f));
+	//body->SetPrimitive(new CollisionBox(Vector3f(0.3f, 0.2f, 0.2f)));
+	//body->SetPrimitive(new CollisionBox(Vector3f(0.4f, 0.1f, 0.2f)));
+	//body->AddPrimitive(new CollisionBox(Vector3f(0.2f, 0.2f, 0.2f) * 0.2f), Vector3f(0, -0.5f, 0));
+	//body->AddPrimitive(new CollisionSphere(0.1f), Vector3f(0, -0.5f, 0));
+	//body->AddPrimitive(new CollisionBox(Vector3f(0.2f, 0.2f, 0.2f)), Vector3f(0, -0.5f, 0));
+	//body->AddPrimitive(new CollisionBox(Vector3f(0.4f, 0.2f, 0.1f)), Vector3f(0, 0.5f, 0));
 
 	float roofWidth = chassisSize.x * 0.9f;
 	Vector3f roofSize(chassisSize.x * 0.9f, chassisSize.y * 0.5f, chassisSize.z * 0.6f);
 	Vector3f baseSize(chassisSize.x, chassisSize.y * 0.5f, chassisSize.z);
 	Vector3f roofPos(0, roofSize.y * 0.5f, chassisSize.z * 0.15f);
 	Vector3f basePos(0, -baseSize.y * 0.5f, 0);
+	//body->AddPrimitive(new CollisionBox(roofSize * 0.5f), roofPos);
+	//body->AddPrimitive(new CollisionBox(baseSize * 0.5f), basePos);
+	//body->AddPrimitive(new CollisionSphere(wheelRadius), Vector3f(-wheelTrack, -chassisSize.y, -wheelBase) * 0.5f);
+	//body->AddPrimitive(new CollisionSphere(wheelRadius), Vector3f(-wheelTrack, -chassisSize.y, wheelBase) * 0.5f);
+	//body->AddPrimitive(new CollisionSphere(wheelRadius), Vector3f(wheelTrack, -chassisSize.y, -wheelBase) * 0.5f);
+	//body->AddPrimitive(new CollisionSphere(wheelRadius), Vector3f(wheelTrack, -chassisSize.y, wheelBase) * 0.5f);
+	body->SetPrimitive(new CollisionBox(Vector3f(0.2f, 0.1f, 0.2f)));
+	//body->SetCollider(new BoxCollider(Vector3f(0.6f, 0.5f, 0.2f)));
+	body->SetCollider(new SphereCollider(0.6f));
+	body->SetMass(4.0f);
+	body->SetMass(mass);
+	body->SetInverseMass(0.0f);
+	body->SetInverseInertiaTensor(Matrix3f::ZERO);
+	m_physicsEngine.AddBody(body);
+	m_testBody1 = body;
 
-	m_testBody1->AddPrimitive(new CollisionBox(roofSize * 0.5f), roofPos);
-	m_testBody1->AddPrimitive(new CollisionBox(baseSize * 0.5f), basePos);
-	m_testBody1->AddPrimitive(new CollisionSphere(wheelRadius), Vector3f(-wheelTrack, -chassisSize.y, -wheelBase) * 0.5f);
-	m_testBody1->AddPrimitive(new CollisionSphere(wheelRadius), Vector3f(-wheelTrack, -chassisSize.y, wheelBase) * 0.5f);
-	m_testBody1->AddPrimitive(new CollisionSphere(wheelRadius), Vector3f(wheelTrack, -chassisSize.y, -wheelBase) * 0.5f);
-	m_testBody1->AddPrimitive(new CollisionSphere(wheelRadius), Vector3f(wheelTrack, -chassisSize.y, wheelBase) * 0.5f);
+	body = new RigidBody();
+	body->SetInverseMass(0.0f);
+	body->SetInverseInertiaTensor(Matrix3f::ZERO);
+	//body->SetInverseInertiaTensor(Matrix3f::CreateScale(1.0f, 1.0f, 1.0f));
+	body->SetPosition(Vector3f(0, 2.0f, 0));
+	//body->SetOrientation(Quaternion(Vector3f::UNITZ, 0.0f));
+	//body->SetOrientation(Quaternion(Vector3f::UNITY, Math::HALF_PI * 0.5f));
+	//body->SetAngularVelocity(Vector3f(1.9f, 1.11f,-0.7f));
+	//body->SetPrimitive(new CollisionBox(Vector3f(0.2f, 0.2f, 0.8f)));
+	body->SetPrimitive(new CollisionBox(Vector3f(0.2f, 0.1f, 0.2f)));
+	body->SetCollider(new BoxCollider(Vector3f(0.5f, 0.3f, 0.4f)));
+	m_physicsEngine.AddBody(body);
+	m_testBody2 = body;
 
-
-	m_testBody1->SetMass(4.0f);
-	m_testBody1->SetMass(mass);
-	m_physicsEngine.AddBody(m_testBody1);
-
-	m_testBody2 = new RigidBody();
-	m_testBody2->SetInverseMass(0.0f);
-	m_testBody2->SetInverseInertiaTensor(Matrix3f::ZERO);
-	//m_testBody2->SetInverseInertiaTensor(Matrix3f::CreateScale(1.0f, 1.0f, 1.0f));
-	m_testBody2->SetPosition(Vector3f(0, 2.0f, 0));
-	//m_testBody2->SetOrientation(Quaternion(Vector3f::UNITZ, 0.0f));
-	//m_testBody2->SetOrientation(Quaternion(Vector3f::UNITY, Math::HALF_PI * 0.5f));
-	//m_testBody2->SetAngularVelocity(Vector3f(1.9f, 1.11f,-0.7f));
-	//m_testBody2->SetPrimitive(new CollisionBox(Vector3f(0.2f, 0.2f, 0.8f)));
-	m_testBody2->SetPrimitive(new CollisionBox(Vector3f(0.2f, 0.1f, 0.2f)));
-	//m_physicsEngine.AddBody(m_testBody2);
-
+	/*
 	//float wallWidth = 0.1f;
 	//float wallHeight = 2.0f;
 	//float groundHalfSize = 1.5f;
@@ -113,7 +120,7 @@ void PhysicsApp::OnInitialize()
 	float groundHeight = 0.3f;
 	
 	// Floor
-	RigidBody* body = new RigidBody();
+	body = new RigidBody();
 	body->SetInverseMass(0.0f);
 	body->SetInverseInertiaTensor(Matrix3f::ZERO);
 	//body->SetInverseInertiaTensor(Matrix3f::CreateScale(1.0f, 1.0f, 1.0f));
@@ -156,8 +163,6 @@ void PhysicsApp::OnInitialize()
 	m_physicsEngine.AddBody(body);
 
 	// Create walls.
-
-	
 	//body = new RigidBody();
 	//body->SetInverseMass(0.0f);
 	//body->SetInverseInertiaTensor(Matrix3f::ZERO);
@@ -165,7 +170,8 @@ void PhysicsApp::OnInitialize()
 	//body->SetOrientation(Quaternion::IDENTITY);
 	//body->SetPrimitive(&m_physGround);
 	//m_physicsEngine.AddBody(body);
-	
+	*/
+		
 	m_cameraTransform.position = Vector3f(0, 4, 3);
 	m_cameraTransform.rotation.Rotate(Vector3f::UNITX, -0.3f);
 
@@ -184,10 +190,19 @@ void PhysicsApp::OnInitialize()
 	//m_renderParams.EnableNearFarPlaneClipping(false);
 	m_frameTimer.Start();
 
+	m_gjk.done = true;
+	m_gjk.result = false;
+	m_gjk.simplex.Clear();
+	m_gjk.shapeA = m_testBody1->GetCollider();
+	m_gjk.shapeB = m_testBody2->GetCollider();
+
+	m_debugDraw = new DebugDraw();
 }
 
 void PhysicsApp::OnQuit()
 {
+	delete m_debugDraw;
+	m_debugDraw = nullptr;
 }
 
 void PhysicsApp::OnResizeWindow(int width, int height)
@@ -208,7 +223,7 @@ void PhysicsApp::OnUpdate(float timeDelta)
 
 	if (m_frameTimer.GetElapsedSeconds() >= 1.0f)
 	{
-		m_physicsEngine.GetProfiler()->Print(std::cout);
+		//m_physicsEngine.GetProfiler()->Print(std::cout);
 		m_frameTimer.Start();
 	}
 
@@ -225,14 +240,91 @@ void PhysicsApp::OnUpdate(float timeDelta)
 	// Right bracket: simulate a single frame.
 	if (keyboard->IsKeyPressed(Keys::right_bracket))
 		simulateSingleFrame = true;
+
 	
-	if (keyboard->IsKeyPressed(Keys::i))
+	if (m_gjk.done)
 	{
-		std::cout << "m_testBody1->SetPosition(Vector3f" << m_testBody1->GetPosition() << ");" << std::endl;
-		std::cout << "m_testBody1->SetOrientation(Quaternion" << m_testBody1->GetOrientation() << ");" << std::endl;
-		std::cout << "m_testBody2->SetPosition(Vector3f" << m_testBody2->GetPosition() << ");" << std::endl;
-		std::cout << "m_testBody2->SetOrientation(Quaternion" << m_testBody2->GetOrientation() << ");" << std::endl;
+		if (keyboard->IsKeyPressed(Keys::space) ||
+			keyboard->IsKeyPressed(Keys::m))
+		{
+			m_gjk.simplex.Clear();
+			m_gjk.direction = Vector3f(1, 1, 1);
+
+			m_gjk.done = false;
+			m_gjk.result = false;
+			m_gjk.shapeA = m_testBody1->GetCollider();
+			m_gjk.shapeB = m_testBody2->GetCollider();
+			m_gjk.iteration = 0;
+
+			m_gjk.nextPoint = GJK::GetSupportMinkowskiDiff(
+				m_gjk.direction, m_gjk.shapeA, m_gjk.shapeB);
+			m_gjk.simplex.Add(m_gjk.nextPoint);
+			m_gjk.direction = -m_gjk.nextPoint; // Search towards the origin.
+			
+			printf("----------------------------------------------------\n");
+			printf("Beginning new GJK\n");
+		}
 	}
+	else if (keyboard->IsKeyPressed(Keys::space) ||
+			keyboard->IsKeyDown(Keys::m))
+	{
+		//bool gjk = GJK::TestIntersection(
+			//m_testBody1->GetPhysicsMesh()->GetShape(0),
+			//m_testBody2->GetPhysicsMesh()->GetShape(0));
+		//printf("GJK RESULT = %d\n", (int) gjk);
+		
+		if (m_gjk.iteration > 0)
+		{
+			if (GJK::DoSimplex(m_gjk.simplex, m_gjk.direction))
+			{
+				m_gjk.done = true;
+				m_gjk.result = true;
+				printf("GJK passed after %u iterations\n", m_gjk.iteration);
+			}
+		}
+
+		++m_gjk.iteration;
+			
+		m_gjk.nextPoint = GJK::GetSupportMinkowskiDiff(
+			m_gjk.direction, m_gjk.shapeA, m_gjk.shapeB);
+			
+		if (m_gjk.nextPoint.Dot(m_gjk.direction) < 0.0f)
+		{
+			m_gjk.done = true;
+			m_gjk.result = false;
+			printf("GJK failed after %u iterations\n", m_gjk.iteration);
+			m_gjk.simplex.Add(m_gjk.nextPoint);
+		}
+
+		if (!m_gjk.done)
+		{
+			m_gjk.simplex.Add(m_gjk.nextPoint);
+			printf("%u. Simplex size = %u\n", m_gjk.iteration, m_gjk.simplex.GetNumPoints());
+		}
+	}
+
+	
+	// F3: Print profiling info.
+	if (keyboard->IsKeyPressed(Keys::f3))
+		m_physicsEngine.GetProfiler()->Print(std::cout);
+	
+	//if (keyboard->IsKeyPressed(Keys::i))
+	//{
+	//	std::cout << "m_testBody1->SetPosition(Vector3f" << m_testBody1->GetPosition() << ");" << std::endl;
+	//	std::cout << "m_testBody1->SetOrientation(Quaternion" << m_testBody1->GetOrientation() << ");" << std::endl;
+	//	std::cout << "m_testBody2->SetPosition(Vector3f" << m_testBody2->GetPosition() << ");" << std::endl;
+	//	std::cout << "m_testBody2->SetOrientation(Quaternion" << m_testBody2->GetOrientation() << ");" << std::endl;
+	//}
+	
+	float debugMoveSpeed = 1.0f;
+	if (keyboard->IsKeyDown(Keys::i))
+		m_testBody1->SetPosition(m_testBody1->GetPosition() + debugMoveSpeed * Vector3f::UNITY * timeDelta);
+	if (keyboard->IsKeyDown(Keys::k))
+		m_testBody1->SetPosition(m_testBody1->GetPosition() - debugMoveSpeed * Vector3f::UNITY * timeDelta);
+	if (keyboard->IsKeyDown(Keys::l))
+		m_testBody1->SetPosition(m_testBody1->GetPosition() + debugMoveSpeed * Vector3f::UNITX * timeDelta);
+	if (keyboard->IsKeyDown(Keys::j))
+		m_testBody1->SetPosition(m_testBody1->GetPosition() - debugMoveSpeed * Vector3f::UNITX * timeDelta);
 	
 	if (keyboard->IsKeyPressed(Keys::t))
 	{
@@ -253,7 +345,9 @@ void PhysicsApp::OnUpdate(float timeDelta)
 	if (keyboard->IsKeyPressed(Keys::enter))
 	{
 		m_testBody1->SetPosition(Vector3f(0, 2, 14));
-		m_testBody1->SetOrientation(Quaternion(Vector3f::UNITZ, 0.0f));
+		//m_testBody1->SetOrientation(Quaternion(Vector3f::UNITZ, 0.0f));
+		m_testBody1->SetOrientation(Quaternion::IDENTITY);
+		m_testBody1->SetPosition(Vector3f(0, 3.0f, 0));
 		m_testBody1->SetVelocity(Vector3f(0, 1, 0));
 		m_testBody1->SetAngularVelocity(Vector3f(0.0f, 0.0f, 0.0f));
 	}
@@ -340,7 +434,7 @@ void PhysicsApp::OnUpdate(float timeDelta)
 	
 	UpdateDebugBodyControls(m_testBody1, timeDelta);
 
-	if (mouse->IsButtonDown(MouseButtons::right))
+	if (mouse->IsButtonDown(MouseButtons::left))
 	{
 		MouseState currState = mouse->GetMouseState();
 		MouseState prevState = mouse->GetPrevMouseState();
@@ -349,6 +443,13 @@ void PhysicsApp::OnUpdate(float timeDelta)
 		rotateAmount = 0.005f;
 		m_cameraTransform.rotation.Rotate(Vector3f::UP, -mouseDelta.x * rotateAmount);
 		m_cameraTransform.rotation.Rotate(m_cameraTransform.rotation.GetLeft(), mouseDelta.y * rotateAmount);
+
+		//GetWindow()->SetMouseVisibility(false);
+		//GetWindow()->SetMousePosition(1920 / 2, 1080 / 2);
+	}
+	else
+	{
+		//GetWindow()->SetMouseVisibility(true);
 	}
 
 	if (!m_simulationPaused || simulateSingleFrame)
@@ -457,7 +558,7 @@ void PhysicsApp::OnRender()
 	m_cameraProjection = Matrix4f::CreatePerspective(
 		1.5f, GetWindow()->GetAspectRatio(), 0.01f, 100.0f);
 	Matrix4f viewMatrix = m_cameraTransform.GetInvMatrix();
-		Matrix4f viewProjection = m_cameraProjection * viewMatrix;
+	Matrix4f viewProjection = m_cameraProjection * viewMatrix;
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadMatrixf(viewProjection.data());
@@ -480,14 +581,147 @@ void PhysicsApp::OnRender()
 	RigidBody* firstBody = collisionData.firstBody;*/
 	
 	// Draw all rigid bodies.
-	for (auto it = m_physicsEngine.bodies_begin();
-		it != m_physicsEngine.bodies_end(); it++)
-	{
-		DrawRigidBody(*it);
-	}
-	
+	//for (auto it = m_physicsEngine.bodies_begin();
+	//	it != m_physicsEngine.bodies_end(); it++)
+	//{
+	//	DrawRigidBody(*it);
+	//}
+
+	m_debugDraw->SetViewProjection(viewProjection);
+	m_debugDraw->SetShaded(true);
+	m_debugDraw->DrawFilledCollider(m_testBody1->GetCollider(), Color::RED);
+	m_debugDraw->DrawFilledCollider(m_testBody2->GetCollider(), Color::BLUE);
+
+	m_debugDraw->DrawFilledCylinder(Matrix4f::IDENTITY, m_testBody1->GetPosition(), m_testBody2->GetPosition(), 0.3f, Color::YELLOW);
+
+	glUseProgram(0);
+	glClear(GL_DEPTH_BUFFER_BIT);
+
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+
+	// Draw simplex.
+	m_gjk.result = GJK::TestIntersection(
+		m_testBody1->GetCollider(),
+		m_testBody2->GetCollider(),
+		&m_gjk.simplex);
+	m_gjk.done = true;
+
+	// Draw the origin.
+	float originRadius = 0.3f;
+	glLineWidth(1.0f);
+	glBegin(GL_LINES);
+	glColor3f(1.0f, 0.0f, 0.0f);
+	glVertex3f(-originRadius, 0, 0); glVertex3f(originRadius, 0, 0);
+	glColor3f(0.0f, 1.0f, 0.0f);
+	glVertex3f(0, -originRadius, 0); glVertex3f(0, originRadius, 0);
+	glColor3f(0.0f, 0.0f, 1.0f);
+	glVertex3f(0, 0, -originRadius); glVertex3f(0, 0, originRadius);
+	glEnd();
+
+	// Draw Minkowski Difference point cloud.
+	/*CollisionBox* boxA = (CollisionBox*) m_gjk.shapeA;
+	CollisionBox* boxB = (CollisionBox*) m_gjk.shapeB;
+	glPointSize(4.0f);
+	glBegin(GL_POINTS);
+	glColor3f(1.0f, 0.5f, 1.0f);
+	for (unsigned int i = 0; i < 8; ++i)
+	{
+		for (unsigned int j = 0; j < 8; ++j)
+		{
+			Vector3f minkowskiPoint = boxA->GetVertex(i) - boxB->GetVertex(j);
+			glVertex3fv(minkowskiPoint.v);
+		}
+	}
+	glEnd();*/
+
+	Vector3f simplexPointColors[4] = {
+		Vector3f(1,0,0), Vector3f(0,1,0), Vector3f(0,0,1), Vector3f(1,1,1) 
+	};
+	
+	Vector3f a = m_gjk.simplex.GetPoint(0);
+	Vector3f b = m_gjk.simplex.GetPoint(1);
+	Vector3f c = m_gjk.simplex.GetPoint(2);
+	Vector3f d = m_gjk.simplex.GetPoint(3);
+	Vector3f ab = b - a;
+	Vector3f ac = c - a;
+	Vector3f ad = d - a;
+	Vector3f ao = -a;
+	Vector3f abc = -ab.Cross(ac);
+	Vector3f acd = ac.Cross(ad);
+	Vector3f adb = ad.Cross(ab);
+
+	// Draw simplex points.
+	if (m_gjk.simplex.GetNumPoints() >= 1)
+	{
+		glPointSize(8.0f);
+		glBegin(GL_POINTS);
+		glColor3f(1.0f, 0.0f, 0.0f);
+		for (unsigned int i = 0; i < m_gjk.simplex.GetNumPoints(); ++i)
+		{
+			glColor3fv(simplexPointColors[i].v);
+			glVertex3fv(m_gjk.simplex.GetPoint(i).v);
+		}
+		glEnd();
+	}
+	
+	// Draw simplex lines.
+	if (m_gjk.simplex.GetNumPoints() >= 2)
+	{
+		glLineWidth(4.0f);
+		glBegin(GL_LINES);
+		glColor3f(1.0f, 0.25f, 0.25f);
+		for (unsigned int i = 0; i < m_gjk.simplex.GetNumPoints(); ++i)
+		{
+			for (unsigned int j = i + 1; j < m_gjk.simplex.GetNumPoints(); ++j)
+			{
+				glVertex3fv(m_gjk.simplex.GetPoint(i).v);
+				glVertex3fv(m_gjk.simplex.GetPoint(j).v);
+			}
+		}
+		glEnd();
+	}
+	
+	if (m_gjk.simplex.GetNumPoints() == 3)
+	{
+		glBegin(GL_LINES);
+		glColor3f(1,0,1);
+			glVertex3fv(a.v);
+			glVertex3fv((a + abc).v);
+		glColor3f(0,1,0);
+			glVertex3fv(a.v);
+			glVertex3fv((a + abc.Cross(ab)).v);
+		glColor3f(0,0,1);
+			glVertex3fv(a.v);
+			glVertex3fv((a + abc.Cross(-ac)).v);
+		glEnd();
+
+	}
+
+	// Draw simplex faces.
+	if (m_gjk.simplex.GetNumPoints() >= 3)
+	{
+		unsigned int count = (m_gjk.simplex.GetNumPoints() == 3 ? 1 : 4);
+		
+		glDisable(GL_CULL_FACE);
+		glBegin(GL_TRIANGLES);
+		glColor3f(1.0f, 0.5f, 0.5f);
+		if (m_gjk.result)
+			glColor3f(0.5f, 1.0f, 0.5f);
+		for (unsigned int i = 0; i < count; ++i)
+		{
+			unsigned int i0 = (i + 0) % 4;
+			unsigned int i1 = (i + 1) % 4;
+			unsigned int i2 = (i + 2) % 4;
+
+				glVertex3fv(m_gjk.simplex.GetPoint(i0).v);
+				glVertex3fv(m_gjk.simplex.GetPoint(i1).v);
+				glVertex3fv(m_gjk.simplex.GetPoint(i2).v);
+		}
+		glEnd();
+		glEnable(GL_CULL_FACE);
+	}
+
 	
 	// Draw center of masses.
 	for (auto it = m_physicsEngine.bodies_begin();

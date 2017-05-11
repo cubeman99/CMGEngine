@@ -154,6 +154,23 @@ void CollisionBox::CalculateInertiaTensor(float mass, Matrix3f& outInertiaTensor
 		scale * ((halfSize.x * halfSize.x) + (halfSize.y * halfSize.y)));
 }
 
+Vector3f CollisionBox::GetSupport(const Vector3f& direction) const
+{
+	Vector3f farthestVertex;
+	float farthestDot = -FLT_MAX;
+	for (unsigned int i = 0; i < 8; ++i)
+	{
+		Vector3f vertex = GetVertex(i);
+		float dot = vertex.Dot(direction);
+		if (dot > farthestDot)
+		{
+			farthestVertex = vertex;
+			farthestDot = dot;
+		}
+	}
+	return farthestVertex;
+}
+
 
 //-----------------------------------------------------------------------------
 // CollisionSphere

@@ -3,12 +3,14 @@ set(CMG_GENERIC_TESTS
 	main.cpp
 	TestApp.h
 	TestApp.cpp
-
-
+	
 	physics/PhysicsApp.h
 	physics/PhysicsApp.cpp
 	physics/PrimitiveMeshes.h
 	physics/PrimitiveMeshes.cpp
+
+	graphics/DebugDraw.h
+	graphics/DebugDraw.cpp
 
 	driving/DrivingEngine.h
 	driving/DrivingEngine.cpp
@@ -26,7 +28,6 @@ set(CMG_GENERIC_TESTS
 	driving/diagrams/Tachometer.cpp
 	driving/diagrams/Speedometer.h
 	driving/diagrams/Speedometer.cpp
-
 	driving/Graph.h
 	driving/Graph.cpp
 	driving/Graphics.h

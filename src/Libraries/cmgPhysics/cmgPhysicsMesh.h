@@ -23,6 +23,8 @@ public:
 	PhysicsMesh(RigidBody* body);
 	~PhysicsMesh();
 	
+	inline CollisionPrimitive* GetShape(unsigned int index) { return m_shapes[index]; }
+
 	Vector3f GetCenterOfMass() const;
 	float GetVolume() const;
 	void CalcInertiaTensor(float mass, Matrix3f& outInertiaTensor) const;

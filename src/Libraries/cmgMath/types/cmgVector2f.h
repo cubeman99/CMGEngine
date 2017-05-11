@@ -10,7 +10,11 @@ struct Point2i;
 // 2D floating-point vector.
 struct Vector2f
 {
-	float x, y;
+	union
+	{
+		struct { float x, y; };
+		struct { float v[2]; };
+	};
 
 
 	// Constants.

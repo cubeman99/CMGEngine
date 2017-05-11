@@ -7,6 +7,7 @@
 #include <cmgMath/types/cmgMatrix4f.h>
 #include <cmgCore/containers/cmgArray.h>
 #include "cmgPhysicsMesh.h"
+#include <cmgPhysics/colliders/cmgCollider.h>
 
 
 //-----------------------------------------------------------------------------
@@ -29,6 +30,11 @@ public:
 	inline const Matrix3f& GetInverseInertiaTensor() const { return m_inverseInertiaTensor; }
 	inline PhysicsMesh* GetPhysicsMesh() { return &m_physicsMesh; }
 	inline unsigned int GetId() const { return m_id; }
+	inline Collider* GetCollider() { return m_collider; }
+
+	inline const Matrix4f& GetBodyToWorld() const { return m_bodyToWorld; }
+	inline const Matrix4f& GetWorldToBody() const { return m_worldToBody; }
+
 
 	// Setters
 	inline void SetPosition(const Vector3f& position) { m_position = position; }
@@ -39,6 +45,8 @@ public:
 	inline void SetInverseInertiaTensor(const Matrix3f& inverseInertiaTensor) { m_inverseInertiaTensor = inverseInertiaTensor; }
 	inline void SetRestitution(float restitution) { m_restitution = restitution; }
 	void SetMass(float mass);
+	void SetCollider(Collider* collider);
+
 	inline void SetPrimitive(CollisionPrimitive* primitive)
 	{
 		AddPrimitive(primitive, Matrix4f::IDENTITY);
@@ -57,7 +65,6 @@ public:
 	}
 	inline std::vector<CollisionPrimitive*>::iterator primitives_begin() { return m_physicsMesh.shapes_begin(); }
 	inline std::vector<CollisionPrimitive*>::iterator primitives_end() { return m_physicsMesh.shapes_end(); }
-
 
 	void ApplyImpulse(const Vector3f& impulse, const Vector3f& contactPoint);
 	void CalculateDerivedData();
@@ -96,6 +103,7 @@ public:
 
 	// Geometry
 	PhysicsMesh		m_physicsMesh;
+	Collider*		m_collider;
 
 	// Material properties
 	float			m_inverseMass;
@@ -107,6 +115,7 @@ public:
 public:
 	// Derived data
 	Matrix4f		m_bodyToWorld;
+	Matrix4f		m_worldToBody;
 	Matrix3f		m_inverseInertiaTensorWorld; // inverse inertia tensor in world space.
 };
 

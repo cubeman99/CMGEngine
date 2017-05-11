@@ -52,6 +52,33 @@ struct PrimitiveList
 // Standard vertex formats for models
 //-----------------------------------------------------------------------------
 
+enum class VertexAttrib
+{
+	k_position		= 0,
+	k_bone_weights	= 1,
+	k_normal		= 2,
+	k_color			= 3,
+	k_unused1,
+	k_unused2,
+	k_unused3,
+	k_bone_indices	= 7,
+	k_tex_coord		= 8,
+	//k_tbn_matrix	= 6,
+};
+
+enum class AttributeType
+{
+	k_int,
+	k_ivec2,
+	k_ivec3,
+	k_ivec4,
+
+	k_float,
+	k_vec2,
+	k_vec3,
+	k_vec4,
+};
+
 // NOTE: Order is important here
 struct VertexType
 {
@@ -65,6 +92,23 @@ struct VertexType
 		k_bone_indices	= 0x20,
 		//k_tbn_matrix		= 0x40, // TODO: TBN Matrix support
 	};
+};
+
+struct VertexAttributeInfo
+{
+	VertexAttrib name;
+	AttributeType type;
+	unsigned int stride; // 0 = tightly packed
+	const void *data;
+
+	// Derived from type:
+	unsigned int numComponents;
+	unsigned int componentSize;
+	AttributeType internalType;
+
+
+	VertexAttributeInfo();
+	VertexAttributeInfo(VertexAttrib name, AttributeType type, const void* data, unsigned int stride = 0);
 };
 
 
@@ -264,11 +308,17 @@ public:
 	template <class T>
 	void SetVertices(int numVertices, const T* vertices);
 
+	void BufferVertices(
+		unsigned int numVertices,
+		const VertexAttributeInfo* attribs,
+		unsigned int numAttribs);
+
+
 private:
-	int				m_numVertices;		// The number of vertices in the vertex buffer.
-	int				m_bufferSize;		// The size in bytes of the vertex buffer.
-	unsigned int	m_glVertexBuffer;	// The ID for the OpenGL vertex buffer.
-	unsigned int	m_glVertexArray;	// The ID for the OpenGL vertex array object.
+	int				m_numVertices;		// Number of vertices in the buffer.
+	int				m_bufferSize;		// Size in bytes of the vertex buffer.
+	unsigned int	m_glVertexBuffer;	// OpenGL vertex buffer ID.
+	unsigned int	m_glVertexArray;	// OpenGL vertex array object ID.
 	unsigned int	m_vertexType;
 };
 
@@ -310,14 +360,21 @@ public:
 	VertexData(unsigned int start, unsigned int count);
 	~VertexData();
 
-	void BufferVertices(int numVertices, const VertexPosTex* vertices)
+	inline void BufferVertices(int numVertices, const VertexAttributeInfo* attribs, unsigned int numAttribs)
+	{
+		m_vertexStart = 0;
+		m_vertexCount = numVertices;
+		m_vertexBuffer.BufferVertices(numVertices, attribs, numAttribs);
+	}
+
+	inline void BufferVertices(int numVertices, const VertexPosTex* vertices)
 	{
 		m_vertexStart = 0;
 		m_vertexCount = numVertices;
 		m_vertexBuffer.SetVertices(numVertices, vertices);
 	}
 
-	void BufferVertices(int numVertices, const VertexPosTexNorm* vertices)
+	inline void BufferVertices(int numVertices, const VertexPosTexNorm* vertices)
 	{
 		m_vertexStart = 0;
 		m_vertexCount = numVertices;

@@ -17,6 +17,8 @@ set(CMG_GRAPHICS_SOURCE_FILES
 	cmgShader.cpp
 	cmgVertexData.h
 	cmgVertexData.cpp
+	cmgMesh.h
+	cmgMesh.cpp
 
 	render/cmgRenderParams.h
 	render/cmgRenderParams.cpp

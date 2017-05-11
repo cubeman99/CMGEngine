@@ -198,7 +198,6 @@ TEST(Matrix4f, Matrix4f_Inverse)
 	EPXECT_MATRIX_EQ(Matrix4f::IDENTITY, matrixInverse * matrix);
 }
 
-
 int main(int argc, char* argv[])
 {
 	//TestApp app;

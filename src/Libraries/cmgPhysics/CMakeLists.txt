@@ -18,12 +18,15 @@ set(CMG_PHYSICS_SOURCE_FILES
 	cmgContact.h
 	cmgContact.cpp
 	
-	collision/cmgCollider.h
-	collision/cmgCollider.cpp
-	collision/cmgBoxCollider.h
-	collision/cmgBoxCollider.cpp
-	collision/cmgSphereCollider.h
-	collision/cmgSphereCollider.cpp
+	cmgGJK.h
+	cmgGJK.cpp
+
+	colliders/cmgCollider.h
+	colliders/cmgCollider.cpp
+	colliders/cmgBoxCollider.h
+	colliders/cmgBoxCollider.cpp
+	colliders/cmgSphereCollider.h
+	colliders/cmgSphereCollider.cpp
 )
 
 cmg_install_library(cmgPhysics "${CMG_PHYSICS_SOURCE_FILES}")

@@ -414,6 +414,11 @@ void Window::SetMouseVisibility(bool isMouseVisible)
 	DoSetMouseVisibility(m_mouseVisible);
 }
 
+void Window::SetMousePosition(int x, int y)
+{
+	SetCursorPos(x, y);
+}
+
 // Set whether the mouse should be confined to the window bounds.
 void Window::ConfineMouseToWindow(bool confineMouse)
 {
@@ -917,7 +922,6 @@ void Window::DoProcessEvent(UINT message, WPARAM wParam, LPARAM lParam)
 		case WM_DROPFILES:
 		{
 			HDROP hdrop = (HDROP) wParam;
-			printf("WM_DROPFILES WM_DROPFILES WM_DROPFILES\n");
 			SendEvent(WindowEvent(WindowEvent::k_drop_file, GetWidth(), GetHeight()));
 			break;
 		}

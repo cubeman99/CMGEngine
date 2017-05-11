@@ -49,7 +49,8 @@ public:
 	virtual primitive_type GetType() const = 0;
 	virtual float GetVolume() const { return 0.0f; }
 	virtual void CalculateInertiaTensor(float mass, Matrix3f& outInertiaTensor) const {}
-	
+	virtual Vector3f GetSupport(const Vector3f& direction) const { return Vector3f::ZERO; }
+
 	// Coordinate space methods
 
 	Vector3f GetWorldPosition() const;
@@ -120,6 +121,7 @@ public:
 
 	float GetVolume() const override;
 	void CalculateInertiaTensor(float mass, Matrix3f& outInertiaTensor) const override;
+	Vector3f GetSupport(const Vector3f& direction) const override;
 
 public:
 	Vector3f halfSize;

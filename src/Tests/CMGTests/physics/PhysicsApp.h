@@ -6,6 +6,7 @@
 #include <cmgPhysics/cmg_physics.h>
 #include "PrimitiveMeshes.h"
 #include <driving/SpriteFont.h>
+#include <graphics/DebugDraw.h>
 
 
 class PhysObject
@@ -62,8 +63,21 @@ private:
 	CollisionBox	m_physCube;
 	CollisionBox	m_physGround;
 
+	DebugDraw*		m_debugDraw;
 	RigidBody*		m_testBody1;
 	RigidBody*		m_testBody2;
+
+	struct 
+	{
+		Vector3f nextPoint;
+		Simplex simplex;
+		Vector3f direction;
+		unsigned int iteration;
+		Collider* shapeA;
+		Collider* shapeB;
+		bool done;
+		bool result;
+	} m_gjk;
 
 	RenderParams m_renderParams;
 

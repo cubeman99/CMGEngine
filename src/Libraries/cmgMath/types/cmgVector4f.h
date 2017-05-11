@@ -2,9 +2,8 @@
 #define _CMG_VECTOR_4F_H_
 
 #include <iostream>
+#include <cmgMath/types/cmgVector3f.h>
 
-struct Vector2f;
-struct Vector3f;
 struct Matrix4f;
 struct Quaternion;
 
@@ -12,7 +11,13 @@ struct Quaternion;
 // 4D floating-point vector.
 struct Vector4f
 {
-	float x, y, z, w;
+	union
+	{
+		struct { float x, y, z, w; };
+		struct { Vector3f xyz; };
+		struct { Vector2f xy; };
+		struct { float v[4]; };
+	};
 
 
 	// Constants.

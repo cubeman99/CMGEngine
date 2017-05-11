@@ -33,18 +33,18 @@ struct UniformType
 //-----------------------------------------------------------------------------
 // ShaderType - Types of supported shaders stages.
 //-----------------------------------------------------------------------------
-struct ShaderType
+enum class ShaderType
 {
-	typedef int value_type;
+	//typedef int value_type;
 
-	enum
-	{
+	//enum
+	//{
 		k_vertex_shader = 0,
 		k_fragment_shader,
 		k_geometry_shader,
 		k_compute_shader,
 		k_count,
-	};
+	//};
 };
 
 
@@ -66,7 +66,7 @@ public:
 	{
 	}
 
-	// Accessors.
+	// Getters
 	inline const String&	GetName()			const { return m_name; }
 	inline uniform_type		GetType()			const { return m_type; }
 	inline int				GetLocation()		const { return m_location; }
@@ -86,7 +86,7 @@ private:
 class Shader
 {
 public:
-	typedef ShaderType::value_type shader_type;
+	//typedef ShaderType::value_type shader_type;
 
 public:
 	Shader();
@@ -101,24 +101,24 @@ public:
 	int					GetUniformLocation(const String& name) const;
 	bool				GetUniformLocation(const String& name, int& outUniformLocation) const;
 			
-	Error AddStage(shader_type type, const String& code, const String& fileName = "");
+	Error AddStage(ShaderType type, const String& code, const String& fileName = "");
 	Error CompileAndLink();
 
 	inline unsigned int GetGLProgram() const { return m_glProgram; }
 
 private:
 	Error Compile();
-	Error CompileStage(shader_type stage);
+	Error CompileStage(ShaderType stage);
 	Error Link();
 	Error Validate();
 	void GenerateUniforms();
 	
 private:
-	String			m_shaderStageFileNames[ShaderType::k_count];
+	String			m_shaderStageFileNames[(int) ShaderType::k_count];
 	bool			m_isLinked;
 	Array<Uniform>	m_uniforms;
 	unsigned int	m_glProgram;
-	unsigned int	m_glShaderStages[ShaderType::k_count];
+	unsigned int	m_glShaderStages[(int) ShaderType::k_count];
 };
 
 

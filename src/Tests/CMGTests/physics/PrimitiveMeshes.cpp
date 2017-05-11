@@ -8,6 +8,363 @@
 typedef std::vector<VertexPosNormCol> VertexList;
 typedef std::vector<unsigned int> IndexList;
 
+
+
+static const unsigned int cubeVertexCount = 36;
+static Vector3f cubePositions[cubeVertexCount];
+static Vector3f cubeNormals[cubeVertexCount];
+static Vector2f cubeTexCoords[cubeVertexCount];
+static Vector3f cubeColors[cubeVertexCount];
+
+static const unsigned int sphereResolutionX = 20;
+static const unsigned int sphereResolutionY = 10;
+static const unsigned int sphereVertexCount = (sphereResolutionX + 1) * (sphereResolutionY - 1) + (2 * sphereResolutionX);
+static const unsigned int sphereIndexCount = 6 * sphereResolutionX * (sphereResolutionY - 1);
+static Vector3f spherePositions[sphereVertexCount];
+static Vector3f sphereNormals[sphereVertexCount];
+static Vector2f sphereTexCoords[sphereVertexCount];
+static Vector3f sphereColors[sphereVertexCount];
+static unsigned int sphereIndices[sphereIndexCount];
+
+static const unsigned int cylinderNumSides = 20;
+static const unsigned int cylinderVertexCount = cylinderNumSides * 4;
+static const unsigned int cylinderIndexCount = (cylinderNumSides * 6) + ((cylinderNumSides - 2) * 6);
+static Vector3f cylinderPositions[cylinderVertexCount];
+static Vector3f cylinderNormals[cylinderVertexCount];
+static Vector2f cylinderTexCoords[cylinderVertexCount];
+static Vector3f cylinderColors[cylinderVertexCount];
+static unsigned int cylinderIndices[cylinderIndexCount];
+
+
+
+//-----------------------------------------------------------------------------
+// Cube
+//-----------------------------------------------------------------------------
+
+void Primitives::InitializeCube()
+{
+	unsigned int i;
+
+	// Setup the corner positions.
+	Vector3f corner[8];
+	for (i = 0; i < 8; ++i)
+	{
+		corner[i] = -Vector3f::ONE;
+		if (i & 0x1)
+			corner[i].x = 1;
+		if (i & 0x2)
+			corner[i].y = 1;
+		if (i & 0x4)
+			corner[i].z = 1;
+	}
+
+	i = 0;
+	cubePositions[i++] = corner[6]; // Top
+	cubePositions[i++] = corner[7];
+	cubePositions[i++] = corner[3];
+	cubePositions[i++] = corner[6];
+	cubePositions[i++] = corner[3];
+	cubePositions[i++] = corner[2];
+	cubePositions[i++] = corner[5]; // Bottom
+	cubePositions[i++] = corner[4];
+	cubePositions[i++] = corner[0];
+	cubePositions[i++] = corner[5];
+	cubePositions[i++] = corner[0];
+	cubePositions[i++] = corner[1];
+	cubePositions[i++] = corner[5]; // Right
+	cubePositions[i++] = corner[1];
+	cubePositions[i++] = corner[3];
+	cubePositions[i++] = corner[5];
+	cubePositions[i++] = corner[3];
+	cubePositions[i++] = corner[7];
+	cubePositions[i++] = corner[0]; // Left
+	cubePositions[i++] = corner[4];
+	cubePositions[i++] = corner[6];
+	cubePositions[i++] = corner[0];
+	cubePositions[i++] = corner[6];
+	cubePositions[i++] = corner[2];
+	cubePositions[i++] = corner[1]; // Front
+	cubePositions[i++] = corner[0];
+	cubePositions[i++] = corner[2];
+	cubePositions[i++] = corner[1];
+	cubePositions[i++] = corner[2];
+	cubePositions[i++] = corner[3];
+	cubePositions[i++] = corner[4]; // Back
+	cubePositions[i++] = corner[5];
+	cubePositions[i++] = corner[7];
+	cubePositions[i++] = corner[4];
+	cubePositions[i++] = corner[7];
+	cubePositions[i++] = corner[6];
+
+	for (i = 0; i < 6; ++i)
+	{
+		cubeNormals[i + (6 * 0)] = Vector3f::UNITY;
+		cubeNormals[i + (6 * 1)] = Vector3f::NEG_UNITY;
+		cubeNormals[i + (6 * 2)] = Vector3f::UNITX;
+		cubeNormals[i + (6 * 3)] = Vector3f::NEG_UNITX;
+		cubeNormals[i + (6 * 4)] = Vector3f::NEG_UNITZ;
+		cubeNormals[i + (6 * 5)] = Vector3f::UNITZ;
+		
+		cubeColors[i + (6 * 0)] = Vector3f(0, 1, 0);
+		cubeColors[i + (6 * 1)] = Vector3f(1, 0, 1);
+		cubeColors[i + (6 * 2)] = Vector3f(1, 0, 0);
+		cubeColors[i + (6 * 3)] = Vector3f(0, 1, 1);
+		cubeColors[i + (6 * 4)] = Vector3f(0, 0, 1);
+		cubeColors[i + (6 * 5)] = Vector3f(1, 1, 0);
+
+		cubeTexCoords[(i * 4) + 0] = Vector2f(0, 0);
+		cubeTexCoords[(i * 4) + 1] = Vector2f(1, 0);
+		cubeTexCoords[(i * 4) + 2] = Vector2f(1, 1);
+		cubeTexCoords[(i * 4) + 3] = Vector2f(0, 0);
+		cubeTexCoords[(i * 4) + 4] = Vector2f(1, 1);
+		cubeTexCoords[(i * 4) + 5] = Vector2f(0, 1);
+	}
+}
+
+unsigned int Primitives::GetCubeVertexCount()
+{
+	return cubeVertexCount;
+}
+
+const Vector3f* Primitives::GetCubePositions()
+{
+	return cubePositions;
+}
+
+const Vector3f* Primitives::GetCubeNormals()
+{
+	return cubeNormals;
+}
+
+const Vector2f* Primitives::GetCubeTexCoords()
+{
+	return cubeTexCoords;
+}
+
+const Vector3f* Primitives::GetCubeColors()
+{
+	return cubeColors;
+}
+
+
+//-----------------------------------------------------------------------------
+// Sphere
+//-----------------------------------------------------------------------------
+
+void Primitives::InitializeSphere()
+{
+	Vector2f texCoord;
+
+	Matrix3f rotationHorz = Matrix3f::CreateRotation(Vector3f::UNITY, Math::TWO_PI / sphereResolutionX);
+	Matrix3f rotationVert = Matrix3f::CreateRotation(Vector3f::UNITX, Math::PI / sphereResolutionY);
+
+	unsigned int first = sphereResolutionX * 2;
+
+	// Create vertices at poles.
+	for (unsigned int x = 0; x < sphereResolutionX; ++x)
+	{
+		float t = ((float) x + 0.5f) / (float) sphereResolutionX;
+		sphereTexCoords[x]	= Vector2f(t, 1.0f);
+		spherePositions[x]	= -Vector3f::UNITY;
+		sphereNormals[x]	= -Vector3f::UNITY;
+		sphereTexCoords[x + sphereResolutionX]	= Vector2f(t, 0.0f);
+		spherePositions[x + sphereResolutionX]	= Vector3f::UNITY;
+		sphereNormals[x + sphereResolutionX]	= Vector3f::UNITY;
+	}
+
+	// Create the first vertex.
+	spherePositions[first] = rotationVert * spherePositions[0];
+
+	// Create the first line of latitude.
+	for (unsigned int y = 1; y < sphereResolutionY - 1; ++y)
+	{
+		spherePositions[first + y] = rotationVert *
+			spherePositions[first + y - 1];
+	}
+
+	// Create the rest of the lines of latitude.
+	for (unsigned int x = 1; x <= sphereResolutionX; ++x)
+	{
+		for (unsigned int y = 0; y < sphereResolutionY - 1; ++y)
+		{
+			unsigned int index = first + (x * (sphereResolutionY - 1)) + y;
+			unsigned int indexPrev = index - (sphereResolutionY - 1);
+			spherePositions[index] = rotationHorz * spherePositions[indexPrev];
+		}
+	}
+
+	// Setup texcoords and normals.
+	for (unsigned int x = 0; x <= sphereResolutionX; ++x)
+	{
+		texCoord.x = ((float) x / (float) sphereResolutionX);
+
+		for (unsigned int y = 0; y < sphereResolutionY - 1; ++y)
+		{
+			unsigned int index = first + (x * (sphereResolutionY - 1)) + y;
+			texCoord.y = 1.0f - (((float) y + 1.0f) / (float) sphereResolutionY);
+
+			sphereTexCoords[index] = texCoord;
+			sphereNormals[index] = spherePositions[index];
+			sphereColors[index] = (sphereNormals[index] + Vector3f::ONE) * 0.5f;
+		}
+	}
+
+	// Setup indices.
+	unsigned int index = 0;
+	for (unsigned int x = 0; x < sphereResolutionX; ++x)
+	{
+		for (unsigned int y = 0; y < sphereResolutionY - 2; ++y)
+		{
+			unsigned int i0 = first + (x * (sphereResolutionY - 1)) + y;
+			unsigned int i1 = i0 + (sphereResolutionY - 1);
+			unsigned int i2 = i0 + 1;
+			unsigned int i3 = i1 + 1;
+
+			sphereIndices[index++] = i2;
+			sphereIndices[index++] = i3;
+			sphereIndices[index++] = i1;
+			sphereIndices[index++] = i2;
+			sphereIndices[index++] = i1;
+			sphereIndices[index++] = i0;
+
+			// Poles
+			if (y == 0)
+			{
+				sphereIndices[index++] = i0;
+				sphereIndices[index++] = i1;
+				sphereIndices[index++] = x;
+			}
+			else if (y == sphereResolutionY - 3)
+			{
+				sphereIndices[index++] = sphereResolutionX + x;
+				sphereIndices[index++] = i2;
+				sphereIndices[index++] = i3;
+			}
+		}
+	}
+
+	// Setup normals and colors.
+	for (unsigned int i = 0; i < sphereVertexCount; ++i)
+	{
+		sphereNormals[i] = spherePositions[i];
+		sphereColors[i] = (sphereNormals[i] + Vector3f::ONE) * 0.5f;
+	}
+}
+
+unsigned int Primitives::GetSphereVertexCount()
+{
+	return sphereVertexCount;
+}
+
+const Vector3f* Primitives::GetSpherePositions()
+{
+	return spherePositions;
+}
+
+const Vector3f* Primitives::GetSphereNormals()
+{
+	return sphereNormals;
+}
+
+const Vector2f* Primitives::GetSphereTexCoords()
+{
+	return sphereTexCoords;
+}
+
+const Vector3f* Primitives::GetSphereColors()
+{
+	return sphereColors;
+}
+
+unsigned int Primitives::GetSphereIndexCount()
+{
+	return sphereIndexCount;
+}
+
+const unsigned int* Primitives::GetSphereIndices()
+{
+	return sphereIndices;
+}
+
+//-----------------------------------------------------------------------------
+// Cylinder
+//-----------------------------------------------------------------------------
+
+void Primitives::InitializeCylinder()
+{
+	unsigned int index = 0;
+	for (unsigned int i = 0; i < cylinderNumSides; ++i)
+	{
+		float angle = ((float) i / (float) cylinderNumSides) * Math::TWO_PI;
+		Vector2f xy(Math::Cos(angle), Math::Sin(angle));
+		cylinderPositions[i + (cylinderNumSides * 0)] = Vector3f(xy, 1.0f);
+		cylinderPositions[i + (cylinderNumSides * 1)] = Vector3f(xy, -1.0f);
+		cylinderPositions[i + (cylinderNumSides * 2)] = Vector3f(xy, 1.0f);
+		cylinderPositions[i + (cylinderNumSides * 3)] = Vector3f(xy, -1.0f);
+		cylinderNormals[i + (cylinderNumSides * 0)] = Vector3f::UNITZ;
+		cylinderNormals[i + (cylinderNumSides * 1)] = -Vector3f::UNITZ;
+		cylinderNormals[i + (cylinderNumSides * 2)] = Vector3f(xy, 0.0f);
+		cylinderNormals[i + (cylinderNumSides * 3)] = Vector3f(xy, 0.0f);
+
+		if (i >= 2)
+		{
+			cylinderIndices[index++] = 0;
+			cylinderIndices[index++] = i;
+			cylinderIndices[index++] = i - 1;
+			cylinderIndices[index++] = cylinderNumSides + 0;
+			cylinderIndices[index++] = cylinderNumSides + i - 1;
+			cylinderIndices[index++] = cylinderNumSides + i;
+		}
+		
+		cylinderIndices[index++] = (cylinderNumSides * 2) + ((i + 0) % cylinderNumSides);
+		cylinderIndices[index++] = (cylinderNumSides * 2) + ((i + 1) % cylinderNumSides);
+		cylinderIndices[index++] = (cylinderNumSides * 3) + ((i + 1) % cylinderNumSides);
+		cylinderIndices[index++] = (cylinderNumSides * 2) + ((i + 0) % cylinderNumSides);
+		cylinderIndices[index++] = (cylinderNumSides * 3) + ((i + 1) % cylinderNumSides);
+		cylinderIndices[index++] = (cylinderNumSides * 3) + ((i + 0) % cylinderNumSides);
+	}
+}
+
+unsigned int Primitives::GetCylinderVertexCount()
+{
+	return cylinderVertexCount;
+}
+
+const Vector3f* Primitives::GetCylinderPositions()
+{
+	return cylinderPositions;
+}
+
+const Vector3f* Primitives::GetCylinderNormals()
+{
+	return cylinderNormals;
+}
+
+const Vector2f* Primitives::GetCylinderTexCoords()
+{
+	return cylinderTexCoords;
+}
+
+const Vector3f* Primitives::GetCylinderColors()
+{
+	return cylinderColors;
+}
+
+unsigned int Primitives::GetCylinderIndexCount()
+{
+	return cylinderIndexCount;
+}
+
+const unsigned int* Primitives::GetCylinderIndices()
+{
+	return cylinderIndices;
+}
+
+
+
+
+
+
 static void CreateIcosahedronRaw(float radius, bool smooth, VertexList& vertices, IndexList& indices)
 {
 	float g = 1.61803398875f; // Golden ratio

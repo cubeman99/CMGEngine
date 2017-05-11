@@ -12,7 +12,7 @@ Shader::Shader()
 {
 	// Create the shader program
 	m_glProgram = glCreateProgram();
-	for (int i = 0; i < ShaderType::k_count; ++i)
+	for (int i = 0; i < (int) ShaderType::k_count; ++i)
 		m_glShaderStages[i] = 0;
 }
 
@@ -22,7 +22,7 @@ Shader::~Shader()
 	glDeleteProgram(m_glProgram);
 		
 	// Delete the shader stages.
-	for (int i = 0; i < ShaderType::k_count; ++i)
+	for (int i = 0; i < (int) ShaderType::k_count; ++i)
 	{
 		if (m_glShaderStages != 0)
 			glDeleteShader(m_glShaderStages[i]);
@@ -88,7 +88,7 @@ bool Shader::GetUniformLocation(const String& name, int& outUniformLocation) con
 // Compiling and Linking
 //-----------------------------------------------------------------------------
 
-Error Shader::AddStage(shader_type type, const String& code, const String& fileName)
+Error Shader::AddStage(ShaderType type, const String& code, const String& fileName)
 {
 	GLuint shaderGL = 0;
 
@@ -127,17 +127,26 @@ Error Shader::CompileAndLink()
 	// 1. Compile the stages.
 	error = Compile();
 	if (error.Failed())
+	{
+		error.Uncheck();
 		return error;
+	}
 
 	// 2. Link the program.
 	error = Link();
 	if (error.Failed())
+	{
+		error.Uncheck();
 		return error;
+	}
 
 	// 3. Validate the program.
 	error = Validate();
 	if (error.Failed())
+	{
+		error.Uncheck();
 		return error;
+	}
 
 	// 4. Generate uniforms.
 	GenerateUniforms();
@@ -157,11 +166,11 @@ Error Shader::Compile()
 	Error compileError;
 
 	// Compile all shader stages.
-	for (unsigned int i = 0; i < ShaderType::k_count; ++i)
+	for (unsigned int i = 0; i < (int) ShaderType::k_count; ++i)
 	{
 		if (m_glShaderStages[i] != 0)
 		{
-			compileError = CompileStage(i);
+			compileError = CompileStage((ShaderType) i);
 			if (compileError.Failed())
 				compileErrors.push_back(compileError.GetText());
 		}
@@ -184,9 +193,9 @@ Error Shader::Compile()
 	return CMG_ERROR_SUCCESS;
 }
 
-Error Shader::CompileStage(shader_type stage)
+Error Shader::CompileStage(ShaderType stage)
 {
-	GLuint shaderGL = m_glShaderStages[stage];
+	GLuint shaderGL = m_glShaderStages[(int) stage];
 	CMG_ASSERT(shaderGL != 0);
 
 	// Compile the shader.
@@ -204,7 +213,7 @@ Error Shader::CompileStage(shader_type stage)
 		// Format the error message.
 		String errorMessage = errorMsg;
 		errorMessage = "\n" + errorMessage;
-		String toReplace = "\n" + m_shaderStageFileNames[stage] + "(";
+		String toReplace = "\n" + m_shaderStageFileNames[(int) stage] + "(";
 
 		// Insert the shader file name before each error.
 		size_t index = 0;
@@ -277,7 +286,7 @@ void Shader::GenerateUniforms()
 	glGetProgramiv(m_glProgram, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxNameLength);
 	glGetProgramiv(m_glProgram, GL_ACTIVE_UNIFORMS, &numUniforms);
 	m_uniforms.resize(numUniforms);
-	GLchar* uniformName = new char[maxNameLength];
+	GLchar* uniformName = new char[maxNameLength + 1];
 
 	int samplerSlot = 0;
 		
