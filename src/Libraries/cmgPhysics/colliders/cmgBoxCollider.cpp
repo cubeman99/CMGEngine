@@ -22,6 +22,15 @@ float BoxCollider::GetVolume() const
 	return (8.0f * m_halfSize.x * m_halfSize.y * m_halfSize.z);
 }
 
+Matrix3f BoxCollider::CalcInertiaTensor(float mass) const
+{
+	float scale = (1.0f / 12.0f) * mass;
+	return Matrix3f::CreateScale(
+		scale * ((m_halfSize.y * m_halfSize.y) + (m_halfSize.z * m_halfSize.z)),
+		scale * ((m_halfSize.z * m_halfSize.z) + (m_halfSize.x * m_halfSize.x)),
+		scale * ((m_halfSize.x * m_halfSize.x) + (m_halfSize.y * m_halfSize.y)));
+}
+
 Vector3f BoxCollider::GetSupportPoint(const Vector3f& direction) const
 {
 	Vector3f point = m_shapeToWorld.c3.xyz;

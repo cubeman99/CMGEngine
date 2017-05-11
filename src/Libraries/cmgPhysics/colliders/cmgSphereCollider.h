@@ -11,6 +11,7 @@ public:
 	
 	// Collider implementations
 	float GetVolume() const override;
+	Matrix3f CalcInertiaTensor(float mass) const override;
 	Vector3f GetSupportPoint(const Vector3f& direction) const override;
 
 	inline float GetRadius() const { return m_radius; }

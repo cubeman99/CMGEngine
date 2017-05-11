@@ -1,6 +1,7 @@
 #ifndef _CMG_PHYSICS_COLLIDERS_COLLIDER_H_
 #define _CMG_PHYSICS_COLLIDERS_COLLIDER_H_
 
+#include <cmgMath/types/cmgMatrix3f.h>
 #include <cmgMath/types/cmgMatrix4f.h>
 #include <cmgMath/cmgMathLib.h>
 
@@ -19,8 +20,9 @@ enum class ColliderType
 	k_plane,
 
 	k_cylinder,
+	k_cone,
 	k_capsule,
-	k_polyhedra,
+	k_ellipsoid,
 
 	k_count,
 };
@@ -45,11 +47,11 @@ public:
 	inline const Matrix4f& GetWorldToShape() const { return m_worldToShape; }
 	inline RigidBody* GetBody() { return m_body; }
 	inline const RigidBody* GetBody() const { return m_body; }
-
-
+	
 	// Virtual functions
+	virtual Vector3f GetCenterOfMassOffset() const { return Vector3f::ZERO; }
 	virtual float GetVolume() const { return 0.0f; }
-	//virtual void CalculateInertiaTensor(float mass, Matrix3f& outInertiaTensor) const {}
+	virtual Matrix3f CalcInertiaTensor(float mass) const { return Matrix3f::IDENTITY; }
 	virtual Vector3f GetSupportPoint(const Vector3f& direction) const { return Vector3f::ZERO; }
 
 

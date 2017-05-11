@@ -4,6 +4,8 @@
 #include <cmgGraphics/cmg_graphics.h>
 #include <cmgPhysics/colliders/cmgSphereCollider.h>
 #include <cmgPhysics/colliders/cmgBoxCollider.h>
+#include <cmgPhysics/colliders/cmgCylinderCollider.h>
+#include <cmgPhysics/colliders/cmgConeCollider.h>
 
 class DebugDraw
 {
@@ -26,6 +28,10 @@ public:
 	void DrawFilledBoxCollider(const BoxCollider* box, const Color& color);
 	void DrawWireSphereCollider(const SphereCollider* sphere, const Color& color);
 	void DrawFilledSphereCollider(const SphereCollider* sphere, const Color& color);
+	void DrawWireCylinderCollider(const CylinderCollider* cylinder, const Color& color);
+	void DrawFilledCylinderCollider(const CylinderCollider* cylinder, const Color& color);
+	void DrawWireConeCollider(const ConeCollider* cone, const Color& color);
+	void DrawFilledConeCollider(const ConeCollider* cone, const Color& color);
 
 	// Primitives
 	void DrawWireBox(const Matrix4f& modelMatrix, const Vector3f& halfSize, const Color& color);
@@ -36,6 +42,8 @@ public:
 	void DrawFilledCylinder(const Matrix4f& modelMatrix, float radius, float halfHeight, const Color& color);
 	void DrawWireCylinder(const Matrix4f& modelMatrix, const Vector3f& a, const Vector3f& b, float radius, const Color& color);
 	void DrawFilledCylinder(const Matrix4f& modelMatrix, const Vector3f& a, const Vector3f& b, float radius, const Color& color);
+	void DrawWireCone(const Matrix4f& modelMatrix, float radius, float height, const Color& color);
+	void DrawFilledCone(const Matrix4f& modelMatrix, float radius, float height, const Color& color);
 
 
 private:
@@ -59,6 +67,7 @@ private:
 	Mesh* m_meshSphere;
 	Mesh* m_meshSphereLowRes;
 	Mesh* m_meshCylinder;
+	Mesh* m_meshCone;
 };
 
 

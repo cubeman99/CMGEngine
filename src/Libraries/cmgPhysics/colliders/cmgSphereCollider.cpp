@@ -22,6 +22,11 @@ float SphereCollider::GetVolume() const
 	return ((4.0f / 3.0f) * Math::PI * m_radius * m_radius * m_radius);
 }
 
+Matrix3f SphereCollider::CalcInertiaTensor(float mass) const
+{
+	return Matrix3f::CreateScale3((2.0f / 5.0f) * mass * m_radius * m_radius);
+}
+
 Vector3f SphereCollider::GetSupportPoint(const Vector3f& direction) const
 {
 	return m_shapeToWorld.c3.xyz +

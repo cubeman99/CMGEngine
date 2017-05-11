@@ -68,6 +68,7 @@ DebugDraw::DebugDraw() :
 	Primitives::InitializeCube();
 	Primitives::InitializeSphere();
 	Primitives::InitializeCylinder();
+	Primitives::InitializeCone();
 	
 	attribs[0].data = Primitives::GetCubePositions();
 	attribs[1].data = Primitives::GetCubeNormals();
@@ -98,6 +99,16 @@ DebugDraw::DebugDraw() :
 	m_meshCylinder->GetVertexData()->BufferVertices(Primitives::GetCylinderVertexCount(), attribs, 4);
 	m_meshCylinder->GetIndexData()->BufferIndices(Primitives::GetCylinderIndexCount(), Primitives::GetCylinderIndices());
 	m_meshCylinder->SetIndices(0, Primitives::GetCylinderIndexCount());
+		
+	attribs[0].data = Primitives::GetConePositions();
+	attribs[1].data = Primitives::GetConeNormals();
+	attribs[2].data = Primitives::GetConeTexCoords();
+	attribs[3].data = Primitives::GetConeColors();
+	m_meshCone = new Mesh();
+	m_meshCone->SetPrimitiveType(VertexPrimitiveType::k_triangles);
+	m_meshCone->GetVertexData()->BufferVertices(Primitives::GetConeVertexCount(), attribs, 4);
+	m_meshCone->GetIndexData()->BufferIndices(Primitives::GetConeIndexCount(), Primitives::GetConeIndices());
+	m_meshCone->SetIndices(0, Primitives::GetConeIndexCount());
 	
 	m_meshSphereLowRes = nullptr;
 }
@@ -160,6 +171,10 @@ void DebugDraw::DrawWireCollider(const Collider* collider, const Color& color)
 		DrawWireBoxCollider((const BoxCollider*) collider, color);
 	else if (type == ColliderType::k_sphere)
 		DrawWireSphereCollider((const SphereCollider*) collider, color);
+	else if (type == ColliderType::k_cylinder)
+		DrawWireCylinderCollider((const CylinderCollider*) collider, color);
+	else if (type == ColliderType::k_cone)
+		DrawWireConeCollider((const ConeCollider*) collider, color);
 }
 
 void DebugDraw::DrawFilledCollider(const Collider* collider, const Color& color)
@@ -169,6 +184,10 @@ void DebugDraw::DrawFilledCollider(const Collider* collider, const Color& color)
 		DrawFilledBoxCollider((const BoxCollider*) collider, color);
 	else if (type == ColliderType::k_sphere)
 		DrawFilledSphereCollider((const SphereCollider*) collider, color);
+	else if (type == ColliderType::k_cylinder)
+		DrawFilledCylinderCollider((const CylinderCollider*) collider, color);
+	else if (type == ColliderType::k_cone)
+		DrawFilledConeCollider((const ConeCollider*) collider, color);
 }
 
 void DebugDraw::DrawWireBoxCollider(const BoxCollider* box, const Color& color)
@@ -193,6 +212,30 @@ void DebugDraw::DrawFilledSphereCollider(const SphereCollider* sphere, const Col
 {
 	DrawFilledSphere(sphere->GetShapeToWorld(),
 		sphere->GetRadius(), color);
+}
+
+void DebugDraw::DrawWireCylinderCollider(const CylinderCollider* cylinder, const Color& color)
+{
+	DrawWireCylinder(cylinder->GetShapeToWorld(),
+		cylinder->GetRadius(), cylinder->GetHalfHeight(), color);
+}
+
+void DebugDraw::DrawFilledCylinderCollider(const CylinderCollider* cylinder, const Color& color)
+{
+	DrawFilledCylinder(cylinder->GetShapeToWorld(),
+		cylinder->GetRadius(), cylinder->GetHalfHeight(), color);
+}
+
+void DebugDraw::DrawWireConeCollider(const ConeCollider* cone, const Color& color)
+{
+	DrawWireCone(cone->GetShapeToWorld(),
+		cone->GetRadius(), cone->GetHeight(), color);
+}
+
+void DebugDraw::DrawFilledConeCollider(const ConeCollider* cone, const Color& color)
+{
+	DrawFilledCone(cone->GetShapeToWorld(),
+		cone->GetRadius(), cone->GetHeight(), color);
 }
 
 
@@ -259,6 +302,16 @@ void DebugDraw::DrawFilledCylinder(const Matrix4f& modelMatrix,
 	
 	DrawMesh(m_meshCylinder, modelMatrix *
 		cylinderModelMatrix, color);
+}
+
+void DebugDraw::DrawWireCone(const Matrix4f& modelMatrix, float radius, float height, const Color& color)
+{
+}
+
+void DebugDraw::DrawFilledCone(const Matrix4f& modelMatrix, float radius, float height, const Color& color)
+{
+	DrawMesh(m_meshCone, modelMatrix *
+		Matrix4f::CreateScale(radius, height, radius), color);
 }
 
 

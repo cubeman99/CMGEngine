@@ -47,7 +47,7 @@ public:
 	void SetMass(float mass);
 	void SetCollider(Collider* collider);
 
-	inline void SetPrimitive(CollisionPrimitive* primitive)
+	/*inline void SetPrimitive(CollisionPrimitive* primitive)
 	{
 		AddPrimitive(primitive, Matrix4f::IDENTITY);
 	}
@@ -63,8 +63,10 @@ public:
 		primitive->bodyToShape = Matrix4f::CreateTranslation(offset);
 		m_physicsMesh.AddShape(primitive);
 	}
+	*/
 	inline std::vector<CollisionPrimitive*>::iterator primitives_begin() { return m_physicsMesh.shapes_begin(); }
 	inline std::vector<CollisionPrimitive*>::iterator primitives_end() { return m_physicsMesh.shapes_end(); }
+
 
 	void ApplyImpulse(const Vector3f& impulse, const Vector3f& contactPoint);
 	void CalculateDerivedData();
@@ -73,7 +75,7 @@ public:
 	void CalcInertia()
 	{
 		// Rigid body origin must be aligned with the center of mass.
-		m_physicsMesh.ShiftOriginToCenterOfMass();
+		//m_physicsMesh.ShiftOriginToCenterOfMass();
 
 		// Calculate the inverse inertia tensor from the geometry.
 		if (m_inverseMass == 0.0f)
@@ -82,8 +84,10 @@ public:
 		}
 		else
 		{
-			m_physicsMesh.CalcInverseInertiaTensor(
-				1.0f / m_inverseMass, m_inverseInertiaTensor);
+			m_inverseInertiaTensor = m_collider->CalcInertiaTensor(1.0f / m_inverseMass);
+			m_inverseInertiaTensor.Invert();
+			//m_physicsMesh.CalcInverseInertiaTensor(
+				//1.0f / m_inverseMass, m_inverseInertiaTensor);
 		}
 	}
 

@@ -15,6 +15,8 @@ public:
 	
 	void DetectCollision(RigidBody* one, RigidBody* two, CollisionData* collisionData);
 
+	void DetectCollision(Collider* a, Collider* b, CollisionData* collisionData);
+
 	void DetectCollision(CollisionPrimitive* one, CollisionPrimitive* two, CollisionData* collisionData);
 
 	unsigned int CollideSphereAndSphere(

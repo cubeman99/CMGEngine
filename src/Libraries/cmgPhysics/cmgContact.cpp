@@ -108,7 +108,7 @@ Vector3f Contact::CalculateFrictionImpulse()
 	deltaVelocity = deltaVelocity * contactToWorld;
 
 	// Add in the linear velocity change.
-	deltaVelocity += Matrix3f::CreateScale(inverseMassSum);
+	deltaVelocity += Matrix3f::CreateScale3(inverseMassSum);
 
 	// Invert to get the impulse needed per unit velocity.
 	Matrix3f impulseMatrix = deltaVelocity.GetInverse();

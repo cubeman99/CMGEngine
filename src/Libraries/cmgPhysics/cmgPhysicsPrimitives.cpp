@@ -183,7 +183,7 @@ float CollisionSphere::GetVolume() const
 
 void CollisionSphere::CalculateInertiaTensor(float mass, Matrix3f& outInertiaTensor) const
 {
-	outInertiaTensor.InitScale((2.0f / 5.0f) * mass * radius * radius);
+	outInertiaTensor.InitScale3((2.0f / 5.0f) * mass * radius * radius);
 }
 
 

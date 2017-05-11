@@ -106,7 +106,7 @@ struct Matrix3f
 
 	Matrix3f& InitTranslation(float x, float y);
 	Matrix3f& InitTranslation(const Vector2f& translation);
-	Matrix3f& InitScale(float scalar);
+	Matrix3f& InitScale3(float scalar);
 	Matrix3f& InitScale(float x, float y);
 	Matrix3f& InitScale(float x, float y, float z);
 	Matrix3f& InitScale(const Vector2f& scale);
@@ -119,7 +119,7 @@ struct Matrix3f
 	static Matrix3f	CreateIdentity();
 	static Matrix3f	CreateTranslation(float x, float y);
 	static Matrix3f	CreateTranslation(const Vector2f& translation);
-	static Matrix3f	CreateScale(float scale);
+	static Matrix3f	CreateScale3(float scale);
 	static Matrix3f	CreateScale(float x, float y);
 	static Matrix3f	CreateScale(float x, float y, float z);
 	static Matrix3f	CreateScale(const Vector2f& scale);

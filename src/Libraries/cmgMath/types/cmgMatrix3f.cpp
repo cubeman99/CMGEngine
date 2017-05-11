@@ -498,7 +498,7 @@ Matrix3f& Matrix3f::InitTranslation(const Vector2f& translation)
 	return *this;
 }
 
-Matrix3f& Matrix3f::InitScale(float scale)
+Matrix3f& Matrix3f::InitScale3(float scale)
 {
 	return InitScale(scale, scale, scale);
 }
@@ -598,7 +598,7 @@ Matrix3f Matrix3f::CreateTranslation(const Vector2f& translation)
 	return result;
 }
 
-Matrix3f Matrix3f::CreateScale(float scale)
+Matrix3f Matrix3f::CreateScale3(float scale)
 {
 	Matrix3f result;
 	result.InitScale(scale, scale, scale);

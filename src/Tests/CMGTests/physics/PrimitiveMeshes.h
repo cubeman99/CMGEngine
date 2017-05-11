@@ -37,6 +37,15 @@ public:
 	static const Vector3f*	GetCylinderColors();
 	static unsigned int		GetCylinderIndexCount();
 	static const unsigned int*	GetCylinderIndices();
+	
+	static void				InitializeCone();
+	static unsigned int		GetConeVertexCount();
+	static const Vector3f*	GetConePositions();
+	static const Vector3f*	GetConeNormals();
+	static const Vector2f*	GetConeTexCoords();
+	static const Vector3f*	GetConeColors();
+	static unsigned int		GetConeIndexCount();
+	static const unsigned int*	GetConeIndices();
 
 	static Mesh* CreateCube();
 	static Mesh* CreateIcosahedron(float radoius, bool smooth = true);

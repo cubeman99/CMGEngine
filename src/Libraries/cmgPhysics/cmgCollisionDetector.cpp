@@ -2,6 +2,7 @@
 #include <cmgMath/cmgMathLib.h>
 #include <cmgMath/types/cmgPlane.h>
 #include <cmgMath/types/cmgRay.h>
+#include <cmgPhysics/cmgGJK.h>
 
 
 CollisionDetector::CollisionDetector()
@@ -17,15 +18,43 @@ void CollisionDetector::DetectCollision(RigidBody* one, RigidBody* two, Collisio
 
 	if (one->m_inverseMass == 0.0f && two->m_inverseMass == 0.0f)
 		return;
+
+	if (one->GetCollider() == nullptr || two->GetCollider() == nullptr)
+		return;
+
+	DetectCollision(one->GetCollider(), two->GetCollider(), collisionData);
 	
-	for (auto it1 = one->primitives_begin(); it1 != one->primitives_end(); ++it1)
+	//for (auto it1 = one->primitives_begin(); it1 != one->primitives_end(); ++it1)
+	//{
+	//	for (auto it2 = two->primitives_begin(); it2 != two->primitives_end(); ++it2)
+	//	{
+	//		DetectCollision(*it1, *it2, collisionData);
+	//	}
+	//}
+}
+
+void CollisionDetector::DetectCollision(Collider* a, Collider* b, CollisionData* collisionData)
+{
+	Simplex simplex;
+	bool gjkResult = GJK::TestIntersection(a, b, &simplex);
+
+	if (gjkResult)
 	{
-		for (auto it2 = two->primitives_begin(); it2 != two->primitives_end(); ++it2)
+		EPAResult epaResult = EPA::PerformEPA(a, b, simplex);
+		if (epaResult.passed)
 		{
-			DetectCollision(*it1, *it2, collisionData);
+			collisionData->firstBody = a->GetBody();
+			collisionData->secondBody = b->GetBody();
+			collisionData->numContacts = 1;
+			collisionData->contacts[0].body[0]			= a->GetBody();
+			collisionData->contacts[0].body[1]			= b->GetBody();
+			collisionData->contacts[0].contactNormal	= epaResult.normal;
+			collisionData->contacts[0].penetration		= epaResult.depth;
+			collisionData->contacts[0].contactPoint		= epaResult.contactPoint;
 		}
 	}
 }
+
 
 void CollisionDetector::DetectCollision(CollisionPrimitive* one, CollisionPrimitive* two, CollisionData* collisionData)
 {

@@ -35,6 +35,15 @@ static Vector2f cylinderTexCoords[cylinderVertexCount];
 static Vector3f cylinderColors[cylinderVertexCount];
 static unsigned int cylinderIndices[cylinderIndexCount];
 
+static const unsigned int coneNumSides = 20;
+static const unsigned int coneVertexCount = coneNumSides * 3;
+static const unsigned int coneIndexCount = (coneNumSides * 3) + ((coneNumSides - 2) * 3);
+static Vector3f conePositions[coneVertexCount];
+static Vector3f coneNormals[coneVertexCount];
+static Vector2f coneTexCoords[coneVertexCount];
+static Vector3f coneColors[coneVertexCount];
+static unsigned int coneIndices[coneIndexCount];
+
 
 
 //-----------------------------------------------------------------------------
@@ -286,6 +295,7 @@ const unsigned int* Primitives::GetSphereIndices()
 	return sphereIndices;
 }
 
+
 //-----------------------------------------------------------------------------
 // Cylinder
 //-----------------------------------------------------------------------------
@@ -361,6 +371,78 @@ const unsigned int* Primitives::GetCylinderIndices()
 }
 
 
+//-----------------------------------------------------------------------------
+// Cone
+//-----------------------------------------------------------------------------
+
+void Primitives::InitializeCone()
+{
+	unsigned int index = 0;
+
+	float cosAngle = 1.0f / Math::Sqrt(2.0f);
+
+	for (unsigned int i = 0; i < coneNumSides; ++i)
+	{
+		float angle = ((float) i / (float) coneNumSides) * Math::TWO_PI;
+		float midAngle = (((float) i + 0.5f) / (float) coneNumSides) * Math::TWO_PI;
+		float x = Math::Cos(angle);
+		float z = Math::Sin(angle);
+		float x2 = Math::Cos(midAngle);
+		float z2 = Math::Sin(midAngle);
+		conePositions[i + (coneNumSides * 0)] = Vector3f(x, 0.0f, z);
+		conePositions[i + (coneNumSides * 1)] = Vector3f(x, 0.0f, z);
+		conePositions[i + (coneNumSides * 2)] = Vector3f::UNITY;
+		coneNormals[i + (coneNumSides * 0)] = -Vector3f::UNITY;
+		coneNormals[i + (coneNumSides * 1)] = Vector3f(x2 * cosAngle, cosAngle, z2 * cosAngle);
+		coneNormals[i + (coneNumSides * 2)] = Vector3f(x2 * cosAngle, cosAngle, z2 * cosAngle);
+
+		if (i >= 2)
+		{
+			coneIndices[index++] = 0;
+			coneIndices[index++] = i;
+			coneIndices[index++] = i - 1;
+		}
+		
+		coneIndices[index++] = (coneNumSides * 1) + ((i + 0) % coneNumSides);
+		coneIndices[index++] = (coneNumSides * 1) + ((i + 1) % coneNumSides);
+		coneIndices[index++] = (coneNumSides * 2) + ((i + 0) % coneNumSides);
+	}
+}
+
+unsigned int Primitives::GetConeVertexCount()
+{
+	return coneVertexCount;
+}
+
+const Vector3f* Primitives::GetConePositions()
+{
+	return conePositions;
+}
+
+const Vector3f* Primitives::GetConeNormals()
+{
+	return coneNormals;
+}
+
+const Vector2f* Primitives::GetConeTexCoords()
+{
+	return coneTexCoords;
+}
+
+const Vector3f* Primitives::GetConeColors()
+{
+	return coneColors;
+}
+
+unsigned int Primitives::GetConeIndexCount()
+{
+	return coneIndexCount;
+}
+
+const unsigned int* Primitives::GetConeIndices()
+{
+	return coneIndices;
+}
 
 
 

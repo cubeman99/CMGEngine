@@ -392,7 +392,7 @@ void EPA::Barycentric(
 EPAResult EPA::PerformEPA(Collider* shapeA, Collider* shapeB, const Simplex& gjkTerminationSimplex)
 {
 	// The tolerance should be something positive close to zero (ex. 0.00001)
-	const float EPA_TOLERANCE = 0.00001f;
+	const float EPA_TOLERANCE = 0.0001f;
 
 	// Create the polytop from the termination simplex.
 	Polytope polytope(gjkTerminationSimplex);

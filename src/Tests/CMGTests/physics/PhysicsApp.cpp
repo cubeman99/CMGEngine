@@ -85,13 +85,17 @@ void PhysicsApp::OnInitialize()
 	//body->AddPrimitive(new CollisionSphere(wheelRadius), Vector3f(-wheelTrack, -chassisSize.y, wheelBase) * 0.5f);
 	//body->AddPrimitive(new CollisionSphere(wheelRadius), Vector3f(wheelTrack, -chassisSize.y, -wheelBase) * 0.5f);
 	//body->AddPrimitive(new CollisionSphere(wheelRadius), Vector3f(wheelTrack, -chassisSize.y, wheelBase) * 0.5f);
-	body->SetPrimitive(new CollisionBox(Vector3f(0.2f, 0.1f, 0.2f)));
+	//body->SetPrimitive(new CollisionBox(Vector3f(0.2f, 0.1f, 0.2f)));
 	//body->SetCollider(new BoxCollider(Vector3f(0.6f, 0.5f, 0.2f)));
-	body->SetCollider(new SphereCollider(0.6f));
+	//body->SetCollider(new SphereCollider(0.6f));
+	//body->SetCollider(new CylinderCollider(0.6f, 4.0f));
+	body->SetCollider(new ConeCollider(0.6f, 2.0f));
 	body->SetMass(4.0f);
 	body->SetMass(mass);
 	body->SetInverseMass(0.0f);
 	body->SetInverseInertiaTensor(Matrix3f::ZERO);
+	body->SetMass(1.0f);
+	body->SetInverseInertiaTensor(Matrix3f::CreateScale3(1.0f));
 	m_physicsEngine.AddBody(body);
 	m_testBody1 = body;
 
@@ -104,12 +108,13 @@ void PhysicsApp::OnInitialize()
 	//body->SetOrientation(Quaternion(Vector3f::UNITY, Math::HALF_PI * 0.5f));
 	//body->SetAngularVelocity(Vector3f(1.9f, 1.11f,-0.7f));
 	//body->SetPrimitive(new CollisionBox(Vector3f(0.2f, 0.2f, 0.8f)));
-	body->SetPrimitive(new CollisionBox(Vector3f(0.2f, 0.1f, 0.2f)));
+	//body->SetPrimitive(new CollisionBox(Vector3f(0.2f, 0.1f, 0.2f)));
 	body->SetCollider(new BoxCollider(Vector3f(0.5f, 0.3f, 0.4f)));
+	//body->SetMass(1.0f);
+	//body->SetInverseInertiaTensor(Matrix3f::CreateScale(1.0f));
 	m_physicsEngine.AddBody(body);
 	m_testBody2 = body;
 
-	/*
 	//float wallWidth = 0.1f;
 	//float wallHeight = 2.0f;
 	//float groundHalfSize = 1.5f;
@@ -128,7 +133,7 @@ void PhysicsApp::OnInitialize()
 	//body->SetOrientation(Quaternion(Vector3f::UNITZ, 0.0f));
 	//body->SetOrientation(Quaternion(Vector3f::UNITZ, 0.1f));
 	body->SetAngularVelocity(Vector3f(0.0f, 0.0f, 0.0f));
-	body->SetPrimitive(new CollisionBox(Vector3f(groundHalfSize, groundHeight * 0.5f, groundHalfSize)));
+	body->SetCollider(new BoxCollider(Vector3f(groundHalfSize, groundHeight * 0.5f, groundHalfSize)));
 	m_physicsEngine.AddBody(body);
 	
 	// Ramp
@@ -137,29 +142,29 @@ void PhysicsApp::OnInitialize()
 	body->SetPosition(Vector3f(0.0f, 1.0f, -12.0f));
 	body->SetOrientation(Quaternion(Vector3f::UNITX, 0.3f));
 	body->SetAngularVelocity(Vector3f(0.0f, 0.0f, 0.0f));
-	body->SetPrimitive(new CollisionBox(Vector3f(4.0f, 0.3f, 6.0f)));
+	body->SetCollider(new BoxCollider(Vector3f(4.0f, 0.3f, 6.0f)));
 	m_physicsEngine.AddBody(body);
 
 	// Walls
 	body = new RigidBody();
 	body->SetInverseMass(0.0f);
 	body->SetPosition(Vector3f(-groundHalfSize + (wallWidth * 0.5f), wallHeight * 0.5f, 0));
-	body->SetPrimitive(new CollisionBox(Vector3f(wallWidth * 0.5f, wallHeight * 0.5f, groundHalfSize)));
+	body->SetCollider(new BoxCollider(Vector3f(wallWidth * 0.5f, wallHeight * 0.5f, groundHalfSize)));
 	m_physicsEngine.AddBody(body);
 	body = new RigidBody();
 	body->SetInverseMass(0.0f);
 	body->SetPosition(Vector3f(groundHalfSize - (wallWidth * 0.5f), wallHeight * 0.5f, 0));
-	body->SetPrimitive(new CollisionBox(Vector3f(wallWidth * 0.5f, wallHeight * 0.5f, groundHalfSize)));
+	body->SetCollider(new BoxCollider(Vector3f(wallWidth * 0.5f, wallHeight * 0.5f, groundHalfSize)));
 	m_physicsEngine.AddBody(body);
 	body = new RigidBody();
 	body->SetInverseMass(0.0f);
 	body->SetPosition(Vector3f(0, wallHeight * 0.5f, groundHalfSize - (wallWidth * 0.5f)));
-	body->SetPrimitive(new CollisionBox(Vector3f(groundHalfSize - wallWidth, wallHeight * 0.5f, wallWidth * 0.5f)));
+	body->SetCollider(new BoxCollider(Vector3f(groundHalfSize - wallWidth, wallHeight * 0.5f, wallWidth * 0.5f)));
 	m_physicsEngine.AddBody(body);
 	body = new RigidBody();
 	body->SetInverseMass(0.0f);
 	body->SetPosition(Vector3f(0, wallHeight * 0.5f, -groundHalfSize + (wallWidth * 0.5f)));
-	body->SetPrimitive(new CollisionBox(Vector3f(groundHalfSize - wallWidth, wallHeight * 0.5f, wallWidth * 0.5f)));
+	body->SetCollider(new BoxCollider(Vector3f(groundHalfSize - wallWidth, wallHeight * 0.5f, wallWidth * 0.5f)));
 	m_physicsEngine.AddBody(body);
 
 	// Create walls.
@@ -170,7 +175,6 @@ void PhysicsApp::OnInitialize()
 	//body->SetOrientation(Quaternion::IDENTITY);
 	//body->SetPrimitive(&m_physGround);
 	//m_physicsEngine.AddBody(body);
-	*/
 		
 	m_cameraTransform.position = Vector3f(0, 4, 3);
 	m_cameraTransform.rotation.Rotate(Vector3f::UNITX, -0.3f);
@@ -377,7 +381,7 @@ void PhysicsApp::OnUpdate(float timeDelta)
 		body->SetVelocity(Vector3f(0, 0, 0));
 		body->SetAngularVelocity(Vector3f(0.0f, 0.0f, 0.0f));
 		body->SetMass(400.0f);
-		body->SetPrimitive(new CollisionBox(Vector3f(1, 1, 1)));
+		body->SetCollider(new BoxCollider(Vector3f(1, 1, 1)));
 		m_physicsEngine.AddBody(body);
 	}
 
@@ -392,13 +396,13 @@ void PhysicsApp::OnUpdate(float timeDelta)
 			0.2f + RandomFloat() * 0.8f,
 			0.2f + RandomFloat() * 0.8f,
 			0.2f + RandomFloat() * 0.8f) * 1.5f;
-		CollisionPrimitive* primitive = nullptr;
+		Collider* collider = nullptr;
 		if (RandomFloat() > 0.5f)
-			primitive = new CollisionBox(halfSize);
+			collider = new BoxCollider(halfSize);
 		else
-			primitive = new CollisionSphere(halfSize.x);
+			collider = new SphereCollider(halfSize.x);
 		float density = 200.0f;
-		float volume = primitive->GetVolume();
+		float volume = collider->GetVolume();
 
 		RigidBody* body = new RigidBody();
 		body->SetPosition(Vector3f(0, 4.0f, 0) + 5.0f * Vector3f(RandomFloatClamped(), RandomFloatClamped(), RandomFloatClamped()));
@@ -406,7 +410,8 @@ void PhysicsApp::OnUpdate(float timeDelta)
 		body->SetVelocity(Vector3f(0, 0, 0));
 		body->SetAngularVelocity(Vector3f(0.0f, 0.0f, 0.0f));
 		body->SetMass(volume * density);
-		body->SetPrimitive(primitive);
+		//body->SetInverseInertiaTensor(Matrix3f::CreateScale3(1.0f));
+		body->SetCollider(collider);
 		m_physicsEngine.AddBody(body);
 	}
 	
@@ -577,6 +582,9 @@ void PhysicsApp::OnRender()
 	glLoadMatrixf(viewProjection.data());
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+	
+	m_debugDraw->SetViewProjection(viewProjection);
+	m_debugDraw->SetShaded(true);
 
 	CollisionData collisionData;
 	//collisionData.firstBody = m_testBody1;
@@ -594,16 +602,14 @@ void PhysicsApp::OnRender()
 	RigidBody* firstBody = collisionData.firstBody;*/
 	
 	// Draw all rigid bodies.
-	//for (auto it = m_physicsEngine.bodies_begin();
-	//	it != m_physicsEngine.bodies_end(); it++)
-	//{
-	//	DrawRigidBody(*it);
-	//}
+	for (auto it = m_physicsEngine.bodies_begin();
+		it != m_physicsEngine.bodies_end(); it++)
+	{
+		DrawRigidBody(*it);
+	}
 
-	m_debugDraw->SetViewProjection(viewProjection);
-	m_debugDraw->SetShaded(true);
-	m_debugDraw->DrawFilledCollider(m_testBody1->GetCollider(), Color::RED);
-	m_debugDraw->DrawFilledCollider(m_testBody2->GetCollider(), Color::BLUE);
+	//m_debugDraw->DrawFilledCollider(m_testBody1->GetCollider(), Color::RED);
+	//m_debugDraw->DrawFilledCollider(m_testBody2->GetCollider(), Color::BLUE);
 
 	glUseProgram(0);
 	glClear(GL_DEPTH_BUFFER_BIT);
@@ -1274,11 +1280,14 @@ void PhysicsApp::DrawRigidBody(RigidBody* body)
 	color.b = minColor + (rand() % colorAdd);
 	color.a = 255;
 
+	if (body->GetCollider() != nullptr)
+		m_debugDraw->DrawFilledCollider(body->GetCollider(), color);
+
 	// Draw the object primitives.
-	for (auto it = body->primitives_begin(); it != body->primitives_end(); ++it)
-	{
-		DrawPrimitive(*it, color, modelMatrix);
-	}
+	//for (auto it = body->primitives_begin(); it != body->primitives_end(); ++it)
+	//{
+		//DrawPrimitive(*it, color, modelMatrix);
+	//}
 	//CollisionPrimitive* primitive = body->GetPrimitive();
 	//DrawPrimitive(primitive, color, modelMatrix);
 }
