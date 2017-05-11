@@ -67,9 +67,11 @@ private:
 	RigidBody*		m_testBody1;
 	RigidBody*		m_testBody2;
 
+	EPAResult m_epa;
+
 	struct 
 	{
-		Vector3f nextPoint;
+		SupportPoint nextPoint;
 		Simplex simplex;
 		Vector3f direction;
 		unsigned int iteration;

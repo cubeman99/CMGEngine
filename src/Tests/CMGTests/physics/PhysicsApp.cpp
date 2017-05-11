@@ -244,6 +244,19 @@ void PhysicsApp::OnUpdate(float timeDelta)
 	
 	if (m_gjk.done)
 	{
+		if (m_gjk.result && keyboard->IsKeyPressed(Keys::h))
+		{
+			m_epa = EPA::PerformEPA(
+				m_testBody1->GetCollider(),
+				m_testBody2->GetCollider(),
+				m_gjk.simplex);
+
+			printf("depth = %f\n", m_epa.depth);
+			std::cout << "normal = " << m_epa.normal << std::endl;
+			std::cout << "passed = " << m_epa.passed << std::endl;
+			std::cout << "contact point = " << m_epa.contactPoint << std::endl;
+		}
+
 		if (keyboard->IsKeyPressed(Keys::space) ||
 			keyboard->IsKeyPressed(Keys::m))
 		{
@@ -259,7 +272,7 @@ void PhysicsApp::OnUpdate(float timeDelta)
 			m_gjk.nextPoint = GJK::GetSupportMinkowskiDiff(
 				m_gjk.direction, m_gjk.shapeA, m_gjk.shapeB);
 			m_gjk.simplex.Add(m_gjk.nextPoint);
-			m_gjk.direction = -m_gjk.nextPoint; // Search towards the origin.
+			m_gjk.direction = -m_gjk.nextPoint.p; // Search towards the origin.
 			
 			printf("----------------------------------------------------\n");
 			printf("Beginning new GJK\n");
@@ -288,7 +301,7 @@ void PhysicsApp::OnUpdate(float timeDelta)
 		m_gjk.nextPoint = GJK::GetSupportMinkowskiDiff(
 			m_gjk.direction, m_gjk.shapeA, m_gjk.shapeB);
 			
-		if (m_gjk.nextPoint.Dot(m_gjk.direction) < 0.0f)
+		if (m_gjk.nextPoint.p.Dot(m_gjk.direction) < 0.0f)
 		{
 			m_gjk.done = true;
 			m_gjk.result = false;
@@ -592,8 +605,6 @@ void PhysicsApp::OnRender()
 	m_debugDraw->DrawFilledCollider(m_testBody1->GetCollider(), Color::RED);
 	m_debugDraw->DrawFilledCollider(m_testBody2->GetCollider(), Color::BLUE);
 
-	m_debugDraw->DrawFilledCylinder(Matrix4f::IDENTITY, m_testBody1->GetPosition(), m_testBody2->GetPosition(), 0.3f, Color::YELLOW);
-
 	glUseProgram(0);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -606,6 +617,13 @@ void PhysicsApp::OnRender()
 		m_testBody2->GetCollider(),
 		&m_gjk.simplex);
 	m_gjk.done = true;
+	if (m_gjk.result)
+	{
+		m_epa = EPA::PerformEPA(
+			m_testBody1->GetCollider(),
+			m_testBody2->GetCollider(),
+			m_gjk.simplex);
+	}
 
 	// Draw the origin.
 	float originRadius = 0.3f;
@@ -639,10 +657,10 @@ void PhysicsApp::OnRender()
 		Vector3f(1,0,0), Vector3f(0,1,0), Vector3f(0,0,1), Vector3f(1,1,1) 
 	};
 	
-	Vector3f a = m_gjk.simplex.GetPoint(0);
-	Vector3f b = m_gjk.simplex.GetPoint(1);
-	Vector3f c = m_gjk.simplex.GetPoint(2);
-	Vector3f d = m_gjk.simplex.GetPoint(3);
+	Vector3f a = m_gjk.simplex.GetPoint(0).p;
+	Vector3f b = m_gjk.simplex.GetPoint(1).p;
+	Vector3f c = m_gjk.simplex.GetPoint(2).p;
+	Vector3f d = m_gjk.simplex.GetPoint(3).p;
 	Vector3f ab = b - a;
 	Vector3f ac = c - a;
 	Vector3f ad = d - a;
@@ -650,6 +668,23 @@ void PhysicsApp::OnRender()
 	Vector3f abc = -ab.Cross(ac);
 	Vector3f acd = ac.Cross(ad);
 	Vector3f adb = ad.Cross(ab);
+
+	// Draw contact point
+	if (m_gjk.result && m_epa.passed)
+	{
+		glPointSize(8.0f);
+		glBegin(GL_POINTS);
+		glColor3f(1.0f, 1.0f, 0.0f);
+		glVertex3fv(m_epa.contactPoint.v);
+		glEnd();
+		
+		glLineWidth(4.0f);
+		glBegin(GL_LINES);
+		glColor3f(1.0f, 1.0f, 0.5f);
+		glVertex3fv(m_epa.contactPoint.v);
+		glVertex3fv((m_epa.contactPoint + m_epa.normal * m_epa.depth).v);
+		glEnd();
+	}
 
 	// Draw simplex points.
 	if (m_gjk.simplex.GetNumPoints() >= 1)
@@ -660,7 +695,7 @@ void PhysicsApp::OnRender()
 		for (unsigned int i = 0; i < m_gjk.simplex.GetNumPoints(); ++i)
 		{
 			glColor3fv(simplexPointColors[i].v);
-			glVertex3fv(m_gjk.simplex.GetPoint(i).v);
+			glVertex3fv(m_gjk.simplex.GetPoint(i).p.v);
 		}
 		glEnd();
 	}
@@ -675,8 +710,8 @@ void PhysicsApp::OnRender()
 		{
 			for (unsigned int j = i + 1; j < m_gjk.simplex.GetNumPoints(); ++j)
 			{
-				glVertex3fv(m_gjk.simplex.GetPoint(i).v);
-				glVertex3fv(m_gjk.simplex.GetPoint(j).v);
+				glVertex3fv(m_gjk.simplex.GetPoint(i).p.v);
+				glVertex3fv(m_gjk.simplex.GetPoint(j).p.v);
 			}
 		}
 		glEnd();
@@ -714,9 +749,9 @@ void PhysicsApp::OnRender()
 			unsigned int i1 = (i + 1) % 4;
 			unsigned int i2 = (i + 2) % 4;
 
-				glVertex3fv(m_gjk.simplex.GetPoint(i0).v);
-				glVertex3fv(m_gjk.simplex.GetPoint(i1).v);
-				glVertex3fv(m_gjk.simplex.GetPoint(i2).v);
+				glVertex3fv(m_gjk.simplex.GetPoint(i0).p.v);
+				glVertex3fv(m_gjk.simplex.GetPoint(i1).p.v);
+				glVertex3fv(m_gjk.simplex.GetPoint(i2).p.v);
 		}
 		glEnd();
 		glEnable(GL_CULL_FACE);
