@@ -22,6 +22,10 @@ public:
 	void AddBody(RigidBody* body);
 	void ClearBodies();
 
+	inline unsigned int GetNumBodies() const { return m_bodies.size(); }
+	inline RigidBody* GetBody(unsigned int index) { return m_bodies[index]; }
+	void RemoveBody(RigidBody* body);
+
 	inline std::vector<RigidBody*>::iterator bodies_begin() { return m_bodies.begin(); }
 	inline std::vector<RigidBody*>::iterator bodies_end() { return m_bodies.end(); }
 	inline std::vector<CollisionData>::iterator collisions_begin() { return m_collisions.begin(); }

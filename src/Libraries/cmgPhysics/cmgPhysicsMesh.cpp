@@ -51,7 +51,8 @@ void PhysicsMesh::CalcInverseInertiaTensor(float mass, Matrix3f& outInverseInert
 	CalcInertiaTensor(mass, inertiaTensor, outInverseInertiaTensor);
 }
 
-void PhysicsMesh::CalcInertiaTensor(float mass, Matrix3f& outInertiaTensor, Matrix3f& outInverseInertiaTensor) const
+void PhysicsMesh::CalcInertiaTensor(float mass,
+	Matrix3f& outInertiaTensor, Matrix3f& outInverseInertiaTensor) const
 {
 	if (mass == 0.0f || m_shapes.empty())
 	{

@@ -8,6 +8,8 @@ set(CMG_CORE_SOURCE_FILES
 	cmgAssert.cpp
 	cmgConsole.h
 	cmgConsole.cpp
+	cmgRandom.h
+	cmgRandom.cpp
 
 	containers/cmgArray.h
 	containers/cmgArray.cpp

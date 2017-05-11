@@ -27,17 +27,20 @@ float CylinderCollider::GetVolume() const
 Matrix3f CylinderCollider::CalcInertiaTensor(float mass) const
 {
 	float radiusSqr = m_radius * m_radius;
-	float xy = (mass / 12.0f) * ((3.0f * radiusSqr) +
+	float xz = (mass / 12.0f) * ((3.0f * radiusSqr) +
 		(4.0f * m_halfHeight * m_halfHeight));
 	return Matrix3f::CreateScale(
-		xy, xy, mass * radiusSqr * 0.5f);
+		xz, mass * radiusSqr * 0.5f, xz);
 }
 
 Vector3f CylinderCollider::GetSupportPoint(const Vector3f& direction) const
 {
 	Vector3f point = m_worldToShape.Rotate(direction);
-	point.z = (point.z > 0.0f ? m_halfHeight : -m_halfHeight);
-	point.xy.Normalize();
-	point.xy *= m_radius;
+	point.y = (point.y > 0.0f ? m_halfHeight : -m_halfHeight);
+	Vector2f xz(point.x, point.z);
+	xz.Normalize();
+	xz *= m_radius;
+	point.x = xz.x;
+	point.z = xz.y;
 	return m_shapeToWorld.TransformAffine(point);
 }

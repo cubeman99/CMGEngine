@@ -6,6 +6,7 @@
 #include <cmgPhysics/colliders/cmgBoxCollider.h>
 #include <cmgPhysics/colliders/cmgCylinderCollider.h>
 #include <cmgPhysics/colliders/cmgConeCollider.h>
+#include <cmgPhysics/colliders/cmgCapsuleCollider.h>
 
 class DebugDraw
 {
@@ -30,6 +31,8 @@ public:
 	void DrawFilledSphereCollider(const SphereCollider* sphere, const Color& color);
 	void DrawWireCylinderCollider(const CylinderCollider* cylinder, const Color& color);
 	void DrawFilledCylinderCollider(const CylinderCollider* cylinder, const Color& color);
+	void DrawWireCapsuleCollider(const CapsuleCollider* capsule, const Color& color);
+	void DrawFilledCapsuleCollider(const CapsuleCollider* capsule, const Color& color);
 	void DrawWireConeCollider(const ConeCollider* cone, const Color& color);
 	void DrawFilledConeCollider(const ConeCollider* cone, const Color& color);
 
@@ -42,6 +45,10 @@ public:
 	void DrawFilledCylinder(const Matrix4f& modelMatrix, float radius, float halfHeight, const Color& color);
 	void DrawWireCylinder(const Matrix4f& modelMatrix, const Vector3f& a, const Vector3f& b, float radius, const Color& color);
 	void DrawFilledCylinder(const Matrix4f& modelMatrix, const Vector3f& a, const Vector3f& b, float radius, const Color& color);
+	void DrawWireCapsule(const Matrix4f& modelMatrix, float radius, float halfHeight, const Color& color);
+	void DrawFilledCapsule(const Matrix4f& modelMatrix, float radius, float halfHeight, const Color& color);
+	void DrawWireCapsule(const Matrix4f& modelMatrix, const Vector3f& a, const Vector3f& b, float radius, const Color& color);
+	void DrawFilledCapsule(const Matrix4f& modelMatrix, const Vector3f& a, const Vector3f& b, float radius, const Color& color);
 	void DrawWireCone(const Matrix4f& modelMatrix, float radius, float height, const Color& color);
 	void DrawFilledCone(const Matrix4f& modelMatrix, float radius, float height, const Color& color);
 

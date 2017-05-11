@@ -173,6 +173,8 @@ void DebugDraw::DrawWireCollider(const Collider* collider, const Color& color)
 		DrawWireSphereCollider((const SphereCollider*) collider, color);
 	else if (type == ColliderType::k_cylinder)
 		DrawWireCylinderCollider((const CylinderCollider*) collider, color);
+	else if (type == ColliderType::k_capsule)
+		DrawWireCapsuleCollider((const CapsuleCollider*) collider, color);
 	else if (type == ColliderType::k_cone)
 		DrawWireConeCollider((const ConeCollider*) collider, color);
 }
@@ -186,6 +188,8 @@ void DebugDraw::DrawFilledCollider(const Collider* collider, const Color& color)
 		DrawFilledSphereCollider((const SphereCollider*) collider, color);
 	else if (type == ColliderType::k_cylinder)
 		DrawFilledCylinderCollider((const CylinderCollider*) collider, color);
+	else if (type == ColliderType::k_capsule)
+		DrawFilledCapsuleCollider((const CapsuleCollider*) collider, color);
 	else if (type == ColliderType::k_cone)
 		DrawFilledConeCollider((const ConeCollider*) collider, color);
 }
@@ -226,6 +230,18 @@ void DebugDraw::DrawFilledCylinderCollider(const CylinderCollider* cylinder, con
 		cylinder->GetRadius(), cylinder->GetHalfHeight(), color);
 }
 
+void DebugDraw::DrawWireCapsuleCollider(const CapsuleCollider* capsule, const Color& color)
+{
+	DrawWireCapsule(capsule->GetShapeToWorld(),
+		capsule->GetRadius(), capsule->GetHalfHeight(), color);
+}
+
+void DebugDraw::DrawFilledCapsuleCollider(const CapsuleCollider* capsule, const Color& color)
+{
+	DrawFilledCapsule(capsule->GetShapeToWorld(),
+		capsule->GetRadius(), capsule->GetHalfHeight(), color);
+}
+
 void DebugDraw::DrawWireConeCollider(const ConeCollider* cone, const Color& color)
 {
 	DrawWireCone(cone->GetShapeToWorld(),
@@ -236,6 +252,14 @@ void DebugDraw::DrawFilledConeCollider(const ConeCollider* cone, const Color& co
 {
 	DrawFilledCone(cone->GetShapeToWorld(),
 		cone->GetRadius(), cone->GetHeight(), color);
+}
+
+void DrawWireCapsuleCollider(const CapsuleCollider* capsule, const Color& color)
+{
+}
+
+void DrawFilledCapsuleCollider(const CapsuleCollider* capsule, const Color& color)
+{
 }
 
 
@@ -276,7 +300,7 @@ void DebugDraw::DrawFilledCylinder(const Matrix4f& modelMatrix,
 	float radius, float halfHeight, const Color& color)
 {
 	DrawMesh(m_meshCylinder, modelMatrix *
-		Matrix4f::CreateScale(radius, radius, halfHeight), color);
+		Matrix4f::CreateScale(radius, halfHeight, radius), color);
 }
 
 void DebugDraw::DrawWireCylinder(const Matrix4f& modelMatrix,
@@ -296,12 +320,55 @@ void DebugDraw::DrawFilledCylinder(const Matrix4f& modelMatrix,
 	
 	Matrix4f cylinderModelMatrix = Matrix4f::IDENTITY;
 	cylinderModelMatrix.c0.xyz = right * radius;
-	cylinderModelMatrix.c1.xyz = back * radius;
-	cylinderModelMatrix.c2.xyz = up * (height * 0.5f);
+	cylinderModelMatrix.c1.xyz = up * (height * 0.5f);
+	cylinderModelMatrix.c2.xyz = back * radius;
 	cylinderModelMatrix.c3.xyz = (p0 + p1) * 0.5f;
 	
 	DrawMesh(m_meshCylinder, modelMatrix *
 		cylinderModelMatrix, color);
+}
+
+void DebugDraw::DrawWireCapsule(const Matrix4f& modelMatrix,
+	float radius, float halfHeight, const Color& color)
+{
+}
+
+void DebugDraw::DrawFilledCapsule(const Matrix4f& modelMatrix,
+	float radius, float halfHeight, const Color& color)
+{
+	DrawMesh(m_meshCylinder, modelMatrix *
+		Matrix4f::CreateScale(radius, halfHeight, radius), color);
+	DrawMesh(m_meshSphere, modelMatrix *
+		Matrix4f::CreateTranslation(0.0f, halfHeight, 0.0f) *
+		Matrix4f::CreateScale(radius), color);
+	DrawMesh(m_meshSphere, modelMatrix *
+		Matrix4f::CreateTranslation(0.0f, -halfHeight, 0.0f) *
+		Matrix4f::CreateScale(radius), color);
+}
+
+void DebugDraw::DrawWireCapsule(const Matrix4f& modelMatrix,
+	const Vector3f& a, const Vector3f& b, float radius, const Color& color)
+{
+}
+
+void DebugDraw::DrawFilledCapsule(const Matrix4f& modelMatrix,
+	const Vector3f& p0, const Vector3f& p1, float radius, const Color& color)
+{
+	// Create basis vectors
+	float height = p0.DistTo(p1);
+	Vector3f up = (p1 - p0) / height;
+	Vector3f right = (Math::Abs(up.x) < Math::Abs(up.z) ? Vector3f::UNITX : Vector3f::UNITZ);
+	right = up.Cross(right).Normalize();
+	Vector3f back = right.Cross(up).Normalize();
+	
+	Matrix4f cylinderModelMatrix = Matrix4f::IDENTITY;
+	cylinderModelMatrix.c0.xyz = right;
+	cylinderModelMatrix.c1.xyz = up;
+	cylinderModelMatrix.c2.xyz = back;
+	cylinderModelMatrix.c3.xyz = (p0 + p1) * 0.5f;
+	
+	DrawFilledCapsule(modelMatrix *
+		cylinderModelMatrix, radius, height * 0.5f, color);
 }
 
 void DebugDraw::DrawWireCone(const Matrix4f& modelMatrix, float radius, float height, const Color& color)

@@ -27,6 +27,8 @@ public:
 	void OnUpdate(float timeDelta) override;
 	void OnRender() override;
 
+	void Reset();
+
 	void UpdateDebugBodyControls(RigidBody* body, float timeDelta);
 
 	void DrawSphere(float radius, const Matrix4f& transform, const Color& color);
@@ -40,15 +42,7 @@ public:
 
 	void DrawDebugBoxInfo(const CollisionBox& box);
 
-	void DrawSATViewGrid(
-		CollisionBox* first,
-		CollisionBox* second);
-	void DrawSATViewPort(
-		CollisionBox* one,
-		CollisionBox* two,
-		unsigned int axisIndex,
-		const Vector2f& viewPortTopLeft,
-		const Vector2f& viewPortSize);
+	void DrawSimplex(const Simplex& simplex);
 	
 	void DrawRigidBody(RigidBody* body);
 	void DrawPrimitive(CollisionPrimitive* primitive, const Color& color, const Matrix4f& modelMatrix);
@@ -87,6 +81,8 @@ private:
 	float m_simulationSpeed;
 
 	std::vector<PhysObject*> m_physObjects;
+
+	bool m_showContacts;
 
 	Shader*		m_shader;
 	SpriteFont*	m_font;

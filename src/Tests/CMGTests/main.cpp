@@ -200,6 +200,8 @@ TEST(Matrix4f, Matrix4f_Inverse)
 
 int main(int argc, char* argv[])
 {
+	srand((unsigned int) time(nullptr));
+
 	//TestApp app;
 	PhysicsApp app;
 	app.Initialize("3D Physics Engine", 800, 600);

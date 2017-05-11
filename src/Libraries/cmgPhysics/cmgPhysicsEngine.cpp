@@ -9,7 +9,7 @@ PhysicsEngine::PhysicsEngine() :
 	m_idCounter(0),
 	m_enableFriction(true),
 	m_enableRestitution(true),
-	m_numIterations(10),
+	m_numIterations(3),
 	m_profiler("Physics")
 {
 	m_gravity = Vector3f::DOWN * 9.81f;
@@ -42,6 +42,18 @@ void PhysicsEngine::ClearBodies()
 	for (unsigned int i = 0; i < m_bodies.size(); ++i)
 		delete m_bodies[i];
 	m_bodies.clear();
+
+	m_idCounter = 0;
+}
+
+void PhysicsEngine::RemoveBody(RigidBody* body)
+{
+	auto it = std::find(m_bodies.begin(), m_bodies.end(), body);
+	if (it != m_bodies.end())
+	{
+		m_bodies.erase(it);
+		delete body;
+	}
 }
 
 void PhysicsEngine::Simulate(float timeDelta)

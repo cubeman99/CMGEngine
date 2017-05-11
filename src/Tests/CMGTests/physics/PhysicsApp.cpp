@@ -1,4 +1,5 @@
 #include "PhysicsApp.h"
+#include <cmgCore/cmgRandom.h>
 #include <gl/GL.h>
 
 
@@ -26,17 +27,6 @@ PhysicsApp::PhysicsApp()
 
 void PhysicsApp::OnInitialize()
 {
-	Vector3f chassisSize;
-	float wheelTrack	= 1.400f;
-	float wheelBase		= 2.400f;
-	float mass			= 1000.0f; // kg
-	float wheelRadius	= 0.3f;
-	chassisSize.x		= 1.630f;
-	chassisSize.z		= 4.200f;
-	chassisSize.y		= 1.340f;
-
-	RigidBody* body;
-
 	// Load meshes.
 	m_meshCube		= Primitives::CreateCube();
 	m_meshSphere	= Primitives::CreateIcoSphere(1.0f, 3);
@@ -56,15 +46,49 @@ void PhysicsApp::OnInitialize()
 	m_simulationPaused = false;
 	m_simulationSpeed = 1.0f;
 
-	m_physSphere = CollisionSphere(0.2f);
-	m_physCube = CollisionBox(Vector3f(0.2f, 0.2f, 0.2f));
-	m_physGround = CollisionBox(Vector3f(4, 0.1f, 4));
+	m_renderParams.EnableBlend(true);
+	m_renderParams.EnablePolygonSmooth(false);
+	m_renderParams.EnableLineSmooth(false);
+	m_renderParams.SetClearColor(Color::BLACK);
+	m_renderParams.SetPolygonMode(PolygonMode::k_fill);
+	m_renderParams.SetClearBits(ClearBits::k_color_buffer_bit | ClearBits::k_depth_buffer_bit);
+	m_renderParams.SetBlendFunction(BlendFunc::k_source_alpha, BlendFunc::k_one_minus_source_alpha);
+	
+	// 2D mode
+	//m_renderParams.EnableCullFace(false);
+	//m_renderParams.EnableDepthBufferWrite(false);
+	//m_renderParams.EnableDepthTest(false);
+	//m_renderParams.EnableNearFarPlaneClipping(false);
+	m_frameTimer.Start();
+
+	m_showContacts = true;
+
+	m_debugDraw = new DebugDraw();
+		
+	m_cameraTransform.position = Vector3f(0, 4, 3);
+	m_cameraTransform.rotation = Quaternion(Vector3f::UNITX, -0.3f);
+
+	Reset();
+}
+
+void PhysicsApp::Reset()
+{
+	RigidBody* body;
+
+	Vector3f chassisSize;
+	float wheelTrack	= 1.400f;
+	float wheelBase		= 2.400f;
+	float mass			= 1000.0f; // kg
+	float wheelRadius	= 0.3f;
+	chassisSize.x		= 1.630f;
+	chassisSize.z		= 4.200f;
+	chassisSize.y		= 1.340f;
 
 	body = new RigidBody();
 	body->SetMass(2.0f);
 	body->SetOrientation(Quaternion::IDENTITY);
 	//body->SetInverseInertiaTensor(Matrix3f::CreateScale(1.0f, 1.0f, 1.0f));
-	body->SetPosition(Vector3f(0, 3.0f, 0));
+	body->SetPosition(Vector3f(0, 4.0f, 0));
 	//body->SetOrientation(Quaternion(Vector3f::UNITY, -Math::HALF_PI));
 	//body->SetAngularVelocity(Vector3f(0.0f, 0.0f, 2.0f));
 	//body->SetPrimitive(new CollisionBox(Vector3f(0.3f, 0.2f, 0.2f)));
@@ -88,15 +112,19 @@ void PhysicsApp::OnInitialize()
 	//body->SetPrimitive(new CollisionBox(Vector3f(0.2f, 0.1f, 0.2f)));
 	//body->SetCollider(new BoxCollider(Vector3f(0.6f, 0.5f, 0.2f)));
 	//body->SetCollider(new SphereCollider(0.6f));
-	//body->SetCollider(new CylinderCollider(0.6f, 4.0f));
+	body->SetCollider(new CylinderCollider(0.8f, 1.0f));
 	//body->SetCollider(new ConeCollider(0.6f, 2.0f));
-	body->SetCollider(new ConeCollider(1.0f, 1.0f));
+	//body->SetCollider(new ConeCollider(1.0f, 1.0f));
+	//body->SetCollider(new CapsuleCollider(0.6f, 1.0f));
 	body->SetMass(4.0f);
 	body->SetMass(mass);
 	body->SetInverseMass(0.0f);
 	body->SetInverseInertiaTensor(Matrix3f::ZERO);
 	body->SetMass(1.0f);
 	body->SetInverseInertiaTensor(Matrix3f::CreateScale3(1.0f));
+	body->SetOrientation(Quaternion(Vector3f::UNITZ, 0.2f));
+	body->SetAngularVelocity(Vector3f(0.0f, 5.0f, 0.0f));
+	//body->SetOrientation(Quaternion(Vector3f::UNITX, Math::HALF_PI));
 	m_physicsEngine.AddBody(body);
 	m_testBody1 = body;
 
@@ -110,7 +138,7 @@ void PhysicsApp::OnInitialize()
 	//body->SetAngularVelocity(Vector3f(1.9f, 1.11f,-0.7f));
 	//body->SetPrimitive(new CollisionBox(Vector3f(0.2f, 0.2f, 0.8f)));
 	//body->SetPrimitive(new CollisionBox(Vector3f(0.2f, 0.1f, 0.2f)));
-	body->SetCollider(new BoxCollider(Vector3f(0.5f, 0.3f, 0.4f)));
+	body->SetCollider(new BoxCollider(Vector3f(4.0f, 0.3f, 4.0f)));
 	//body->SetMass(1.0f);
 	//body->SetInverseInertiaTensor(Matrix3f::CreateScale(1.0f));
 	m_physicsEngine.AddBody(body);
@@ -176,32 +204,12 @@ void PhysicsApp::OnInitialize()
 	//body->SetOrientation(Quaternion::IDENTITY);
 	//body->SetPrimitive(&m_physGround);
 	//m_physicsEngine.AddBody(body);
-		
-	m_cameraTransform.position = Vector3f(0, 4, 3);
-	m_cameraTransform.rotation.Rotate(Vector3f::UNITX, -0.3f);
-
-	m_renderParams.EnableBlend(true);
-	m_renderParams.EnablePolygonSmooth(false);
-	m_renderParams.EnableLineSmooth(false);
-	m_renderParams.SetClearColor(Color::BLACK);
-	m_renderParams.SetPolygonMode(PolygonMode::k_fill);
-	m_renderParams.SetClearBits(ClearBits::k_color_buffer_bit | ClearBits::k_depth_buffer_bit);
-	m_renderParams.SetBlendFunction(BlendFunc::k_source_alpha, BlendFunc::k_one_minus_source_alpha);
-	
-	// 2D mode
-	//m_renderParams.EnableCullFace(false);
-	//m_renderParams.EnableDepthBufferWrite(false);
-	//m_renderParams.EnableDepthTest(false);
-	//m_renderParams.EnableNearFarPlaneClipping(false);
-	m_frameTimer.Start();
 
 	m_gjk.done = true;
 	m_gjk.result = false;
 	m_gjk.simplex.Clear();
 	m_gjk.shapeA = m_testBody1->GetCollider();
 	m_gjk.shapeB = m_testBody2->GetCollider();
-
-	m_debugDraw = new DebugDraw();
 }
 
 void PhysicsApp::OnQuit()
@@ -245,6 +253,9 @@ void PhysicsApp::OnUpdate(float timeDelta)
 	// Right bracket: simulate a single frame.
 	if (keyboard->IsKeyPressed(Keys::right_bracket))
 		simulateSingleFrame = true;
+	// C: toggle visible contacts
+	if (keyboard->IsKeyPressed(Keys::c))
+		m_showContacts = !m_showContacts;
 
 	
 	if (m_gjk.done)
@@ -372,7 +383,17 @@ void PhysicsApp::OnUpdate(float timeDelta)
 	// Backspace: Clear all bodies.
 	if (keyboard->IsKeyPressed(Keys::backspace))
 	{
-		//m_physicsEngine.ClearBodies();
+		m_physicsEngine.ClearBodies();
+		Reset();
+		//for (unsigned int i = 0; i < m_physicsEngine.GetNumBodies(); ++i)
+		//{
+		//	RigidBody* body = m_physicsEngine.GetBody(i);
+		//	if (body != m_testBody1 && body != m_testBody2)
+		//	{
+		//		m_physicsEngine.RemoveBody(body);
+		//		--i;
+		//	}
+		//}
 	}
 
 	if (keyboard->IsKeyPressed(Keys::f))
@@ -398,10 +419,15 @@ void PhysicsApp::OnUpdate(float timeDelta)
 			0.2f + RandomFloat() * 0.8f,
 			0.2f + RandomFloat() * 0.8f) * 1.5f;
 		Collider* collider = nullptr;
-		if (RandomFloat() > 0.5f)
+		unsigned int shapeIndex = Random::NextInt(0, 4);
+		if (shapeIndex == 0)
 			collider = new BoxCollider(halfSize);
-		else
+		else if (shapeIndex == 1)
 			collider = new SphereCollider(halfSize.x);
+		else if (shapeIndex == 2)
+			collider = new CylinderCollider(halfSize.x, halfSize.y);
+		else if (shapeIndex == 3)
+			collider = new ConeCollider(halfSize.x, halfSize.y * 2.0f);
 		float density = 200.0f;
 		float volume = collider->GetVolume();
 
@@ -564,7 +590,7 @@ void PhysicsApp::OnRender()
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, 0);
     //glDepthMask(false);
-    glDisable(GL_CULL_FACE);
+    //glDisable(GL_CULL_FACE);
     //glDisable(GL_DEPTH_TEST);
     //glDisable(GL_DEPTH_CLAMP);
     glEnable(GL_BLEND);
@@ -632,139 +658,8 @@ void PhysicsApp::OnRender()
 			m_gjk.simplex);
 	}
 
-	// Draw the origin.
-	float originRadius = 0.3f;
-	glLineWidth(1.0f);
-	glBegin(GL_LINES);
-	glColor3f(1.0f, 0.0f, 0.0f);
-	glVertex3f(-originRadius, 0, 0); glVertex3f(originRadius, 0, 0);
-	glColor3f(0.0f, 1.0f, 0.0f);
-	glVertex3f(0, -originRadius, 0); glVertex3f(0, originRadius, 0);
-	glColor3f(0.0f, 0.0f, 1.0f);
-	glVertex3f(0, 0, -originRadius); glVertex3f(0, 0, originRadius);
-	glEnd();
-
-	// Draw Minkowski Difference point cloud.
-	/*CollisionBox* boxA = (CollisionBox*) m_gjk.shapeA;
-	CollisionBox* boxB = (CollisionBox*) m_gjk.shapeB;
-	glPointSize(4.0f);
-	glBegin(GL_POINTS);
-	glColor3f(1.0f, 0.5f, 1.0f);
-	for (unsigned int i = 0; i < 8; ++i)
-	{
-		for (unsigned int j = 0; j < 8; ++j)
-		{
-			Vector3f minkowskiPoint = boxA->GetVertex(i) - boxB->GetVertex(j);
-			glVertex3fv(minkowskiPoint.v);
-		}
-	}
-	glEnd();*/
-
-	Vector3f simplexPointColors[4] = {
-		Vector3f(1,0,0), Vector3f(0,1,0), Vector3f(0,0,1), Vector3f(1,1,1) 
-	};
-	
-	Vector3f a = m_gjk.simplex.GetPoint(0).p;
-	Vector3f b = m_gjk.simplex.GetPoint(1).p;
-	Vector3f c = m_gjk.simplex.GetPoint(2).p;
-	Vector3f d = m_gjk.simplex.GetPoint(3).p;
-	Vector3f ab = b - a;
-	Vector3f ac = c - a;
-	Vector3f ad = d - a;
-	Vector3f ao = -a;
-	Vector3f abc = -ab.Cross(ac);
-	Vector3f acd = ac.Cross(ad);
-	Vector3f adb = ad.Cross(ab);
-
-	// Draw contact point
-	if (m_gjk.result && m_epa.passed)
-	{
-		glPointSize(8.0f);
-		glBegin(GL_POINTS);
-		glColor3f(1.0f, 1.0f, 0.0f);
-		glVertex3fv(m_epa.contactPoint.v);
-		glEnd();
+	//DrawSimplex(m_gjk.simplex);
 		
-		glLineWidth(4.0f);
-		glBegin(GL_LINES);
-		glColor3f(1.0f, 1.0f, 0.5f);
-		glVertex3fv(m_epa.contactPoint.v);
-		glVertex3fv((m_epa.contactPoint + m_epa.normal * m_epa.depth).v);
-		glEnd();
-	}
-
-	// Draw simplex points.
-	if (m_gjk.simplex.GetNumPoints() >= 1)
-	{
-		glPointSize(8.0f);
-		glBegin(GL_POINTS);
-		glColor3f(1.0f, 0.0f, 0.0f);
-		for (unsigned int i = 0; i < m_gjk.simplex.GetNumPoints(); ++i)
-		{
-			glColor3fv(simplexPointColors[i].v);
-			glVertex3fv(m_gjk.simplex.GetPoint(i).p.v);
-		}
-		glEnd();
-	}
-	
-	// Draw simplex lines.
-	if (m_gjk.simplex.GetNumPoints() >= 2)
-	{
-		glLineWidth(4.0f);
-		glBegin(GL_LINES);
-		glColor3f(1.0f, 0.25f, 0.25f);
-		for (unsigned int i = 0; i < m_gjk.simplex.GetNumPoints(); ++i)
-		{
-			for (unsigned int j = i + 1; j < m_gjk.simplex.GetNumPoints(); ++j)
-			{
-				glVertex3fv(m_gjk.simplex.GetPoint(i).p.v);
-				glVertex3fv(m_gjk.simplex.GetPoint(j).p.v);
-			}
-		}
-		glEnd();
-	}
-	
-	if (m_gjk.simplex.GetNumPoints() == 3)
-	{
-		glBegin(GL_LINES);
-		glColor3f(1,0,1);
-			glVertex3fv(a.v);
-			glVertex3fv((a + abc).v);
-		glColor3f(0,1,0);
-			glVertex3fv(a.v);
-			glVertex3fv((a + abc.Cross(ab)).v);
-		glColor3f(0,0,1);
-			glVertex3fv(a.v);
-			glVertex3fv((a + abc.Cross(-ac)).v);
-		glEnd();
-
-	}
-
-	// Draw simplex faces.
-	if (m_gjk.simplex.GetNumPoints() >= 3)
-	{
-		unsigned int count = (m_gjk.simplex.GetNumPoints() == 3 ? 1 : 4);
-		
-		glDisable(GL_CULL_FACE);
-		glBegin(GL_TRIANGLES);
-		glColor3f(1.0f, 0.5f, 0.5f);
-		if (m_gjk.result)
-			glColor3f(0.5f, 1.0f, 0.5f);
-		for (unsigned int i = 0; i < count; ++i)
-		{
-			unsigned int i0 = (i + 0) % 4;
-			unsigned int i1 = (i + 1) % 4;
-			unsigned int i2 = (i + 2) % 4;
-
-				glVertex3fv(m_gjk.simplex.GetPoint(i0).p.v);
-				glVertex3fv(m_gjk.simplex.GetPoint(i1).p.v);
-				glVertex3fv(m_gjk.simplex.GetPoint(i2).p.v);
-		}
-		glEnd();
-		glEnable(GL_CULL_FACE);
-	}
-
-	
 	// Draw center of masses.
 	for (auto it = m_physicsEngine.bodies_begin();
 		it != m_physicsEngine.bodies_end(); it++)
@@ -783,52 +678,25 @@ void PhysicsApp::OnRender()
 	}
 
 	// Draw contacts.
-	for (auto it = m_physicsEngine.collisions_begin();
-		it != m_physicsEngine.collisions_end(); it++)
+	if (m_showContacts)
 	{
-		collisionData = *it;
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
 
-		for (unsigned int j = 0; j < collisionData.numContacts; j++)
+		for (auto it = m_physicsEngine.collisions_begin();
+			it != m_physicsEngine.collisions_end(); it++)
 		{
-			const Contact& contact = collisionData.contacts[j];
-		
-			glMatrixMode(GL_MODELVIEW);
-			glLoadIdentity();
+			collisionData = *it;
 
-			Color contactColor = Color::BLUE;
-			if (contact.contactType == ContactType::k_debug)
-				contactColor = Color::MAGENTA;
-
-			DrawContactPoint(contact.contactPoint, contact.contactNormal);
-
-			if (contact.contactType == ContactType::k_vertex_face)
+			for (unsigned int j = 0; j < collisionData.numContacts; j++)
 			{
-				/*
-				RigidBody* refBody = contact.bodyB;
-				RigidBody* incBody = contact.bodyA;
-				Matrix4f modelMatrix = Matrix4f::CreateTranslation(refBody->GetPosition()) *
-					Matrix4f::CreateRotation(refBody->GetOrientation());
-				glEnable(GL_CULL_FACE);
-				DrawBoxFace(
-					((CollisionBox*) refBody->GetPrimitive())->halfSize,
-					modelMatrix, contact.features.faceIndex[1], Color::Lerp(Color(255, 150, 0), Color::WHITE, 0.3f));
-				modelMatrix = Matrix4f::CreateTranslation(incBody->GetPosition()) *
-					Matrix4f::CreateRotation(incBody->GetOrientation());
-				DrawBoxFace(
-					((CollisionBox*) incBody->GetPrimitive())->halfSize,
-					modelMatrix, contact.features.faceIndex[0], Color::Lerp(Color::RED, Color::WHITE, 0.3f));
-				glDisable(GL_CULL_FACE);*/
-			}
-			else if (contact.contactType == ContactType::k_edge_edge)
-			{
-				/*
-				CollisionBox* boxA = (CollisionBox*) contact.bodyA->GetPrimitive();
-				CollisionBox* boxB = (CollisionBox*) contact.bodyB->GetPrimitive();
-				DrawContactEdge(boxA->GetVertex(contact.features.edges[0].vertexIndex[0]),
-								boxA->GetVertex(contact.features.edges[0].vertexIndex[1]));
-				DrawContactEdge(boxB->GetVertex(contact.features.edges[1].vertexIndex[0]),
-								boxB->GetVertex(contact.features.edges[1].vertexIndex[1]));
-				*/
+				const Contact& contact = collisionData.contacts[j];
+
+				Color contactColor = Color::BLUE;
+				if (contact.contactType == ContactType::k_debug)
+					contactColor = Color::MAGENTA;
+
+				DrawContactPoint(contact.contactPoint, contact.contactNormal);
 			}
 		}
 	}
@@ -838,67 +706,121 @@ void PhysicsApp::OnRender()
 	//DrawSATViewGrid(firstBox, secondBox);
 }
 
-void PhysicsApp::DrawSphere(float radius, const Matrix4f& transform, const Color& color)
+void PhysicsApp::DrawSimplex(const Simplex& simplex)
 {
-	Matrix4f modelMatrix = transform * Matrix4f::CreateScale(radius);
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf(modelMatrix.data());
-
-	glColor4ubv(color.data());
-	glBindVertexArray(m_meshSphere->GetVertexData()->GetVertexBuffer()->GetGLVertexArray());
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_meshSphere->GetIndexData()->GetIndexBuffer()->GetGLIndexBuffer());
-	glDrawElements(GL_TRIANGLES, m_meshSphere->GetIndexData()->GetCount(), GL_UNSIGNED_INT, (unsigned int*) 0);
-	glBindVertexArray(0);
-}
-
-void PhysicsApp::DrawOutlinedBox(const Vector3f& halfSize, const Matrix4f& transform, const Color& color)
-{
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	//DrawBox(halfSize, transform, color);
-
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	//DrawBox(halfSize, transform, color);
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf(transform.m);
-
+	// Draw the origin.
+	float originRadius = 0.3f;
+	glLineWidth(1.0f);
 	glBegin(GL_LINES);
-		glColor4ubv(color.data());
-		glVertex3f(-halfSize.x,  halfSize.y, -halfSize.z);
-		glVertex3f( halfSize.x,  halfSize.y, -halfSize.z);
-		glVertex3f( halfSize.x,  halfSize.y, -halfSize.z);
-		glVertex3f( halfSize.x,  halfSize.y,  halfSize.z);
-		glVertex3f( halfSize.x,  halfSize.y,  halfSize.z);
-		glVertex3f(-halfSize.x,  halfSize.y,  halfSize.z);
-		glVertex3f(-halfSize.x,  halfSize.y,  halfSize.z);
-		glVertex3f(-halfSize.x,  halfSize.y, -halfSize.z);
-	
-		glVertex3f(-halfSize.x, -halfSize.y, -halfSize.z);
-		glVertex3f( halfSize.x, -halfSize.y, -halfSize.z);
-		glVertex3f( halfSize.x, -halfSize.y, -halfSize.z);
-		glVertex3f( halfSize.x, -halfSize.y,  halfSize.z);
-		glVertex3f( halfSize.x, -halfSize.y,  halfSize.z);
-		glVertex3f(-halfSize.x, -halfSize.y,  halfSize.z);
-		glVertex3f(-halfSize.x, -halfSize.y,  halfSize.z);
-		glVertex3f(-halfSize.x, -halfSize.y, -halfSize.z);
-	
-		glVertex3f(-halfSize.x,  halfSize.y, -halfSize.z);
-		glVertex3f(-halfSize.x, -halfSize.y, -halfSize.z);
-		glVertex3f( halfSize.x,  halfSize.y, -halfSize.z);
-		glVertex3f( halfSize.x, -halfSize.y, -halfSize.z);
-		glVertex3f( halfSize.x,  halfSize.y,  halfSize.z);
-		glVertex3f( halfSize.x, -halfSize.y,  halfSize.z);
-		glVertex3f(-halfSize.x,  halfSize.y,  halfSize.z);
-		glVertex3f(-halfSize.x, -halfSize.y,  halfSize.z);
+	glColor3f(1.0f, 0.0f, 0.0f);
+	glVertex3f(-originRadius, 0, 0); glVertex3f(originRadius, 0, 0);
+	glColor3f(0.0f, 1.0f, 0.0f);
+	glVertex3f(0, -originRadius, 0); glVertex3f(0, originRadius, 0);
+	glColor3f(0.0f, 0.0f, 1.0f);
+	glVertex3f(0, 0, -originRadius); glVertex3f(0, 0, originRadius);
 	glEnd();
-}
 
-void PhysicsApp::DrawBox(const Vector3f& halfSize, const Matrix4f& transform, const Color& color)
-{
-	for (unsigned int i = 0; i < 6; i++)
-		DrawBoxFace(halfSize, transform, i, color);
+	Vector3f simplexPointColors[4] = {
+		Vector3f(1,0,0), // red
+		Vector3f(0,1,0), // green
+		Vector3f(0,0,1), // blue
+		Vector3f(1,1,0), // yellow
+	};
+	
+	Vector3f ab = simplex.b.p - simplex.a.p;
+	Vector3f ac = simplex.c.p - simplex.a.p;
+	Vector3f ad = simplex.d.p - simplex.a.p;
+	//Vector3f ao = -simplex.a.p;
+	Vector3f abc = -ab.Cross(ac);
+	Vector3f acd = ac.Cross(ad);
+	Vector3f adb = ad.Cross(ab);
+
+	// Draw contact point
+	//if (m_gjk.result && m_epa.passed)
+	//{
+	//	glPointSize(8.0f);
+	//	glBegin(GL_POINTS);
+	//	glColor3f(1.0f, 1.0f, 0.0f);
+	//	glVertex3fv(m_epa.contactPoint.v);
+	//	glEnd();
+	//	
+	//	glLineWidth(4.0f);
+	//	glBegin(GL_LINES);
+	//	glColor3f(1.0f, 1.0f, 0.5f);
+	//	glVertex3fv(m_epa.contactPoint.v);
+	//	glVertex3fv((m_epa.contactPoint + m_epa.normal * m_epa.depth).v);
+	//	glEnd();
+	//}
+
+	// Draw simplex points.
+	if (simplex.GetNumPoints() >= 1)
+	{
+		glPointSize(8.0f);
+		glBegin(GL_POINTS);
+		glColor3f(1.0f, 0.0f, 0.0f);
+		for (unsigned int i = 0; i < simplex.numPoints; ++i)
+		{
+			glColor3fv(simplexPointColors[i].v);
+			glVertex3fv(simplex.points[i].p.v);
+		}
+		glEnd();
+	}
+	
+	// Draw simplex lines.
+	if (simplex.numPoints >= 2)
+	{
+		glLineWidth(4.0f);
+		glBegin(GL_LINES);
+		glColor3f(1.0f, 0.25f, 0.25f);
+		for (unsigned int i = 0; i < simplex.numPoints; ++i)
+		{
+			for (unsigned int j = i + 1; j < simplex.numPoints; ++j)
+			{
+				glVertex3fv(simplex.points[i].p.v);
+				glVertex3fv(simplex.points[j].p.v);
+			}
+		}
+		glEnd();
+	}
+	
+	if (simplex.numPoints == 3)
+	{
+		glBegin(GL_LINES);
+		glColor3f(1,0,1);
+			glVertex3fv(simplex.a.p.v);
+			glVertex3fv((simplex.a.p + abc).v);
+		glColor3f(0,1,0);
+			glVertex3fv(simplex.a.p.v);
+			glVertex3fv((simplex.a.p + abc.Cross(ab)).v);
+		glColor3f(0,0,1);
+			glVertex3fv(simplex.a.p.v);
+			glVertex3fv((simplex.a.p + abc.Cross(-ac)).v);
+		glEnd();
+	}
+
+	// Draw simplex faces.
+	if (simplex.numPoints >= 3)
+	{
+		unsigned int count = (simplex.numPoints == 3 ? 1 : 4);
+		
+		glDisable(GL_CULL_FACE);
+		glBegin(GL_TRIANGLES);
+		glColor3f(1.0f, 0.5f, 0.5f);
+		if (m_gjk.result)
+			glColor3f(0.5f, 1.0f, 0.5f);
+		for (unsigned int i = 0; i < count; ++i)
+		{
+			unsigned int i0 = (i + 0) % 4;
+			unsigned int i1 = (i + 1) % 4;
+			unsigned int i2 = (i + 2) % 4;
+
+			glVertex3fv(simplex.points[i0].p.v);
+			glVertex3fv(simplex.points[i1].p.v);
+			glVertex3fv(simplex.points[i2].p.v);
+		}
+		glEnd();
+		glEnable(GL_CULL_FACE);
+	}
 }
 
 void PhysicsApp::DrawBoxEdge(const CollisionBox& box, unsigned int vertexIndex1, unsigned int vertexIndex2, const Color& color)
@@ -1039,232 +961,6 @@ void PhysicsApp::DrawContactEdge(const Vector3f& endPoint1, const Vector3f& endP
 	glLineWidth(1.0f);
 }
 
-
-
-struct SATInfo
-{
-	Vector3f axes[15];
-	
-	float smallestOverlap;
-	unsigned int smallestOverlapAxis;
-	unsigned int axisIndex;
-	Vector3f axis;
-	bool isColliding;
-	
-	CollisionBox* one;
-	CollisionBox* two;
-	CollisionData collisionData;
-
-	SATInfo()
-	{}
-
-	SATInfo(PhysicsEngine* physicsEngine, CollisionBox* one, CollisionBox* two) :
-		one(one),
-		two(two)
-	{
-
-		// Face axes from object one->
-		axes[0] = one->GetAxis(0);
-		axes[1] = one->GetAxis(1);
-		axes[2] = one->GetAxis(2);
-
-		// Face axes from object two->
-		axes[3] = two->GetAxis(0);
-		axes[4] = two->GetAxis(1);
-		axes[5] = two->GetAxis(2);
-
-		// Edge-edge axes.
-		axes[6] = one->GetAxis(0).Cross(two->GetAxis(0));
-		axes[7] = one->GetAxis(0).Cross(two->GetAxis(1));
-		axes[8] = one->GetAxis(0).Cross(two->GetAxis(2));
-		axes[9] = one->GetAxis(1).Cross(two->GetAxis(0));
-		axes[10] = one->GetAxis(1).Cross(two->GetAxis(1));
-		axes[11] = one->GetAxis(1).Cross(two->GetAxis(2));
-		axes[12] = one->GetAxis(2).Cross(two->GetAxis(0));
-		axes[13] = one->GetAxis(2).Cross(two->GetAxis(1));
-		axes[14] = one->GetAxis(2).Cross(two->GetAxis(2));
-		
-		// Perform the Seperating Axis Test for each axis.
-		float minOne, maxOne, minTwo, maxTwo;
-		smallestOverlap = FLT_MAX;
-		isColliding = true;
-
-		for (unsigned int i = 0; i < 15; ++i)
-		{
-			if (axes[i].LengthSquared() < 0.001f)
-				continue;
-			axes[i].Normalize();
-			axis = axes[i];
-
-			// Project each box onto the axis and determine the overlap.
-			one->ProjectOntoAxis(axis, minOne, maxOne);
-			two->ProjectOntoAxis(axis, minTwo, maxTwo);
-			float overlap = Math::Min(maxOne - minTwo, maxTwo - minOne);
-		
-			// If there is no overlap, then the two boxes are not colliding.
-			if (overlap < 0.0f)
-				isColliding = false;
-
-			// Else, keep track of the smallest overlap.
-			if (overlap < smallestOverlap)
-			{
-				smallestOverlap = overlap;
-				smallestOverlapAxis = i;
-			}
-		}
-
-		axisIndex = smallestOverlapAxis;
-		axis = axes[smallestOverlapAxis];
-
-		collisionData.firstBody = one->body;
-		collisionData.secondBody = two->body;
-		collisionData.numContacts = 0;
-		physicsEngine->GetCollisionDetector()->CollideBoxAndBox(*one, *two, &collisionData);
-	}
-};
-
-static SATInfo satInfo;
-
-void PhysicsApp::DrawSATViewGrid(CollisionBox* one, CollisionBox* two)
-{
-	satInfo = SATInfo(&m_physicsEngine, one, two);
-
-	Vector2f windowSize((float) GetWindow()->GetWidth(), (float) GetWindow()->GetHeight());
-	Vector2f panelSize(windowSize.x / 5.0f, windowSize.y / 3.0f);
-	
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	
-
-	for (unsigned int i = 0; i < 15; i++)
-	{
-		unsigned int x = (i / 3);
-		unsigned int y = (i % 3);
-
-		Vector2f topLeft = panelSize * Vector2f((float) x, (float) y);
-		if (i >= 3 && i < 6)
-			DrawSATViewPort(two, one, i, topLeft, panelSize);
-		else
-			DrawSATViewPort(one, two, i, topLeft, panelSize);
-	}
-}
-
-void PhysicsApp::DrawSATViewPort(
-		CollisionBox* one,
-		CollisionBox* two,
-		unsigned int axisIndex,
-		const Vector2f& viewPortTopLeft,
-		const Vector2f& viewPortSize)
-{
-	// Create a basis vectors, where up represents the SAT axis.
-	Vector3f axis = satInfo.axes[axisIndex];
-	Vector3f basisY = axis;
-	Vector3f basisX = one->GetAxis(0);
-	if (Math::Abs(basisY.Dot(basisX)) > 0.9f)
-		basisX = one->GetAxis(1);
-	basisX.Normalize();
-	Vector3f basisZ = basisX.Cross(basisY);
-	basisZ.Normalize();
-	basisX = basisY.Cross(basisZ);
-	basisX.Normalize();
-	Matrix4f worldToView(Matrix3f(basisX, basisY, basisZ));
-
-	// Determine the extents of the two bodies along the X/Y plane.
-	Vector3f oneMin, oneMax;
-	Vector3f twoMin, twoMax;
-	one->ProjectOntoAxis(basisX, oneMin.x, oneMax.x);
-	one->ProjectOntoAxis(basisY, oneMin.y, oneMax.y);
-	one->ProjectOntoAxis(basisZ, oneMin.z, oneMax.z);
-	two->ProjectOntoAxis(basisX, twoMin.x, twoMax.x);
-	two->ProjectOntoAxis(basisY, twoMin.y, twoMax.y);
-	two->ProjectOntoAxis(basisZ, twoMin.z, twoMax.z);
-
-	Vector3f mins, maxs;
-	mins.x = Math::Min(oneMin.x, twoMin.x);
-	mins.y = Math::Min(oneMin.y, twoMin.y);
-	mins.z = Math::Min(oneMin.z, twoMin.z);
-	maxs.x = Math::Max(oneMax.x, twoMax.x);
-	maxs.y = Math::Max(oneMax.y, twoMax.y);
-	maxs.z = Math::Max(oneMax.z, twoMax.z);
-
-	Vector3f halfSize = (maxs - mins) * 0.5f * 1.3f;
-	Vector3f center = (mins + maxs) * 0.5f;
-	float halfSizeAspectRatio = halfSize.x / halfSize.y;
-	float viewPortAspectRatio = viewPortSize.x / viewPortSize.y;
-	if (halfSizeAspectRatio > viewPortAspectRatio)
-		halfSize.y = halfSize.x / viewPortAspectRatio;
-	else
-		halfSize.x = halfSize.y * viewPortAspectRatio;
-	halfSize.z *= 2.0f;
-
-	halfSize.z = 100;
-	Matrix4f viewToProjection = Matrix4f::CreateOrthographic(
-		center.x - halfSize.x, center.x + halfSize.x,
-		center.y - halfSize.y, center.y + halfSize.y,
-		center.z - halfSize.z, center.z + halfSize.z);
-	Matrix4f worldToProjection = viewToProjection * worldToView.GetTranspose();
-	
-	glViewport(
-		(int) viewPortTopLeft.x,
-		(int) viewPortTopLeft.y,
-		(int) viewPortSize.x,
-		(int) viewPortSize.y);
-	
-	Vector3f c = (axis + Vector3f::ONE) * 0.5f;
-	//glClearColor(c.x, c.y, c.z, 1);
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	
-	// Draw bodies.
-
-	glMatrixMode(GL_PROJECTION);
-	glLoadMatrixf(worldToProjection.data());
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-
-	// Render each body.
-	DrawBox(one->halfSize, one->body->m_bodyToWorld * one->GetBodyToShape(), Color::RED);
-	DrawBox(two->halfSize, two->body->m_bodyToWorld * one->GetBodyToShape(), Color::BLUE);
-
-
-	// Draw outline
-	
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-
-	float b = 0.99f;
-	glLineWidth(1.0f);
-	glBegin(GL_LINE_LOOP);
-		glColor3f(1,1,1);
-		glVertex2f(-b, -b);
-		glVertex2f(b, -b);
-		glVertex2f(b, b);
-		glVertex2f(-b, b);
-	glEnd();
-
-	
-	if (satInfo.smallestOverlapAxis == axisIndex)
-	{
-		b = 0.9f;
-		glLineWidth(3.0f);
-		glBegin(GL_LINE_LOOP);
-			if (satInfo.isColliding)
-				glColor3f(1,1,0);
-			else
-				glColor3f(0.5f,0.5f,0);
-			glVertex2f(-b, -b);
-			glVertex2f(b, -b);
-			glVertex2f(b, b);
-			glVertex2f(-b, b);
-		glEnd();
-	}
-}
-
-
-
-
 void PhysicsApp::DrawRigidBody(RigidBody* body)
 {
 	// Setup the model matrix.
@@ -1274,11 +970,13 @@ void PhysicsApp::DrawRigidBody(RigidBody* body)
 	// Create a random color, seeded by the object ID.
 	unsigned char minColor = 100;
 	unsigned char colorAdd = 256 - minColor;
-	srand(body->GetId());
+	
+	RandomNumberGenerator random(body->GetId());
+
 	Color color;
-	color.r = minColor + (rand() % colorAdd);
-	color.g = minColor + (rand() % colorAdd);
-	color.b = minColor + (rand() % colorAdd);
+	color.r = minColor + random.NextInt(0, colorAdd);
+	color.g = minColor + random.NextInt(0, colorAdd);
+	color.b = minColor + random.NextInt(0, colorAdd);
 	color.a = 255;
 
 	if (body->GetCollider() != nullptr)

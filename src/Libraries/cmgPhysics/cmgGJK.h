@@ -34,7 +34,6 @@ public:
 	inline const SupportPoint& GetPoint(unsigned int index) const { return points[index]; }
 	inline unsigned int GetNumPoints() const { return numPoints; }
 
-private:
 	unsigned int numPoints;
 
 	union

@@ -306,15 +306,16 @@ void Primitives::InitializeCylinder()
 	for (unsigned int i = 0; i < cylinderNumSides; ++i)
 	{
 		float angle = ((float) i / (float) cylinderNumSides) * Math::TWO_PI;
-		Vector2f xy(Math::Cos(angle), Math::Sin(angle));
-		cylinderPositions[i + (cylinderNumSides * 0)] = Vector3f(xy, 1.0f);
-		cylinderPositions[i + (cylinderNumSides * 1)] = Vector3f(xy, -1.0f);
-		cylinderPositions[i + (cylinderNumSides * 2)] = Vector3f(xy, 1.0f);
-		cylinderPositions[i + (cylinderNumSides * 3)] = Vector3f(xy, -1.0f);
-		cylinderNormals[i + (cylinderNumSides * 0)] = Vector3f::UNITZ;
-		cylinderNormals[i + (cylinderNumSides * 1)] = -Vector3f::UNITZ;
-		cylinderNormals[i + (cylinderNumSides * 2)] = Vector3f(xy, 0.0f);
-		cylinderNormals[i + (cylinderNumSides * 3)] = Vector3f(xy, 0.0f);
+		float x = Math::Cos(angle);
+		float z = Math::Sin(angle);
+		cylinderPositions[i + (cylinderNumSides * 0)] = Vector3f(x, 1.0f, z);
+		cylinderPositions[i + (cylinderNumSides * 1)] = Vector3f(x, -1.0f, z);
+		cylinderPositions[i + (cylinderNumSides * 2)] = Vector3f(x, 1.0f, z);
+		cylinderPositions[i + (cylinderNumSides * 3)] = Vector3f(x, -1.0f, z);
+		cylinderNormals[i + (cylinderNumSides * 0)] = Vector3f::UNITY;
+		cylinderNormals[i + (cylinderNumSides * 1)] = -Vector3f::UNITY;
+		cylinderNormals[i + (cylinderNumSides * 2)] = Vector3f(x, 0.0f, z);
+		cylinderNormals[i + (cylinderNumSides * 3)] = Vector3f(x, 0.0f, z);
 
 		if (i >= 2)
 		{
@@ -399,13 +400,13 @@ void Primitives::InitializeCone()
 		if (i >= 2)
 		{
 			coneIndices[index++] = 0;
-			coneIndices[index++] = i;
 			coneIndices[index++] = i - 1;
+			coneIndices[index++] = i;
 		}
 		
 		coneIndices[index++] = (coneNumSides * 1) + ((i + 0) % coneNumSides);
-		coneIndices[index++] = (coneNumSides * 1) + ((i + 1) % coneNumSides);
 		coneIndices[index++] = (coneNumSides * 2) + ((i + 0) % coneNumSides);
+		coneIndices[index++] = (coneNumSides * 1) + ((i + 1) % coneNumSides);
 	}
 }
 
