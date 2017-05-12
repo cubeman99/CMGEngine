@@ -37,7 +37,7 @@ public:
 	void DrawBoxFace(const Vector3f& halfSize, const Matrix4f& transform, unsigned int faceIndex, const Color& color);
 	void DrawBoxEdge(const CollisionBox& box, unsigned int vertexIndex1, unsigned int vertexIndex2, const Color& color);
 
-	void DrawContactPoint(const Vector3f& contactPoint, const Vector3f& contactNormal);
+	void DrawContactPoint(const Contact& contact);
 	void DrawContactEdge(const Vector3f& endPoint1, const Vector3f& endPoint2);
 
 	void DrawDebugBoxInfo(const CollisionBox& box);

@@ -9,7 +9,7 @@ PhysicsEngine::PhysicsEngine() :
 	m_idCounter(0),
 	m_enableFriction(true),
 	m_enableRestitution(true),
-	m_numIterations(3),
+	m_numIterations(1),
 	m_profiler("Physics")
 {
 	m_gravity = Vector3f::DOWN * 9.81f;
@@ -44,6 +44,8 @@ void PhysicsEngine::ClearBodies()
 	m_bodies.clear();
 
 	m_idCounter = 0;
+
+	m_collisionCache.Clear();
 }
 
 void PhysicsEngine::RemoveBody(RigidBody* body)
@@ -69,6 +71,8 @@ void PhysicsEngine::Simulate(float timeDelta)
 	unsigned int i, j;
 	RigidBody *body;
 	CollisionData collisionData;
+	CollisionData cachedCollision;
+	//CollisionData* collision;
 
 	timeDelta /= (float) m_numIterations;
 
@@ -99,24 +103,32 @@ void PhysicsEngine::Simulate(float timeDelta)
 
 	// Detect collisions.
 	profileDetection->StartInvocation();
-	m_collisions.clear();
+	m_collisionCache.MarkCollisionsAsInactive();
 	for (i = 0; i < m_bodies.size(); ++i)
 	{
 		for (j = i + 1; j < m_bodies.size(); ++j)
 		{
 			m_collisionDetector.DetectCollision(
 				m_bodies[i], m_bodies[j], &collisionData);
+
 			if (collisionData.numContacts > 0)
-				m_collisions.push_back(collisionData);
+			{
+				collisionData.CalcInternals();
+				m_collisionCache.UpdateCollision(collisionData);
+			}
 		}
 	}
+	m_collisionCache.RemoveInactiveCollisions();
 	profileDetection->StopInvocation();
 
 	// Resolve collisions.
 	profileResponse->StartInvocation();
-	for (i = 0; i < m_collisions.size(); ++i)
+	for (auto it = m_collisionCache.collisions_begin();
+		it != m_collisionCache.collisions_end(); ++it)
 	{
-		SolveCollision(&m_collisions[i]);
+		SolveCollision(&it->second);
+		//collision->CalcInternals();
+		//SolveCollision(collision);
 	}
 	for (i = 0; i < m_bodies.size(); ++i)
 	{
@@ -129,9 +141,18 @@ void PhysicsEngine::Simulate(float timeDelta)
 
 	// Correct positions.
 	profilePositionalCorrection->StartInvocation();
-	for (i = 0; i < m_collisions.size(); ++i)
-		PositionalCorrection(&m_collisions[i]);
+	for (auto it = m_collisionCache.collisions_begin();
+		it != m_collisionCache.collisions_end(); ++it)
+	{
+		PositionalCorrection(&it->second);
+	}
 	profilePositionalCorrection->StopInvocation();
+	}
+		
+	for (i = 0; i < m_bodies.size(); ++i)
+	{
+		body = m_bodies[i];
+		body->CalculateDerivedData();
 	}
 
 	m_profiler.StopInvocation();
@@ -196,7 +217,6 @@ void PhysicsEngine::SolveCollision(CollisionData* collision)
 		*/
 
 		Contact& contact = collision->contacts[i];
-		contact.CalculateInternals(0.01667f);
 
 		// Calculate the impulse in contact coordinates.
 		Vector3f impulse;
@@ -207,6 +227,9 @@ void PhysicsEngine::SolveCollision(CollisionData* collision)
 
 		// Scale the impulse by the number of contacts.
 		impulse *= 1.0f / (float) collision->numContacts;
+
+		if (contact.persistent)
+			impulse *= 0.5f;
 		
 		// Transform the impulse into world coordinates.
 		impulse = contact.contactToWorld * impulse;
@@ -238,7 +261,7 @@ void PhysicsEngine::PositionalCorrection(CollisionData* collision)
 
 void PhysicsEngine::DebugDetectCollisions()
 {
-	unsigned int i, j;
+	unsigned int i;//, j;
 	RigidBody* body;
 	CollisionData collisionData;
 
@@ -247,17 +270,5 @@ void PhysicsEngine::DebugDetectCollisions()
 	{
 		body = m_bodies[i];
 		body->CalculateDerivedData();
-	}
-
-	// Detect collisions.
-	m_collisions.clear();
-	for (i = 0; i < m_bodies.size(); ++i)
-	{
-		for (j = i + 1; j < m_bodies.size(); ++j)
-		{
-			m_collisionDetector.DetectCollision(m_bodies[i], m_bodies[j], &collisionData);
-			if (collisionData.numContacts > 0)
-				m_collisions.push_back(collisionData);
-		}
 	}
 }

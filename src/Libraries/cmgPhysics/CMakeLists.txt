@@ -14,6 +14,8 @@ set(CMG_PHYSICS_SOURCE_FILES
 	cmgPhysicsMesh.cpp
 	cmgCollisionDetector.h
 	cmgCollisionDetector.cpp
+	cmgCollisionCache.h
+	cmgCollisionCache.cpp
 
 	cmgContact.h
 	cmgContact.cpp

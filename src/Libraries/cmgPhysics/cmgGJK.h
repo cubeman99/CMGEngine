@@ -126,6 +126,8 @@ struct EPAResult
 	float depth;
 	Vector3f normal;
 	Vector3f contactPoint;
+	Vector3f contactPointA;
+	Vector3f contactPointB;
 };
 
 

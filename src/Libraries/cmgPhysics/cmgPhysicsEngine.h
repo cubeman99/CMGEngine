@@ -5,6 +5,7 @@
 #include <cmgPhysics/cmgContact.h>
 #include <cmgPhysics/cmgRigidBody.h>
 #include <cmgPhysics/cmgCollisionDetector.h>
+#include <cmgPhysics/cmgCollisionCache.h>
 #include <cmgCore/time/cmgTimer.h>
 
 
@@ -20,24 +21,18 @@ public:
 	void Initialize();
 	void Simulate(float timeDelta);
 	void AddBody(RigidBody* body);
+	void RemoveBody(RigidBody* body);
 	void ClearBodies();
 
+	// Getters
 	inline unsigned int GetNumBodies() const { return m_bodies.size(); }
 	inline RigidBody* GetBody(unsigned int index) { return m_bodies[index]; }
-	void RemoveBody(RigidBody* body);
-
 	inline std::vector<RigidBody*>::iterator bodies_begin() { return m_bodies.begin(); }
 	inline std::vector<RigidBody*>::iterator bodies_end() { return m_bodies.end(); }
-	inline std::vector<CollisionData>::iterator collisions_begin() { return m_collisions.begin(); }
-	inline std::vector<CollisionData>::iterator collisions_end() { return m_collisions.end(); }
-	
-	void SolveCollision(CollisionData* collision);
-	void PositionalCorrection(CollisionData* collision);
-
-	void DebugDetectCollisions();
-
+	inline CollisionCache* GetCollisionCache() { return &m_collisionCache; }
 	inline CollisionDetector* GetCollisionDetector() { return &m_collisionDetector; }
-
+	inline ProfileSection* GetProfiler() { return &m_profiler; }
+	
 	inline unsigned int GetNumIterations() const { return m_numIterations; }
 	inline bool GetEnableFriction() const { return m_enableFriction; }
 	inline bool GetEnableRestitution() const { return m_enableRestitution; }
@@ -46,7 +41,9 @@ public:
 	inline void SetEnableFriction(bool enableFriction) { m_enableFriction = enableFriction; }
 	inline void SetEnableRestitution(bool enableRestitution) { m_enableRestitution = enableRestitution; }
 	
-	inline ProfileSection* GetProfiler() { return &m_profiler; }
+	void SolveCollision(CollisionData* collision);
+	void PositionalCorrection(CollisionData* collision);
+	void DebugDetectCollisions();
 
 
 private:
@@ -56,10 +53,11 @@ private:
 	bool			m_enableRestitution;
 	unsigned int	m_numIterations;
 
+	CollisionCache m_collisionCache;
+
 	std::vector<RigidBody*> m_bodies;
 	unsigned int m_idCounter;
 	Vector3f m_gravity; // Global acceleration due to gravity.
-	std::vector<CollisionData> m_collisions;
 
 	ProfileSection m_profiler;
 };

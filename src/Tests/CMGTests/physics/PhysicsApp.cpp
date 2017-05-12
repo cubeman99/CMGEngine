@@ -110,9 +110,9 @@ void PhysicsApp::Reset()
 	//body->AddPrimitive(new CollisionSphere(wheelRadius), Vector3f(wheelTrack, -chassisSize.y, -wheelBase) * 0.5f);
 	//body->AddPrimitive(new CollisionSphere(wheelRadius), Vector3f(wheelTrack, -chassisSize.y, wheelBase) * 0.5f);
 	//body->SetPrimitive(new CollisionBox(Vector3f(0.2f, 0.1f, 0.2f)));
-	//body->SetCollider(new BoxCollider(Vector3f(0.6f, 0.5f, 0.2f)));
+	body->SetCollider(new BoxCollider(Vector3f(0.8f, 0.4f, 0.6f)));
 	//body->SetCollider(new SphereCollider(0.6f));
-	body->SetCollider(new CylinderCollider(0.8f, 1.0f));
+	//body->SetCollider(new CylinderCollider(0.8f, 1.0f));
 	//body->SetCollider(new ConeCollider(0.6f, 2.0f));
 	//body->SetCollider(new ConeCollider(1.0f, 1.0f));
 	//body->SetCollider(new CapsuleCollider(0.6f, 1.0f));
@@ -122,8 +122,9 @@ void PhysicsApp::Reset()
 	body->SetInverseInertiaTensor(Matrix3f::ZERO);
 	body->SetMass(1.0f);
 	body->SetInverseInertiaTensor(Matrix3f::CreateScale3(1.0f));
-	body->SetOrientation(Quaternion(Vector3f::UNITZ, 0.2f));
-	body->SetAngularVelocity(Vector3f(0.0f, 5.0f, 0.0f));
+	body->SetOrientation(Quaternion(Vector3f(0.2f, 0.1f, 0.3f).Normalize(), 0.05f));
+	//body->SetOrientation(Quaternion(Vector3f::UNITZ, 0.2f));
+	//body->SetAngularVelocity(Vector3f(0.0f, 6.0f, 0.0f));
 	//body->SetOrientation(Quaternion(Vector3f::UNITX, Math::HALF_PI));
 	m_physicsEngine.AddBody(body);
 	m_testBody1 = body;
@@ -132,7 +133,7 @@ void PhysicsApp::Reset()
 	body->SetInverseMass(0.0f);
 	body->SetInverseInertiaTensor(Matrix3f::ZERO);
 	//body->SetInverseInertiaTensor(Matrix3f::CreateScale(1.0f, 1.0f, 1.0f));
-	body->SetPosition(Vector3f(0, 2.0f, 0));
+	body->SetPosition(Vector3f(0, 0.3f, 0));
 	//body->SetOrientation(Quaternion(Vector3f::UNITZ, 0.0f));
 	//body->SetOrientation(Quaternion(Vector3f::UNITY, Math::HALF_PI * 0.5f));
 	//body->SetAngularVelocity(Vector3f(1.9f, 1.11f,-0.7f));
@@ -683,10 +684,12 @@ void PhysicsApp::OnRender()
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 
-		for (auto it = m_physicsEngine.collisions_begin();
-			it != m_physicsEngine.collisions_end(); it++)
+		//for (auto it = m_physicsEngine.collisions_begin();
+			//it != m_physicsEngine.collisions_end(); it++)
+		for (auto it = m_physicsEngine.GetCollisionCache()->collisions_begin();
+			it != m_physicsEngine.GetCollisionCache()->collisions_end(); it++)
 		{
-			collisionData = *it;
+			collisionData = it->second;
 
 			for (unsigned int j = 0; j < collisionData.numContacts; j++)
 			{
@@ -696,7 +699,7 @@ void PhysicsApp::OnRender()
 				if (contact.contactType == ContactType::k_debug)
 					contactColor = Color::MAGENTA;
 
-				DrawContactPoint(contact.contactPoint, contact.contactNormal);
+				DrawContactPoint(contact);
 			}
 		}
 	}
@@ -736,21 +739,25 @@ void PhysicsApp::DrawSimplex(const Simplex& simplex)
 	Vector3f adb = ad.Cross(ab);
 
 	// Draw contact point
-	//if (m_gjk.result && m_epa.passed)
-	//{
-	//	glPointSize(8.0f);
-	//	glBegin(GL_POINTS);
-	//	glColor3f(1.0f, 1.0f, 0.0f);
-	//	glVertex3fv(m_epa.contactPoint.v);
-	//	glEnd();
-	//	
-	//	glLineWidth(4.0f);
-	//	glBegin(GL_LINES);
-	//	glColor3f(1.0f, 1.0f, 0.5f);
-	//	glVertex3fv(m_epa.contactPoint.v);
-	//	glVertex3fv((m_epa.contactPoint + m_epa.normal * m_epa.depth).v);
-	//	glEnd();
-	//}
+	if (m_gjk.result && m_epa.passed)
+	{
+		glPointSize(8.0f);
+		glBegin(GL_POINTS);
+		//glColor3f(1.0f, 1.0f, 0.0f);
+		//glVertex3fv(m_epa.contactPoint.v);
+		glColor3f(1.0f, 0.0f, 0.0f);
+		glVertex3fv(m_epa.contactPointA.v);
+		glColor3f(0.0f, 0.0f, 1.0f);
+		glVertex3fv(m_epa.contactPointB.v);
+		glEnd();
+		
+		glLineWidth(4.0f);
+		glBegin(GL_LINES);
+		glColor3f(1.0f, 1.0f, 0.5f);
+		glVertex3fv(m_epa.contactPoint.v);
+		glVertex3fv((m_epa.contactPoint + m_epa.normal * m_epa.depth).v);
+		glEnd();
+	}
 
 	// Draw simplex points.
 	if (simplex.GetNumPoints() >= 1)
@@ -926,7 +933,7 @@ void PhysicsApp::DrawDebugBoxInfo(const CollisionBox& box)
 	glEnable(GL_DEPTH_TEST);
 }
 
-void PhysicsApp::DrawContactPoint(const Vector3f& contactPoint, const Vector3f& contactNormal)
+void PhysicsApp::DrawContactPoint(const Contact& contact)
 {
 	Color color = Color::BLUE;
 
@@ -934,14 +941,14 @@ void PhysicsApp::DrawContactPoint(const Vector3f& contactPoint, const Vector3f& 
 	glPointSize(8.0f);
 	glBegin(GL_POINTS);
 		glColor4ubv(color.data());
-		glVertex3fv(contactPoint.data());
+		glVertex3fv(contact.contactPoint.v);
 	glEnd();
 	
 	glLineWidth(1.0f);
 	glBegin(GL_LINES);
 		glColor4ubv(color.data());
-		glVertex3fv(contactPoint.data());
-		glVertex3fv((contactPoint + contactNormal * 0.5f).data());
+		glVertex3fv(contact.contactPoint.v);
+		glVertex3fv((contact.contactPoint + contact.contactNormal * contact.penetration).data());
 	glEnd();
 	glEnable(GL_DEPTH_TEST);
 }

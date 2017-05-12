@@ -246,8 +246,8 @@ void Primitives::InitializeSphere()
 			else if (y == sphereResolutionY - 3)
 			{
 				sphereIndices[index++] = sphereResolutionX + x;
-				sphereIndices[index++] = i2;
 				sphereIndices[index++] = i3;
+				sphereIndices[index++] = i2;
 			}
 		}
 	}

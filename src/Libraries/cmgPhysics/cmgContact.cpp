@@ -3,22 +3,36 @@
 #include <cmgMath/cmgMathLib.h>
 
 
-Contact::Contact()
+Contact::Contact() :
+	persistent(nullptr),
+	restitution(0.0f),
+	staticFriction(0.3f),
+	dynamicFriction(0.2f)
 {
 	body[0] = nullptr;
 	body[1] = nullptr;
-	restitution = 0.0f;
-	staticFriction = 0.3f;
-	dynamicFriction = 0.2f;
 }
 
 Vector3f Contact::CalculateFrictionlessImpulse()
 {
-	// NOTE: the contact normal will always face TOWARD body A.
-		
 	// Calculate the contact point's position relative to each body's center of mass.
 	Vector3f ra = contactPoint - body[0]->m_position;
 	Vector3f rb = contactPoint - body[1]->m_position;
+    // Find the relative velocity of the bodies at the contact point.
+	contactVelocity = contactToWorld.GetTranspose() * 
+		((body[1]->GetVelocity() + body[1]->m_angularVelocity.Cross(rb)) - 
+		(body[0]->GetVelocity() + body[0]->m_angularVelocity.Cross(ra)));
+    // Calculate the desired change in velocity for resolution
+    //calculateDesiredDeltaVelocity(timeDelta);
+	desiredDeltaVelocity = -contactVelocity.y;
+	
+
+
+	// NOTE: the contact normal will always face TOWARD body A.
+		
+	// Calculate the contact point's position relative to each body's center of mass.
+	//Vector3f ra = contactPoint - body[0]->m_position;
+	//Vector3f rb = contactPoint - body[1]->m_position;
 
 	// Calculate the velocity of the contact along its normal.
 	// This is also called the closing speed.
@@ -56,6 +70,19 @@ Vector3f Contact::CalculateFrictionlessImpulse()
 
 Vector3f Contact::CalculateFrictionImpulse()
 {
+	// Calculate the contact point's position relative to each body's center of mass.
+	Vector3f ra = contactPoint - body[0]->m_position;
+	Vector3f rb = contactPoint - body[1]->m_position;
+    // Find the relative velocity of the bodies at the contact point.
+	contactVelocity = contactToWorld.GetTranspose() * 
+		((body[1]->GetVelocity() + body[1]->m_angularVelocity.Cross(rb)) - 
+		(body[0]->GetVelocity() + body[0]->m_angularVelocity.Cross(ra)));
+    // Calculate the desired change in velocity for resolution
+    //calculateDesiredDeltaVelocity(timeDelta);
+	desiredDeltaVelocity = -contactVelocity.y;
+	
+
+
 	// Don't apply impulses to seperating contacts.
 	if (contactVelocity.y < 0.0f)
 		return Vector3f::ZERO;
@@ -71,7 +98,7 @@ Vector3f Contact::CalculateFrictionImpulse()
 	// by a skew-symmetric matrix. We build the matrix for converting
 	// between linear and angular velocity.
 	Matrix3f impulseToTorque;
-	Vector3f ra = contactPoint - body[0]->m_position;
+	//Vector3f ra = contactPoint - body[0]->m_position;
 	impulseToTorque.InitSkewSymmetric(ra);
 
 	// Build the matrix to convert contact impulse to change in velocity
@@ -87,7 +114,7 @@ Vector3f Contact::CalculateFrictionImpulse()
 	// The equivalent of a cross-product in matrices is multiplication
 	// by a skew-symmetric matrix. We build the matrix for converting
 	// between linear and angular velocity.
-	Vector3f rb = contactPoint - body[1]->m_position;
+	//Vector3f rb = contactPoint - body[1]->m_position;
 	impulseToTorque.InitSkewSymmetric(rb);
 
 	// Build the matrix to convert contact impulse to change in velocity
@@ -144,6 +171,18 @@ Vector3f Contact::CalculateFrictionImpulse()
 
 void Contact::CalculateInternals(float timeDelta)
 {
+	worldPositionA = contactPoint;
+	localPositionA = bodyA->GetWorldToBody().TransformAffine(contactPoint);
+	worldPositionB = contactPoint;
+	localPositionB = bodyB->GetWorldToBody().TransformAffine(contactPoint);
+	persistent = false;
+	
+	restitution = 0.0f;
+	staticFriction = 0.3f;
+	dynamicFriction = 0.2f;
+	staticFriction = 0.0f;
+	dynamicFriction = 0.0f;
+
     // Calculate an set of axis at the contact point.
 	CreateContactBasis();
 	
@@ -185,4 +224,15 @@ void Contact::CreateContactBasis()
 		contactBitangent);
 }
 
+
+
+
+
+void CollisionData::CalcInternals()
+{
+	for (unsigned int i = 0; i < numContacts; ++i)
+	{
+		contacts[i].CalculateInternals(0.0f);
+	}
+}
 

@@ -26,10 +26,21 @@ enum class ContactType
 struct Contact
 {
 public:
+	
+	Vector3f localPositionA;
+	Vector3f worldPositionA;
+	Vector3f localPositionB;
+	Vector3f worldPositionB;
+	bool persistent;
+
 	// The two bodies in contact.
 	// Index 0: The incident body (for contacts involving a face).
 	// Index 1: The reference body (for contacts involving a face).
-	RigidBody* body[2];
+	union
+	{
+		struct { RigidBody* body[2]; };
+		struct { RigidBody* bodyA; RigidBody* bodyB; };
+	};
 	
 	// The position of the contact in world coordinates.
 	Vector3f contactPoint;
@@ -111,7 +122,7 @@ public:
 
 
 //-----------------------------------------------------------------------------
-// CollisionData
+// CollisionData - a contact manifold
 //-----------------------------------------------------------------------------
 struct CollisionData
 {
@@ -124,15 +135,35 @@ public:
 	float			friction;
 	float			restitution;
 	
+	bool			active;
+
 	CollisionData() :
 		firstBody(nullptr),
 		secondBody(nullptr)
 	{}
 
-	Contact* AddContact()
+	inline Contact* AddContact()
 	{
 		return &contacts[numContacts++];
 	}
+	
+	inline Contact* AddContact(const Contact& contact)
+	{
+		Contact* addedContact = contacts + (numContacts++);
+		*addedContact = contact;
+		return addedContact;
+	}
+
+	inline void RemoveContact(unsigned int index)
+	{
+		--numContacts;
+
+		// Shift other contacts down.
+		for (unsigned int i = index; i < numContacts; ++i)
+			contacts[i] = contacts[i + 1];
+	}
+
+	void CalcInternals();
 
 
 protected:

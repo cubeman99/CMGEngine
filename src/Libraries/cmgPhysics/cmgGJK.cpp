@@ -424,10 +424,15 @@ EPAResult EPA::PerformEPA(Collider* shapeA, Collider* shapeB, const Simplex& gjk
 			EPA::Barycentric(face->normal * face->distToOrigin,
 				face->p0->p, face->p1->p, face->p2->p,
 				baryCoords + 0, baryCoords + 1, baryCoords + 2);
-			result.contactPoint =
+			result.contactPointA =
 				(face->p0->a * baryCoords[0] +
 				face->p1->a * baryCoords[1] +
 				face->p2->a * baryCoords[2]);
+			result.contactPointB =
+				((face->p0->a - face->p0->p) * baryCoords[0] +
+				(face->p1->a - face->p1->p) * baryCoords[1] +
+				(face->p2->a - face->p2->p) * baryCoords[2]);
+			result.contactPoint = result.contactPointA;
 			result.passed = true;
 			result.normal = -face->normal;
 			result.depth = face->distToOrigin;
