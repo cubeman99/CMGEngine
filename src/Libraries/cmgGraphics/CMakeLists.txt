@@ -19,6 +19,11 @@ set(CMG_GRAPHICS_SOURCE_FILES
 	cmgVertexData.cpp
 	cmgMesh.h
 	cmgMesh.cpp
+	
+	scene/cmgScene.h
+	scene/cmgScene.cpp
+	scene/cmgSceneNode.h
+	scene/cmgSceneNode.cpp
 
 	render/cmgRenderParams.h
 	render/cmgRenderParams.cpp

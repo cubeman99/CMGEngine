@@ -158,6 +158,26 @@ bool Plane::CastRay(const Ray& ray, PlaneSide side, Vector3f& intersection) cons
 	return true;
 }
 
+bool Plane::CastBoundedRay(const Ray& ray, PlaneSide side, float& inOutDistance) const
+{
+	float denom = normal.Dot(ray.direction);
+
+	if ((side == PLANE_SIDE_BOTH  && Math::Abs(denom) > 0.0001f) || 
+		(side == PLANE_SIDE_FRONT && denom < -0.0001f) || 
+		(side == PLANE_SIDE_BACK  && denom > 0.0001f))
+	{
+		float dist = Vector3f::Dot(GetPointOnPlane() - ray.origin, normal) / denom; 
+
+		if (dist >= 0.0f && dist < inOutDistance)
+		{
+			inOutDistance = dist;
+			return true;
+		}
+	}
+
+	return false;
+}
+
 
 
 //-----------------------------------------------------------------------------

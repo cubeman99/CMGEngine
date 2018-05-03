@@ -27,7 +27,7 @@ public:
 	void FillRect(float x, float y, float width, float height, const Color& color);
 	void FillRect(const Rect2f& rect, const Color& color);
 
-	void DrawLine(const Vector2f& a, const Vector2f& b, const Color& color);
+	void DrawLine(const Vector2f& a, const Vector2f& b, const Color& color, float width = 1.0f);
 
 	void DrawCircle(const Vector2f& center, float radius, const Color& color);
 	void FillCircle(const Vector2f& center, float radius, const Color& color);

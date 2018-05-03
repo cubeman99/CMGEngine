@@ -207,6 +207,8 @@ struct VertexPosTex
 	Vector3f	position;
 	Vector2f	texCoord;
 	
+	VertexPosTex()
+	{}
 	VertexPosTex(float x, float y, float z, float u, float v) :
 		position(x, y, z),
 		texCoord(u, v)

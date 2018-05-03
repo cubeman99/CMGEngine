@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "TestApp.h"
 #include "physics/PhysicsApp.h"
+#include "physics/CollisionTester.h"
 #include "driving/DrivingEngine.h"
 #include <sstream>
 
@@ -204,6 +205,7 @@ int main(int argc, char* argv[])
 
 	//TestApp app;
 	PhysicsApp app;
+	//CollisionTestApp app;
 	app.Initialize("3D Physics Engine", 800, 600);
 	//DrivingApp app;
 	//app.Initialize("Vehicle Dynamics", 1200, 785);

@@ -39,6 +39,8 @@ public:
 
 	void Clear();
 
+	void RefreshContacts();
+
 	void UpdateCollision(const CollisionData& collisionData);
 
 	void RemoveInactiveCollisions();

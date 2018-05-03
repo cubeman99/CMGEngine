@@ -5,6 +5,7 @@
 #include <cmgCore/cmgBase.h>
 #include <cmgCore/cmgAssert.h>
 #include <cmgCore/cmgConsole.h>
+#include <cmgCore/cmgRandom.h>
 
 #include <cmgCore/io/cmgPath.h>
 #include <cmgCore/io/cmgFile.h>

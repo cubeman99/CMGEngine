@@ -46,6 +46,12 @@ public:
 		return rand();
 	}
 
+	// Exclusive
+	inline static int NextInt(int max)
+	{
+		return (rand() % max);
+	}
+
 	// Inclusive to Exclusive
 	inline static int NextInt(int min, int max)
 	{
@@ -89,6 +95,13 @@ public:
     {
         m_seed = (m_seed * 1103515245) + 12345;
         return (int) ((m_seed / 65536) % 32768);
+	}
+
+	// Return a random integer between minValue (inclusive)
+	// and maxValue (exclusive).
+	inline int NextInt(int maxValue)
+	{
+		return (NextInt() % maxValue);
 	}
 
 	// Return a random integer between minValue (inclusive)

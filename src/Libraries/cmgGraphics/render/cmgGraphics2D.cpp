@@ -6,7 +6,7 @@ namespace
 	void gl_Transform(Matrix4f& transform)
 	{
 		glMatrixMode(GL_MODELVIEW);
-		glLoadMatrixf(transform.GetTranspose().data());
+		glLoadMatrixf(transform.data());
 	}
 
 	void gl_Vertex(float x, float y, float u, float v)
@@ -90,7 +90,7 @@ Graphics2D::Graphics2D(Window* window) :
 	Matrix4f projection = Matrix4f::CreateOrthographic(
 		0, (float) window->GetWidth(), (float) window->GetHeight(), 0, -1, 1);
 	glMatrixMode(GL_PROJECTION);
-	glLoadMatrixf(projection.GetTranspose().data());
+	glLoadMatrixf(projection.data());
 }
 
 void Graphics2D::SetTransformation(const Matrix4f& transformation)
@@ -119,6 +119,7 @@ void Graphics2D::DrawTexture(Texture* texture, float x, float y, const Color& co
 		gl_Vertex(x + w, y + h, 1, 1);
 		gl_Vertex(x, y + h, 0, 1);
 	glEnd();
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Graphics2D::DrawTexture(Texture* texture, const Vector2f& position, const Color& color)
@@ -132,6 +133,7 @@ void Graphics2D::DrawTexture(Texture* texture, const Vector2f& position, const C
 		gl_Color(color);
 		gl_TexturedRect(Rect2f(position, Vector2f(w, h)));
 	glEnd();
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Graphics2D::DrawTexture(Texture* texture, const Rect2f& destination, const Color& color)
@@ -142,6 +144,7 @@ void Graphics2D::DrawTexture(Texture* texture, const Rect2f& destination, const 
 		gl_Color(color);
 		gl_TexturedRect(destination);
 	glEnd();
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Graphics2D::DrawTexture(Texture* texture, const Rect2f& source, const Rect2f& destination, const Color& color)
@@ -162,6 +165,7 @@ void Graphics2D::DrawTexture(Texture* texture, const Rect2f& source, const Rect2
 		glTexCoord2f(src.position.x, src.position.y + src.size.y);
 		glVertex2f(destination.position.x, destination.position.y + destination.size.y);
 	glEnd();
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 
@@ -212,9 +216,10 @@ void Graphics2D::FillRect(const Rect2f& rect, const Color& color)
 }
 
 
-void Graphics2D::DrawLine(const Vector2f& a, const Vector2f& b, const Color& color)
+void Graphics2D::DrawLine(const Vector2f& a, const Vector2f& b, const Color& color, float width)
 {
 	gl_Transform(m_transformation);
+	glLineWidth(width);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBegin(GL_LINES);
 		gl_Color(color);

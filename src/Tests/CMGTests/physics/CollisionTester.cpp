@@ -1,4 +1,4 @@
-#include "PhysicsApp.h"
+#include "CollisionTester.h"
 #include <cmgCore/cmgRandom.h>
 #include <gl/GL.h>
 
@@ -20,12 +20,12 @@ static float RandomFloatClamped()
 
 
 
-PhysicsApp::PhysicsApp()
+CollisionTestApp::CollisionTestApp()
 {
 
 }
 
-void PhysicsApp::OnInitialize()
+void CollisionTestApp::OnInitialize()
 {
 	// Load meshes.
 	m_meshCube		= Primitives::CreateCube();
@@ -62,6 +62,7 @@ void PhysicsApp::OnInitialize()
 	m_frameTimer.Start();
 
 	m_showContacts = true;
+	m_showMinkowskiDifference = false;
 
 	m_debugDraw = new DebugDraw();
 		
@@ -71,7 +72,7 @@ void PhysicsApp::OnInitialize()
 	Reset();
 }
 
-void PhysicsApp::Reset()
+void CollisionTestApp::Reset()
 {
 	RigidBody* body;
 
@@ -126,7 +127,7 @@ void PhysicsApp::Reset()
 	//body->SetOrientation(Quaternion(Vector3f::UNITZ, 0.2f));
 	//body->SetAngularVelocity(Vector3f(0.0f, 6.0f, 0.0f));
 	//body->SetOrientation(Quaternion(Vector3f::UNITX, Math::HALF_PI));
-	m_physicsEngine.AddBody(body);
+	body->CalcInertia();
 	m_testBody1 = body;
 
 	body = new RigidBody();
@@ -146,72 +147,12 @@ void PhysicsApp::Reset()
 	polyVerts.push_back(Vector3f(-2, 0, 3));
 	polyVerts.push_back(Vector3f(2, 0, 3));
 	polyVerts.push_back(Vector3f(2, 0, -3));
-	body->SetCollider(new PolygonCollider(polyVerts.size(), polyVerts.data()));
+	body->SetCollider(new BoxCollider(Vector3f(3, 4, 1)));
+	//body->SetCollider(new PolygonCollider(polyVerts.size(), polyVerts.data()));
 	//body->SetMass(1.0f);
 	//body->SetInverseInertiaTensor(Matrix3f::CreateScale(1.0f));
-	m_physicsEngine.AddBody(body);
 	m_testBody2 = body;
 
-	//float wallWidth = 0.1f;
-	//float wallHeight = 2.0f;
-	//float groundHalfSize = 1.5f;
-	//float groundHeight = 0.1f;
-	float wallWidth = 0.5f;
-	float wallHeight = 2.0f;
-	float groundHalfSize = 34.0f;
-	float groundHeight = 0.3f;
-	
-	// Floor
-	body = new RigidBody();
-	body->SetInverseMass(0.0f);
-	body->SetInverseInertiaTensor(Matrix3f::ZERO);
-	//body->SetInverseInertiaTensor(Matrix3f::CreateScale(1.0f, 1.0f, 1.0f));
-	body->SetPosition(Vector3f(0, -groundHeight * 0.5f, 0));
-	//body->SetOrientation(Quaternion(Vector3f::UNITZ, 0.0f));
-	//body->SetOrientation(Quaternion(Vector3f::UNITZ, 0.1f));
-	body->SetAngularVelocity(Vector3f(0.0f, 0.0f, 0.0f));
-	body->SetCollider(new BoxCollider(Vector3f(groundHalfSize, groundHeight * 0.5f, groundHalfSize)));
-	m_physicsEngine.AddBody(body);
-	
-	// Ramp
-	body = new RigidBody();
-	body->SetInverseMass(0.0f);
-	body->SetPosition(Vector3f(0.0f, 1.0f, -12.0f));
-	body->SetOrientation(Quaternion(Vector3f::UNITX, 0.3f));
-	body->SetAngularVelocity(Vector3f(0.0f, 0.0f, 0.0f));
-	body->SetCollider(new BoxCollider(Vector3f(4.0f, 0.3f, 6.0f)));
-	m_physicsEngine.AddBody(body);
-
-	// Walls
-	body = new RigidBody();
-	body->SetInverseMass(0.0f);
-	body->SetPosition(Vector3f(-groundHalfSize + (wallWidth * 0.5f), wallHeight * 0.5f, 0));
-	body->SetCollider(new BoxCollider(Vector3f(wallWidth * 0.5f, wallHeight * 0.5f, groundHalfSize)));
-	m_physicsEngine.AddBody(body);
-	body = new RigidBody();
-	body->SetInverseMass(0.0f);
-	body->SetPosition(Vector3f(groundHalfSize - (wallWidth * 0.5f), wallHeight * 0.5f, 0));
-	body->SetCollider(new BoxCollider(Vector3f(wallWidth * 0.5f, wallHeight * 0.5f, groundHalfSize)));
-	m_physicsEngine.AddBody(body);
-	body = new RigidBody();
-	body->SetInverseMass(0.0f);
-	body->SetPosition(Vector3f(0, wallHeight * 0.5f, groundHalfSize - (wallWidth * 0.5f)));
-	body->SetCollider(new BoxCollider(Vector3f(groundHalfSize - wallWidth, wallHeight * 0.5f, wallWidth * 0.5f)));
-	m_physicsEngine.AddBody(body);
-	body = new RigidBody();
-	body->SetInverseMass(0.0f);
-	body->SetPosition(Vector3f(0, wallHeight * 0.5f, -groundHalfSize + (wallWidth * 0.5f)));
-	body->SetCollider(new BoxCollider(Vector3f(groundHalfSize - wallWidth, wallHeight * 0.5f, wallWidth * 0.5f)));
-	m_physicsEngine.AddBody(body);
-
-	// Create walls.
-	//body = new RigidBody();
-	//body->SetInverseMass(0.0f);
-	//body->SetInverseInertiaTensor(Matrix3f::ZERO);
-	//body->SetPosition(Vector3f(0, 0, 0));
-	//body->SetOrientation(Quaternion::IDENTITY);
-	//body->SetPrimitive(&m_physGround);
-	//m_physicsEngine.AddBody(body);
 
 	m_gjk.done = true;
 	m_gjk.result = false;
@@ -220,17 +161,17 @@ void PhysicsApp::Reset()
 	m_gjk.shapeB = m_testBody2->GetCollider();
 }
 
-void PhysicsApp::OnQuit()
+void CollisionTestApp::OnQuit()
 {
 	delete m_debugDraw;
 	m_debugDraw = nullptr;
 }
 
-void PhysicsApp::OnResizeWindow(int width, int height)
+void CollisionTestApp::OnResizeWindow(int width, int height)
 {
 }
 
-void PhysicsApp::OnUpdate(float timeDelta)
+void CollisionTestApp::OnUpdate(float timeDelta)
 {
 	Keyboard* keyboard = GetKeyboard();
 	Mouse* mouse = GetMouse();
@@ -265,6 +206,8 @@ void PhysicsApp::OnUpdate(float timeDelta)
 	if (keyboard->IsKeyPressed(Keys::c))
 		m_showContacts = !m_showContacts;
 
+	if (keyboard->IsKeyPressed(Keys::semicolon))
+		m_showMinkowskiDifference = !m_showMinkowskiDifference;
 	
 	if (m_gjk.done)
 	{
@@ -281,27 +224,99 @@ void PhysicsApp::OnUpdate(float timeDelta)
 			std::cout << "contact point = " << m_epa.contactPoint << std::endl;
 		}
 
-		if (keyboard->IsKeyPressed(Keys::space) ||
-			keyboard->IsKeyPressed(Keys::m))
+		if (m_showMinkowskiDifference)
 		{
-			m_gjk.simplex.Clear();
-			m_gjk.direction = Vector3f(1, 1, 1);
-
-			m_gjk.done = false;
-			m_gjk.result = false;
-			m_gjk.shapeA = m_testBody1->GetCollider();
-			m_gjk.shapeB = m_testBody2->GetCollider();
-			m_gjk.iteration = 0;
-
-			m_gjk.nextPoint = GJK::GetSupportMinkowskiDiff(
-				m_gjk.direction, m_gjk.shapeA, m_gjk.shapeB);
-			m_gjk.simplex.Add(m_gjk.nextPoint);
-			m_gjk.direction = -m_gjk.nextPoint.p; // Search towards the origin.
-			
-			printf("----------------------------------------------------\n");
-			printf("Beginning new GJK\n");
+			std::vector<Vector3f> vertices;
+			CreateMinkowskiDifferencePointCloud(vertices,
+				m_testBody1->GetCollider(),
+				m_testBody2->GetCollider());
+			m_quickHull.Clear();
+			m_quickHull.DoQuickHull(vertices.size(), vertices.data());
+			m_quickHull.m_horizon.clear();
+			//while (m_quickHull.MergeFaces())
+				//;
 		}
+
+		if (keyboard->IsKeyPressed(Keys::space))
+		{
+			std::vector<Vector3f> vertices;
+			for (unsigned int i = 0; i < 20; ++i)
+			{
+				Vector3f v;
+				v.x = RandomFloatClamped();
+				v.y = RandomFloatClamped();
+				v.z = RandomFloatClamped();
+				v *= 10;
+				vertices.push_back(v);
+			}
+
+			Vector3f points[] = 
+			{
+				Vector3f(-1.0f, 0.0f, 0.0f),
+				Vector3f(1.0f, 0.0f, -1.0f),
+				Vector3f(1.0f, 0.0f, 1.0f),
+				Vector3f(1.0f, 1.0f, 0.0f),
+				Vector3f(0.0f, 0.7f, 0.7f),
+				Vector3f(-0.4f, 0.7f, -2),
+			};
+
+			vertices.clear();
+			CreateMinkowskiDifferencePointCloud(vertices,
+				m_testBody1->GetCollider(),
+				m_testBody2->GetCollider());
+
+			m_quickHull.Clear();
+
+			if (keyboard->IsKeyDown(Keys::left_control))
+			{
+				m_quickHull.DoQuickHull(vertices.size(), vertices.data());
+				m_quickHull.m_horizon.clear();
+			}
+			else
+			{
+				m_quickHull.BuildInitialHull(vertices.size(), vertices.data());
+			}
+		}
+		if (keyboard->IsKeyPressed(Keys::m))
+		{
+			QuickHullVertex* vertex = m_quickHull.NextConflictVertex();
+			if (vertex != nullptr)
+				m_quickHull.AddVertexToHull(vertex);
+			else
+				m_quickHull.m_horizon.clear();
+		}
+		if (keyboard->IsKeyPressed(Keys::comma))
+		{
+			if (keyboard->IsKeyDown(Keys::left_control))
+			{
+				while (m_quickHull.MergeFaces())
+					;
+			}
+			else
+				m_quickHull.MergeFaces();
+		}
+		//if (keyboard->IsKeyPressed(Keys::space) ||
+		//	keyboard->IsKeyPressed(Keys::m))
+		//{
+		//	m_gjk.simplex.Clear();
+		//	m_gjk.direction = Vector3f(1, 1, 1);
+
+		//	m_gjk.done = false;
+		//	m_gjk.result = false;
+		//	m_gjk.shapeA = m_testBody1->GetCollider();
+		//	m_gjk.shapeB = m_testBody2->GetCollider();
+		//	m_gjk.iteration = 0;
+
+		//	m_gjk.nextPoint = GJK::GetSupportMinkowskiDiff(
+		//		m_gjk.direction, m_gjk.shapeA, m_gjk.shapeB);
+		//	m_gjk.simplex.Add(m_gjk.nextPoint);
+		//	m_gjk.direction = -m_gjk.nextPoint.p; // Search towards the origin.
+		//	
+		//	printf("----------------------------------------------------\n");
+		//	printf("Beginning new GJK\n");
+		//}
 	}
+	/*
 	else if (keyboard->IsKeyPressed(Keys::space) ||
 			keyboard->IsKeyDown(Keys::m))
 	{
@@ -339,6 +354,7 @@ void PhysicsApp::OnUpdate(float timeDelta)
 			printf("%u. Simplex size = %u\n", m_gjk.iteration, m_gjk.simplex.GetNumPoints());
 		}
 	}
+	*/
 
 	
 	// F3: Print profiling info.
@@ -378,30 +394,11 @@ void PhysicsApp::OnUpdate(float timeDelta)
 		m_testBody1->SetOrientation(Quaternion(-0.00093867f, 0.119242f, -0.0154401f, 0.992745f));
 	}
 
-	// Enter: reset test body.
+	// Enter: reset setup.
 	if (keyboard->IsKeyPressed(Keys::enter))
-	{
-		m_testBody1->SetPosition(Vector3f(0, 2, 14));
-		//m_testBody1->SetOrientation(Quaternion(Vector3f::UNITZ, 0.0f));
-		m_testBody1->SetOrientation(Quaternion::IDENTITY);
-		m_testBody1->SetPosition(Vector3f(0, 3.0f, 0));
-		m_testBody1->SetVelocity(Vector3f(0, 1, 0));
-		m_testBody1->SetAngularVelocity(Vector3f(0.0f, 0.0f, 0.0f));
-	}
-	// Backspace: Clear all bodies.
-	if (keyboard->IsKeyPressed(Keys::backspace))
 	{
 		m_physicsEngine.ClearBodies();
 		Reset();
-		//for (unsigned int i = 0; i < m_physicsEngine.GetNumBodies(); ++i)
-		//{
-		//	RigidBody* body = m_physicsEngine.GetBody(i);
-		//	if (body != m_testBody1 && body != m_testBody2)
-		//	{
-		//		m_physicsEngine.RemoveBody(body);
-		//		--i;
-		//	}
-		//}
 	}
 
 	if (keyboard->IsKeyPressed(Keys::f))
@@ -501,7 +498,10 @@ void PhysicsApp::OnUpdate(float timeDelta)
 			m_cameraTransform.position += Vector3f::DOWN * moveAmount;
 	}
 	
-	UpdateDebugBodyControls(m_testBody1, timeDelta);
+	if (keyboard->IsKeyDown(Keys::left_shift))
+		UpdateDebugBodyControls(m_testBody2, timeDelta);
+	else
+		UpdateDebugBodyControls(m_testBody1, timeDelta);
 
 	if (mouse->IsButtonDown(MouseButtons::left))
 	{
@@ -527,13 +527,13 @@ void PhysicsApp::OnUpdate(float timeDelta)
 		m_physicsEngine.DebugDetectCollisions();
 }
 
-void PhysicsApp::UpdateDebugBodyControls(RigidBody* body, float timeDelta)
+void CollisionTestApp::UpdateDebugBodyControls(RigidBody* body, float timeDelta)
 {
 	Keyboard* keyboard = GetKeyboard();
 	Mouse* mouse = GetMouse();
 
-	Quaternion bodyOrientation = m_testBody1->GetOrientation();
-	Vector3f bodyPos = m_testBody1->GetPosition();
+	Quaternion bodyOrientation = body->GetOrientation();
+	Vector3f bodyPos = body->GetPosition();
 	
 	float rotateAmount = timeDelta * 1.8f;
 	float moveAmount = timeDelta * 10.0f;
@@ -603,25 +603,69 @@ void PhysicsApp::UpdateDebugBodyControls(RigidBody* body, float timeDelta)
 		}
 	}
 
-	m_testBody1->SetOrientation(bodyOrientation);
-	m_testBody1->SetPosition(bodyPos);
+	body->SetOrientation(bodyOrientation);
+	body->SetPosition(bodyPos);
 }
 
-void PhysicsApp::OnRender()
+static void GetColliderVertices(std::vector<Vector3f>& vertices, Collider* collider)
+{
+	ColliderType type = collider->GetType();
+	if (type == ColliderType::k_box)
+	{
+		BoxCollider* box = (BoxCollider*) collider;
+		vertices.resize(8);
+		for (unsigned int i = 0; i < 8; ++i)
+		{
+			Vector3f v = box->GetHalfSize();
+			if (i & 1) v.x = -v.x;
+			if (i & 2) v.y = -v.y;
+			if (i & 4) v.z = -v.z;
+			vertices[i] = box->GetShapeToWorld().TransformAffine(v);
+		}
+	}
+}
+
+void CollisionTestApp::CreateMinkowskiDifferencePointCloud(
+	std::vector<Vector3f>& points, Collider* colliderA, Collider* colliderB)
+{
+	std::vector<Vector3f> verticesA;
+	GetColliderVertices(verticesA, colliderA);
+	std::vector<Vector3f> verticesB;
+	GetColliderVertices(verticesB, colliderB);
+
+	points.resize(verticesA.size() * verticesB.size());
+
+	unsigned int i, j;
+	unsigned int index = 0;
+	for (i = 0; i < verticesA.size(); ++i)
+	{
+		for (j = 0; j < verticesB.size(); ++j)
+		{
+			points[index++] = verticesA[i] - verticesB[j];
+		}
+	}
+}
+
+void CollisionTestApp::OnRender()
 {
 	glEnable(GL_DEPTH_TEST);
     glDepthMask(true);
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, 0);
+	glEnable(GL_CULL_FACE);
+	glFrontFace(GL_CCW);
+	glCullFace(GL_BACK);
     //glDepthMask(false);
     //glDisable(GL_CULL_FACE);
     //glDisable(GL_DEPTH_TEST);
     //glDisable(GL_DEPTH_CLAMP);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		
+	
+	Vector3f backgroundColor = Vector3f(0.5f, 0.6f, 0.7f);
+
 	glViewport(0, 0, GetWindow()->GetWidth(), GetWindow()->GetHeight());
-	glClearColor(0, 0, 0, 1);
+	glClearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	m_cameraProjection = Matrix4f::CreatePerspective(
@@ -652,6 +696,18 @@ void PhysicsApp::OnRender()
 	m_physicsEngine.CollideBoxAndBox(*firstBox, *secondBox, &collisionData);
 	RigidBody* firstBody = collisionData.firstBody;*/
 	
+	// Draw the grid.
+	DrawGrid();
+
+	m_testBody1->CalculateDerivedData();
+	m_testBody2->CalculateDerivedData();
+
+	// Draw the two bodies.
+	DrawRigidBody(m_testBody1);
+	DrawRigidBody(m_testBody2);
+
+	DrawQuickHull(&m_quickHull);
+
 	// Draw all rigid bodies.
 	for (auto it = m_physicsEngine.bodies_begin();
 		it != m_physicsEngine.bodies_end(); it++)
@@ -732,7 +788,42 @@ void PhysicsApp::OnRender()
 	//DrawSATViewGrid(firstBox, secondBox);
 }
 
-void PhysicsApp::DrawSimplex(const Simplex& simplex)
+void CollisionTestApp::DrawGrid()
+{
+	int resolution = 20;
+	float squareSize = 1.0f;
+	float extent = squareSize * (resolution / 2);
+
+	m_debugDraw->BeginImmediate();
+	glBegin(GL_LINES);
+	glColor4ubv(Color::GREEN.data());
+	glVertex3f(0.0f, -0.5f, 0.0f);
+	glVertex3f(0.0f, 0.5f, 0.0f);
+	for (int i = 0; i <= resolution; ++i)
+	{
+		float x = (i - (resolution / 2)) * squareSize;
+
+		Color color = Color::GRAY;
+		if (i == 0 || i == resolution)
+			color = Color::BLACK;
+		else if (i == resolution / 2)
+			color = Color::WHITE;
+		glColor4ubv(color.data());
+
+		if (i == resolution / 2)
+			glColor4ubv(Color::BLUE.data());
+		glVertex3f(x, 0.0f, -extent);
+		glVertex3f(x, 0.0f, extent);
+		
+		if (i == resolution / 2)
+			glColor4ubv(Color::RED.data());
+		glVertex3f(-extent, 0.0f, x);
+		glVertex3f(extent, 0.0f, x);
+	}
+	glEnd();
+}
+
+void CollisionTestApp::DrawSimplex(const Simplex& simplex)
 {
 	// Draw the origin.
 	float originRadius = 0.3f;
@@ -853,110 +944,7 @@ void PhysicsApp::DrawSimplex(const Simplex& simplex)
 	}
 }
 
-void PhysicsApp::DrawBoxEdge(const CollisionBox& box, unsigned int vertexIndex1, unsigned int vertexIndex2, const Color& color)
-{
-	Vector3f v1 = box.GetVertex(vertexIndex1);
-	Vector3f v2 = box.GetVertex(vertexIndex2);
-
-	glLineWidth(2.0f);
-	glDisable(GL_DEPTH_TEST);
-	glBegin(GL_LINES);
-		glColor4ubv(color.data());
-		//glColor4ubv(c.data());
-		glVertex3fv(v1.data());
-		glVertex3fv(v2.data());
-	glEnd();
-	glEnable(GL_DEPTH_TEST);
-	glLineWidth(1.0f);
-}
-
-void PhysicsApp::DrawBoxFace(const Vector3f& halfSize, const Matrix4f& transform, unsigned int faceIndex, const Color& color)
-{
-	unsigned int axis = faceIndex / 2;
-	unsigned int axis2 = (axis + 1) % 3;
-	unsigned int axis3 = (axis + 2) % 3;
-
-	Vector3f lightDir = Vector3f(-1.4f, -1, -1.8f);
-	lightDir.Normalize();
-
-	Vector3f normal = Vector3f::ZERO;
-	normal[axis] = (faceIndex % 2 == 0 ? 1 : -1.0f);
-
-	Matrix3f m = transform.Get3x3().GetTranspose();
-	lightDir = m.TransformVector(lightDir);
-
-	float lightAmount = (normal.Dot(-lightDir) + 1) * 0.5f;
-	lightAmount = 0.1f + (lightAmount * 0.9f);	Color c = Color::Lerp(Color::BLACK, color, lightAmount);
-
-	Vector3f vertex = normal * halfSize[axis];
-	vertex[axis2] = -halfSize[axis2];
-	vertex[axis3] = -halfSize[axis3];
-	
-	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf(transform.data());
-
-	glBegin(GL_QUADS);
-		glColor4ubv(c.data());
-		glVertex3fv(vertex.data());
-		vertex[axis2] += 2.0f * halfSize[axis2];
-		glVertex3fv(vertex.data());
-		vertex[axis3] += 2.0f * halfSize[axis3];
-		glVertex3fv(vertex.data());
-		vertex[axis2] -= 2.0f * halfSize[axis2];
-		glVertex3fv(vertex.data());
-	glEnd();
-}
-
-
-void PhysicsApp::DrawDebugBoxInfo(const CollisionBox& box)
-{
-	
-	glDisable(GL_DEPTH_TEST);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-
-	glPointSize(8.0f);
-	/*
-	glBegin(GL_POINTS);
-	{
-		// Draw vertices.
-		glColor3f(1,0,1);
-		for (unsigned int i = 0; i < 8; i++)
-			glVertex3fv(box.GetVertex(i).data());
-	
-		// Draw center point.
-		//glColor3f(0,1,1);
-		//glVertex3fv(box.body->GetPosition().data());
-	}
-	glEnd();*/
-
-	// Draw projections.
-	/*Vector3f center = box.body->GetPosition();
-	glBegin(GL_LINES);
-	glColor3f(0,0,1);
-	Vector3f axes[3];
-	axes[0] = box.GetAxis(0);
-	axes[1] = box.GetAxis(1);
-	axes[2] = box.GetAxis(2);
-	for (unsigned int i = 0; i < 3; i++)
-	{
-		Vector3f axis = axes[i];
-		axis.Normalize();
-
-		float minProj, maxProj;
-		box.ProjectOntoAxis(axis, minProj, maxProj);
-		
-		glColor3f(0,1,0);
-		glVertex3fv((axis * minProj).data());
-		glColor3f(0,0,1);
-		glVertex3fv((axis * maxProj).data());
-	}
-	glEnd();*/
-
-	glEnable(GL_DEPTH_TEST);
-}
-
-void PhysicsApp::DrawContactPoint(const Contact& contact)
+void CollisionTestApp::DrawContactPoint(const Contact& contact)
 {
 	Color color = Color::BLUE;
 	
@@ -996,22 +984,7 @@ void PhysicsApp::DrawContactPoint(const Contact& contact)
 	glEnable(GL_DEPTH_TEST);
 }
 
-void PhysicsApp::DrawContactEdge(const Vector3f& endPoint1, const Vector3f& endPoint2)
-{
-	Color color = Color::CYAN;
-
-	glLineWidth(3.0f);
-	//glDisable(GL_DEPTH_TEST);
-	glBegin(GL_LINES);
-		glColor4ubv(color.data());
-		glVertex3fv(endPoint1.data());
-		glVertex3fv(endPoint2.data());
-	glEnd();
-	//glEnable(GL_DEPTH_TEST);
-	glLineWidth(1.0f);
-}
-
-void PhysicsApp::DrawRigidBody(RigidBody* body)
+void CollisionTestApp::DrawRigidBody(RigidBody* body)
 {
 	// Setup the model matrix.
 	Matrix4f modelMatrix = Matrix4f::CreateTranslation(body->GetPosition()) *
@@ -1041,92 +1014,157 @@ void PhysicsApp::DrawRigidBody(RigidBody* body)
 	//DrawPrimitive(primitive, color, modelMatrix);
 }
 
-void PhysicsApp::DrawPrimitive(CollisionPrimitive* primitive, const Color& color, const Matrix4f& modelMatrix)
+
+void CollisionTestApp::DrawQuickHull(QuickHull* hull)
 {
-	CollisionPrimitive::primitive_type primitiveType = primitive->GetType();
+	unsigned int i;
+	QuickHullFace* face;
+	QuickHullEdge* edge;
+	QuickHullVertex* vertex;
 
-	// Draw object primitive.
-	if (primitiveType == CollisionPrimitiveType::k_box)
+	m_debugDraw->BeginImmediate(Matrix4f::IDENTITY);
+
+	m_debugDraw->SetLineWidth(1.0f);
+	m_debugDraw->SetPointSize(8.0f);
+
+	Color colorFace = Color::WHITE;
+	Color colorEdge = Color::BLACK;
+	Color colorHullVertex = Color::BLACK;
+	Color colorConflictVertex = Color::BLUE;
+	Color colorHorizon = Color::RED;
+	
+	// Draw hull vertices.
+	glBegin(GL_POINTS);
+	for (vertex = hull->m_hullVertices.Head();
+		vertex != nullptr; vertex = vertex->next)
 	{
-		CollisionBox* box = (CollisionBox*) primitive;
-		DrawMesh(m_meshCube, color, modelMatrix * primitive->GetBodyToShape() * 
-			Matrix4f::CreateScale(box->halfSize));
+		glColor4ubv(colorHullVertex.data());
 
-		//glDisable(GL_DEPTH_TEST);
-		//DrawOutlinedBox(box->halfSize, modelMatrix * primitive->GetBodyToShape(), Color::GREEN);
-		//glEnable(GL_DEPTH_TEST);
+		//if (m_quickHull.m_mergedFace != nullptr &&
+			//m_quickHull.m_mergedFace->FindConvexVertex() == vertex)
+			//glColor4ubv(Color::GREEN.data());
 
-		DrawDebugBoxInfo(*box);
+		glVertex3fv(vertex->position.v);
 	}
-	else if (primitiveType == CollisionPrimitiveType::k_sphere)
-	{
-		CollisionSphere* sphere = (CollisionSphere*) primitive;
-		DrawMesh(m_meshSphere, color, modelMatrix * primitive->GetBodyToShape() * 
-			Matrix4f::CreateScale(sphere->radius));
+	glEnd();
 
-		// Draw some points on the sphere so we can see rotation easier.
-		glMatrixMode(GL_MODELVIEW);
-		glLoadMatrixf((modelMatrix * primitive->GetBodyToShape() * 
-			Matrix4f::CreateScale(sphere->radius + 0.0008f)).data());
-		glPointSize(2.0f);
+	// Draw conflict vertices.
+	for (vertex = hull->m_conflictVertices.Head();
+		vertex != nullptr; vertex = vertex->next)
+	{
+		Vector3f posOnFace = vertex->position -
+			(vertex->distToFace * vertex->closestFace->normal);
+
 		glBegin(GL_POINTS);
-			glColor3f(0, 0, 0);
-			glVertex3fv(Vector3f(1,0,0).data());
-			glVertex3fv(Vector3f(-1,0,0).data());
-			glVertex3fv(Vector3f(0,1,0).data());
-			glVertex3fv(Vector3f(0,-1,0).data());
-			glVertex3fv(Vector3f(0,0,1).data());
-			glVertex3fv(Vector3f(0,0,-1).data());
-			glVertex3fv(Vector3f(-1,-1,-1).Normalize().data());
-			glVertex3fv(Vector3f(-1,-1,1).Normalize().data());
-			glVertex3fv(Vector3f(-1,1,-1).Normalize().data());
-			glVertex3fv(Vector3f(-1,1,1).Normalize().data());
-			glVertex3fv(Vector3f(1,-1,-1).Normalize().data());
-			glVertex3fv(Vector3f(1,-1,1).Normalize().data());
-			glVertex3fv(Vector3f(1,1,-1).Normalize().data());
-			glVertex3fv(Vector3f(1,1,1).Normalize().data());
+			glColor4ubv(colorConflictVertex.data());
+			glVertex3fv(vertex->position.v);
+		glEnd();
+		glBegin(GL_LINES);
+			glColor4ubv(colorConflictVertex.data());
+			glVertex3fv(vertex->position.v);
+			glVertex3fv(posOnFace.v);
 		glEnd();
 	}
+
+	// Draw horizon edges.
+	m_debugDraw->SetLineWidth(5.0f);
+	glBegin(GL_LINES);
+	glColor4ubv(colorHorizon.data());
+	unsigned int index = 0;
+	for (auto it = hull->m_horizon.begin(); it != hull->m_horizon.end(); ++it)
+	{
+		float t = ((float) index) / ((float) hull->m_horizon.size() - 1);
+		edge = *it;
+		glColor4ubv(Color::Lerp(Color::RED, Color::YELLOW, t).data());
+		glVertex3fv(edge->tail->position.v);
+		glVertex3fv(edge->twin->tail->position.v);
+		++index;
+	}
+	glEnd();
+
+	// Draw merged edges.
+	m_debugDraw->SetLineWidth(5.0f);
+	for (auto it = hull->m_mergedEdges.begin(); it != hull->m_mergedEdges.end(); ++it)
+	{
+		edge = *it;
+		glBegin(GL_LINES);
+			glColor4ubv(Color::MAGENTA.data());
+			glVertex3fv(edge->tail->position.v);
+			glVertex3fv(edge->twin->tail->position.v);
+		glEnd();
+		glBegin(GL_POINTS);
+			glColor4ubv(Color::MAGENTA.data());
+			glVertex3fv(edge->twin->face->centroid.v);
+		glEnd();
+		++index;
+	}
+
+	// Draw face outlines.
+	m_debugDraw->SetLineWidth(1.0f);
+	for (face = hull->m_hullFaces.Head();
+		face != nullptr; face = face->next)
+	{
+		glBegin(GL_LINES);
+		glColor4ubv(colorEdge.data());
+		for (edge = face->edge, i = 0; i < face->numEdges;
+			edge = edge->next, ++i)
+		{
+			glColor4ubv(colorEdge.data());
+			QuickHullConvexity convexity = edge->CalcConvexity(m_quickHull.m_tolerance);
+			if (convexity == QuickHullConvexity::k_coplanar)
+				glColor4ubv(Color::DARK_MAGENTA.data());
+			if (convexity == QuickHullConvexity::k_concave)
+				glColor4ubv(Color::RED.data());
+			//if (m_quickHull.m_mergedFace == face)
+				//glColor4ubv(Color::CYAN.data());
+			glVertex3fv(edge->tail->position.v);
+			glVertex3fv(edge->next->tail->position.v);
+		}
+		glEnd();
+	}	
+
+	// Draw filled faces.
+	for (face = hull->m_hullFaces.Head();
+		face != nullptr; face = face->next)
+	{
+		glBegin(GL_TRIANGLE_FAN);
+		Color faceColor = colorFace;
+		//if (m_quickHull.m_mergedFace == face)
+			//faceColor = Color(255, 210, 210);
+		glColor4ubv(m_debugDraw->GetShadedColor(face->normal, faceColor).data());
+		for (edge = face->edge, i = 0; i < face->numEdges;
+			edge = edge->next, ++i)
+		{
+			glVertex3fv(edge->tail->position.v);
+		}
+		glEnd();
+
+		
+		glBegin(GL_TRIANGLE_FAN);
+		faceColor = Color::DARK_MAGENTA;
+		glColor4ubv(m_debugDraw->GetShadedColor(-face->normal, faceColor).data());
+		for (edge = face->edge, i = 0; i < face->numEdges;
+			edge = edge->prev, ++i)
+		{
+			glVertex3fv(edge->tail->position.v);
+		}
+		glEnd();
+	}
+
+	//// Draw face normals.
+	//for (face = hull->m_hullFaces.Head();
+	//	face != nullptr; face = face->next)
+	//{
+	//	Vector3f center = face->GetCenter();
+
+	//	glBegin(GL_POINTS);
+	//	glColor4ubv(Color::CYAN.data());
+	//	glVertex3fv(center.v);
+	//	glEnd();
+	//	glBegin(GL_LINES);
+	//	glColor4ubv(Color::CYAN.data());
+	//	glVertex3fv(center.v);
+	//	glVertex3fv((center + face->normal).v);
+	//	glEnd();
+	//}
 }
-
-void PhysicsApp::DrawMesh(Mesh* mesh, const Color& color, const Matrix4f& modelMatrix)
-{
-	glUseProgram(m_shader->GetGLProgram());
-	
-	Color m_lightColor = Color::WHITE;
-	Color m_ambientLight = Color::BLACK;
-	Vector3f m_lightDirection = Vector3f(-1.3f, -1.6f, -1.1f).Normalize();
-
-	Matrix4f viewProjection =  m_cameraProjection * m_cameraTransform.GetInvMatrix();
-	Matrix4f mvp = viewProjection * modelMatrix;
-
-	int uniformLocation = -1;
-	if (m_shader->GetUniformLocation("u_isLit", uniformLocation))
-		glUniform1i(uniformLocation, 1);
-	if (m_shader->GetUniformLocation("u_color", uniformLocation))
-		glUniform4fv(uniformLocation, 1, color.ToVector4f().data());
-	if (m_shader->GetUniformLocation("u_mvp", uniformLocation))
-		glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, mvp.data());
-	if (m_shader->GetUniformLocation("u_model", uniformLocation))
-		glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, modelMatrix.data());
-	if (m_shader->GetUniformLocation("u_lightColor", uniformLocation))
-		glUniform3fv(uniformLocation, 1, m_lightColor.ToVector3f().data());
-	if (m_shader->GetUniformLocation("u_ambientLight", uniformLocation))
-		glUniform3fv(uniformLocation, 1, m_ambientLight.ToVector3f().data());
-	if (m_shader->GetUniformLocation("u_lightDir", uniformLocation))
-		glUniform3fv(uniformLocation, 1, m_lightDirection.data());
-
-	//glEnable(GL_CULL_FACE);
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	//glColor4ubv(Color::GREEN.data());
-	glBindVertexArray(mesh->GetVertexData()->GetVertexBuffer()->GetGLVertexArray());
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->GetIndexData()->GetIndexBuffer()->GetGLIndexBuffer());
-	glDrawElements(GL_TRIANGLES, mesh->GetIndexData()->GetCount(), GL_UNSIGNED_INT, (unsigned int*) 0);
-	glBindVertexArray(0);
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	//glDisable(GL_CULL_FACE);
-	
-	glUseProgram(0);
-}
-
-

@@ -2,6 +2,18 @@
 #define _CMG_CORE_ARRAY_H_
 
 #include <vector>
+#include <set>
+
+
+template <typename T>
+class Set : public std::set<T>
+{
+public:
+	Set() {}
+
+private:
+
+};
 
 
 template <typename T>

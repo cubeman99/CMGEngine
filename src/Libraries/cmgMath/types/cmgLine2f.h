@@ -37,8 +37,9 @@ struct Line2f
 	Line2f& set(const Vector2f& end1, const Vector2f& end2);
 
 	// Static Methods.
-	Vector2f getSegmentIntersection(const Line2f& a, const Line2f& b);
-	Vector2f getLineIntersection(const Line2f& a, const Line2f& b);
+	static Vector2f getSegmentIntersection(const Line2f& a, const Line2f& b);
+	static Vector2f GetLineIntersection(const Vector2f& ps1, const Vector2f& pe1,
+		const Vector2f& ps2, const Vector2f& pe2);
 };
 
 

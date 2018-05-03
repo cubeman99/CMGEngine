@@ -14,13 +14,32 @@ RigidBody::RigidBody() :
 	m_dynamicFriction(0.0f),
 	m_velocityAccumulator(0.0f),
 	m_angularVelocityAccumulator(0.0f),
-	m_collider(nullptr),
-	m_centerOfMass(Vector3f::ZERO)
+	m_force(Vector3f::ZERO),
+	m_torque(Vector3f::ZERO),
+	m_acceleration(Vector3f::ZERO),
+	m_angularAcceleration(Vector3f::ZERO),
+	m_centerOfMass(Vector3f::ZERO),
+	m_physicsEngine(nullptr)
 {
+}
+
+RigidBody::~RigidBody()
+{
+	// Delete colliders.
+	for (unsigned int i = 0; i < m_colliders.size(); ++i)
+		delete m_colliders[i];
+	m_colliders.clear();
+}
+
+Vector3f RigidBody::GetVelocityAtPoint(const Vector3f& pointWorld) const
+{
+	return m_velocity + m_angularVelocity.Cross(pointWorld - m_centerOfMassWorld);
 }
 
 void RigidBody::SetMass(float mass)
 {
+	m_mass = mass;
+
 	if (mass > 0.0f)
 		m_inverseMass = 1.0f / mass;
 	else
@@ -29,24 +48,46 @@ void RigidBody::SetMass(float mass)
 
 void RigidBody::SetCollider(Collider* collider)
 {
-	// Remove existing collider.
-	if (m_collider != nullptr)
-	{
-		m_collider->m_body = nullptr;
-		delete m_collider;
-	}
+	AddCollider(collider);
+}
 
+void RigidBody::AddCollider(Collider* collider)
+{
 	collider->m_body = this;
-	m_collider = collider;
+	m_colliders.push_back(collider);
+}
+
+void RigidBody::ClearColliders()
+{
+	// Delete colliders.
+	for (unsigned int i = 0; i < m_colliders.size(); ++i)
+		delete m_colliders[i];
+	m_colliders.clear();
 }
 
 
+void RigidBody::ApplyForce(const Vector3f& force, const Vector3f& contactPoint)
+{
+	m_force += force;
+	m_torque += Vector3f::Cross(contactPoint - m_centerOfMassWorld, force);
+}
+
+void RigidBody::ApplyForceLinear(const Vector3f& force)
+{
+	m_force += force;
+}
+
+void RigidBody::ApplyTorque(const Vector3f& torque)
+{
+	m_torque += torque;
+}
+
 void RigidBody::ApplyImpulse(const Vector3f& impulse, const Vector3f& contactPoint)
 {
-	m_velocityAccumulator += impulse * m_inverseMass;
-	m_angularVelocityAccumulator += m_inverseInertiaTensorWorld * (contactPoint - m_centerOfMassWorld).Cross(impulse);
-	//m_velocity += impulse * m_inverseMass;
-	//m_angularVelocity += m_inverseInertiaTensorWorld * contactPoint.Cross(impulse);
+	//m_velocityAccumulator += impulse * m_inverseMass;
+	//m_angularVelocityAccumulator += m_inverseInertiaTensorWorld * (contactPoint - m_centerOfMassWorld).Cross(impulse);
+	m_velocity += impulse * m_inverseMass;
+	m_angularVelocity += m_inverseInertiaTensorWorld * (contactPoint - m_centerOfMassWorld).Cross(impulse);
 }
 
 void RigidBody::CalculateDerivedData()
@@ -58,9 +99,9 @@ void RigidBody::CalculateDerivedData()
 	m_worldToBody = m_bodyToWorld.GetAffineInverse();
 
 	m_centerOfMassWorld = m_bodyToWorld.TransformAffine(m_centerOfMass);
-
-	if (m_collider != nullptr)
-		m_collider->CalcDerivedData();
+	
+	for (unsigned int i = 0; i < m_colliders.size(); ++i)
+		m_colliders[i]->CalcDerivedData();
 
 	//m_inverseInertiaTensor.InitScale(1.0f);
 	
@@ -121,6 +162,8 @@ void RigidBody::ClearAccumulators()
 {
 	m_velocityAccumulator.SetZero();
 	m_angularVelocityAccumulator.SetZero();
+	m_force.SetZero();
+	m_torque.SetZero();
 }
 
 
@@ -128,13 +171,13 @@ void RigidBody::ClearAccumulators()
 
 void RigidBody::IntegrateLinear(float dt)
 {
-	//m_acceleration = m_inverseMass * m_force;
+	m_acceleration = m_inverseMass * m_force;
 	//body->force.set(); // clear force accumulator.
 
 	// First-order integration
 	m_position += m_velocity * dt;
 	//m_velocity += m_acceleration * dt;
-	m_velocity += m_velocityAccumulator;
+	m_velocity += m_velocityAccumulator + (m_acceleration * dt);
 }
 
 void RigidBody::IntegrateAngular(float dt)
@@ -143,8 +186,8 @@ void RigidBody::IntegrateAngular(float dt)
 	m_bodyToWorld.InitRotation(m_orientation);
 	m_bodyToWorld.c3.xyz = m_position;
 	m_centerOfMassWorld = m_bodyToWorld.TransformAffine(m_centerOfMass);
-
-	//float angularAcceleration = m_inverseInertiaTensorWorld * m_torque;
+	
+	m_angularAcceleration = m_inverseInertiaTensorWorld * m_torque;
 	//m_torque.SetZero(); // clear torque accumulator
 	
 	// First-order angular velocity integration
@@ -153,7 +196,7 @@ void RigidBody::IntegrateAngular(float dt)
 	angularVelocityQuat.w = 0.0f;
 	m_orientation += (angularVelocityQuat * m_orientation) * (dt * 0.5f);
 	//m_angularVelocity += m_angularAcceleration * dt;
-	m_angularVelocity += m_angularVelocityAccumulator;
+	m_angularVelocity += m_angularVelocityAccumulator + (m_angularAcceleration * dt);
 
 	// Rotate the body's origin around its center of mass.
 	Vector3f momentArm = m_position - m_centerOfMassWorld;
@@ -171,5 +214,34 @@ void RigidBody::IntegrateAngular(float dt)
 	// corrections
 	m_orientation.Normalize();
 	//m_angularVelocityQuat.set(body->angularVelocity, 0.0f);
+}
+
+
+void RigidBody::IntegrateAngularVelocity(const Vector3f& angularVelocity, float amount)
+{
+	// We need to update these in order to rotate the body around it's center of mass.
+	m_bodyToWorld.InitRotation(m_orientation);
+	m_bodyToWorld.c3.xyz = m_position;
+	m_centerOfMassWorld = m_bodyToWorld.TransformAffine(m_centerOfMass);
+
+	// First-order angular velocity integration
+	Quaternion angularVelocityQuat;
+	angularVelocityQuat.xyz = angularVelocity;
+	angularVelocityQuat.w = 0.0f;
+	m_orientation += (angularVelocityQuat * m_orientation) * (amount * 0.5f);
+
+	// Rotate the body's origin around its center of mass.
+	Vector3f momentArm = m_position - m_centerOfMassWorld;
+	float wLength = angularVelocity.Length();
+	if (wLength > 0.0f && momentArm.LengthSquared() > 0.0f)
+	{
+		Quaternion originRotation = Quaternion(
+			angularVelocity / wLength, wLength * amount);
+		m_position -= m_centerOfMassWorld;
+		originRotation.RotateVector(m_position);
+		m_position += m_centerOfMassWorld;
+	}
+
+	m_orientation.Normalize();
 }
 

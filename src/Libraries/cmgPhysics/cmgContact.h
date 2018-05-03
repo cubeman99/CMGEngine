@@ -28,9 +28,10 @@ struct Contact
 public:
 	
 	Vector3f localPositionA;
-	Vector3f worldPositionA;
 	Vector3f localPositionB;
+	Vector3f worldPositionA;
 	Vector3f worldPositionB;
+	Vector3f localNormal;
 	bool persistent;
 
 	// The two bodies in contact.
@@ -42,6 +43,8 @@ public:
 		struct { RigidBody* bodyA; RigidBody* bodyB; };
 	};
 	
+	unsigned int age;
+
 	// The position of the contact in world coordinates.
 	Vector3f contactPoint;
 	
@@ -86,8 +89,13 @@ public:
 	// Calculate and return the friction impulse in contact coordinates.
 	Vector3f CalculateFrictionImpulse();
 	
+	float CalcBaumgarteImpulse();
+
+
 	Vector3f TransformWorldToContact(const Vector3f& worldPoint) const;
 	Vector3f TransformContactToWorld(const Vector3f& contactPoint) const;
+
+	float CalcDepth();
 
 protected:
 public:
@@ -164,6 +172,8 @@ public:
 	}
 
 	void CalcInternals();
+
+	void RefreshContacts();
 
 
 protected:

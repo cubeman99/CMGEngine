@@ -57,6 +57,7 @@ struct Plane
 	bool		CastRay(const Ray& ray, Vector3f& intersection) const;
 	bool		CastRay(const Ray& ray, PlaneSide side, float& distance) const;
 	bool		CastRay(const Ray& ray, PlaneSide side, Vector3f& intersection) const;
+	bool		CastBoundedRay(const Ray& ray, PlaneSide side, float& inOutDistance) const;
 
 	// Mutators.
 	Plane& SetNormal(float x, float y, float z);

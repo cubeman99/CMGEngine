@@ -11,7 +11,7 @@ public:
 	
 	// Collider implementations
 	float GetVolume() const override;
-	virtual Vector3f GetCenterOfMassOffset() const;
+	Vector3f GetCenterOfMassOffset() const override;
 	Matrix3f CalcInertiaTensor(float mass) const override;
 	Vector3f GetSupportPoint(const Vector3f& direction) const override;
 

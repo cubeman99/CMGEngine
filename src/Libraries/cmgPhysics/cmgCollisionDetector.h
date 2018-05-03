@@ -3,6 +3,12 @@
 
 #include <cmgPhysics/cmgContact.h>
 #include <cmgPhysics/cmgRigidBody.h>
+#include <cmgPhysics/colliders/cmgBoxCollider.h>
+#include <cmgPhysics/colliders/cmgSphereCollider.h>
+#include <cmgPhysics/colliders/cmgCapsuleCollider.h>
+#include <cmgPhysics/colliders/cmgCylinderCollider.h>
+#include <cmgPhysics/colliders/cmgConeCollider.h>
+#include <cmgPhysics/cmgGJK.h>
 
 
 //-----------------------------------------------------------------------------
@@ -16,6 +22,7 @@ public:
 	void DetectCollision(RigidBody* one, RigidBody* two, CollisionData* collisionData);
 
 	void DetectCollision(Collider* a, Collider* b, CollisionData* collisionData);
+	void GenerateContactsEPA(Collider* a, Collider* b, CollisionData* collisionData, const EPAResult& epa);
 
 	void DetectCollision(CollisionPrimitive* one, CollisionPrimitive* two, CollisionData* collisionData);
 

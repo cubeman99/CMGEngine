@@ -19,7 +19,7 @@ struct Matrix4f
 					   m10, m11, m12, m13,
 					   m20, m21, m22, m23,
 					   m30, m31, m32, m33; };
-		struct { Vector4f c[4]; };
+		struct { Vector4f col[4]; };
 		struct { Vector4f c0; Vector4f c1; Vector4f c2; Vector4f c3; };
 	};
 

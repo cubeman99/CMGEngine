@@ -86,6 +86,7 @@ Error::~Error()
 	{
 		// TODO: Unchecked failure.
 		CMG_ASSERT_FALSE(m_message.c_str());//"An error went unchecked!");
+		printf("Error: %s", m_message.c_str());
 	}
 }
 

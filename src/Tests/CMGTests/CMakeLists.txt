@@ -6,6 +6,8 @@ set(CMG_GENERIC_TESTS
 	
 	physics/PhysicsApp.h
 	physics/PhysicsApp.cpp
+	physics/CollisionTester.h
+	physics/CollisionTester.cpp
 	physics/PrimitiveMeshes.h
 	physics/PrimitiveMeshes.cpp
 

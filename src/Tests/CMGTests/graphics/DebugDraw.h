@@ -7,6 +7,9 @@
 #include <cmgPhysics/colliders/cmgCylinderCollider.h>
 #include <cmgPhysics/colliders/cmgConeCollider.h>
 #include <cmgPhysics/colliders/cmgCapsuleCollider.h>
+#include <cmgPhysics/colliders/cmgPolygonCollider.h>
+#include <cmgPhysics/colliders/cmgConvexMeshCollider.h>
+
 
 class DebugDraw
 {
@@ -35,6 +38,10 @@ public:
 	void DrawFilledCapsuleCollider(const CapsuleCollider* capsule, const Color& color);
 	void DrawWireConeCollider(const ConeCollider* cone, const Color& color);
 	void DrawFilledConeCollider(const ConeCollider* cone, const Color& color);
+	void DrawWirePolygonCollider(const PolygonCollider* poly, const Color& color);
+	void DrawFilledPolygonCollider(const PolygonCollider* poly, const Color& color);
+	void DrawDrawConvexMeshCollider(const ConvexMeshCollider* mesh, const Color& color);
+	void DrawFilledConvexMeshCollider(const ConvexMeshCollider* mesh, const Color& color);
 
 	// Primitives
 	void DrawWireBox(const Matrix4f& modelMatrix, const Vector3f& halfSize, const Color& color);
@@ -52,6 +59,9 @@ public:
 	void DrawWireCone(const Matrix4f& modelMatrix, float radius, float height, const Color& color);
 	void DrawFilledCone(const Matrix4f& modelMatrix, float radius, float height, const Color& color);
 
+	Color GetShadedColor(const Vector3f& normal, const Color& color);
+
+	void BeginImmediate(const Matrix4f& transform = Matrix4f::IDENTITY);
 
 private:
 	void BeginDrawWire();

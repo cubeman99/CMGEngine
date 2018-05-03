@@ -42,9 +42,12 @@ public:
 	inline void SetEnableRestitution(bool enableRestitution) { m_enableRestitution = enableRestitution; }
 	
 	void SolveCollision(CollisionData* collision);
-	void PositionalCorrection(CollisionData* collision);
+	void PositionalCorrection(CollisionData* collision, float invDT);
 	void DebugDetectCollisions();
 
+	// Operations
+	bool CastRay(const Ray& ray, float& outDistance, Vector3f& outNormal);
+	bool CastBoundedRay(const Ray& ray, float& inOutDistance, Vector3f& outNormal);
 
 private:
 	CollisionDetector m_collisionDetector;
@@ -52,6 +55,9 @@ private:
 	bool			m_enableFriction;
 	bool			m_enableRestitution;
 	unsigned int	m_numIterations;
+
+	unsigned int	m_velocityIterations;
+	unsigned int	m_positionIterations;
 
 	CollisionCache m_collisionCache;
 

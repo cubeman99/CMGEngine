@@ -57,7 +57,7 @@ public:
 
 	void Reset() override;
 	void Update() override;
-
+	
 	const MouseState& GetMouseState()		const { return m_currentState; }
 	const MouseState& GetPrevMouseState()	const { return m_previousState; }
 

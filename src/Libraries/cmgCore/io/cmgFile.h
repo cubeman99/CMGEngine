@@ -52,7 +52,7 @@ public:
 	bool	IsOpen() const;
 	Error	Close();
 
-	// Wread & write.
+	// Read & write.
 	Error	Read(unsigned char* destination, unsigned int size);
 	Error	Write(const unsigned char* data, unsigned int size);
 	Error	GetContents(String& out);

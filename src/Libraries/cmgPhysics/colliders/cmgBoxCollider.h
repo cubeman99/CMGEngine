@@ -16,6 +16,8 @@ public:
 	Vector3f GetSupportPoint(const Vector3f& direction) const override;
 
 	inline const Vector3f& GetHalfSize() const { return m_halfSize; }
+	
+	bool CastBoundedRay(const Ray& ray, float& inOutDistance, Vector3f& outNormal) const override;
 
 private:
 

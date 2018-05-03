@@ -177,6 +177,8 @@ void DebugDraw::DrawWireCollider(const Collider* collider, const Color& color)
 		DrawWireCapsuleCollider((const CapsuleCollider*) collider, color);
 	else if (type == ColliderType::k_cone)
 		DrawWireConeCollider((const ConeCollider*) collider, color);
+	else if (type == ColliderType::k_polygon)
+		DrawWirePolygonCollider((const PolygonCollider*) collider, color);
 }
 
 void DebugDraw::DrawFilledCollider(const Collider* collider, const Color& color)
@@ -192,6 +194,8 @@ void DebugDraw::DrawFilledCollider(const Collider* collider, const Color& color)
 		DrawFilledCapsuleCollider((const CapsuleCollider*) collider, color);
 	else if (type == ColliderType::k_cone)
 		DrawFilledConeCollider((const ConeCollider*) collider, color);
+	else if (type == ColliderType::k_polygon)
+		DrawFilledPolygonCollider((const PolygonCollider*) collider, color);
 }
 
 void DebugDraw::DrawWireBoxCollider(const BoxCollider* box, const Color& color)
@@ -254,12 +258,69 @@ void DebugDraw::DrawFilledConeCollider(const ConeCollider* cone, const Color& co
 		cone->GetRadius(), cone->GetHeight(), color);
 }
 
-void DrawWireCapsuleCollider(const CapsuleCollider* capsule, const Color& color)
+void DebugDraw::DrawWirePolygonCollider(const PolygonCollider* poly, const Color& color)
 {
+	BeginDrawWire();
+	glUseProgram(0);
+	glLoadMatrixf(poly->GetShapeToWorld().m);
+	glBegin(GL_LINE_LOOP);
+	glColor4ubv(color.data());
+	for (auto it = poly->vertices_begin(); it != poly->vertices_end(); ++it)
+		glVertex3fv(it->v);
+	glEnd();
 }
 
-void DrawFilledCapsuleCollider(const CapsuleCollider* capsule, const Color& color)
+void DebugDraw::DrawFilledPolygonCollider(const PolygonCollider* poly, const Color& color)
 {
+	BeginDrawFill();
+	glUseProgram(0);
+	glLoadMatrixf(poly->GetShapeToWorld().m);
+	glBegin(GL_TRIANGLE_FAN);
+	glColor4ubv(color.data());
+	for (auto it = poly->vertices_begin(); it != poly->vertices_end(); ++it)
+		glVertex3fv(it->v);
+	glEnd();
+}
+
+void DebugDraw::DrawDrawConvexMeshCollider(const ConvexMeshCollider* mesh, const Color& color)
+{
+	BeginImmediate(mesh->GetShapeToWorld());
+	glBegin(GL_LINES);
+	glColor4ubv(color.data());
+	for (unsigned int i = 0; i < mesh->GetNumFaces(); ++i)
+	{
+		const ConvexMeshFace& face = mesh->GetFace(i);
+		const ConvexMeshHalfEdge* edge = face.edge;
+		for (unsigned int j = 0; j < face.numEdges; ++j)
+		{
+			glVertex3fv(face.edge->tail->position.v);
+			glVertex3fv(face.edge->twin->tail->position.v);
+			edge = edge->next;
+		}
+	}
+	glEnd();
+}
+
+void DebugDraw::DrawFilledConvexMeshCollider(const ConvexMeshCollider* mesh, const Color& color)
+{
+	BeginImmediate(mesh->GetShapeToWorld());
+	glBegin(GL_TRIANGLES);
+	glColor4ubv(color.data());
+	for (unsigned int i = 0; i < mesh->GetNumFaces(); ++i)
+	{
+		const ConvexMeshFace& face = mesh->GetFace(i);
+		const ConvexMeshHalfEdge* edge = face.edge->next->next;
+		glColor4ubv(GetShadedColor(mesh->GetShapeToWorld().
+			Rotate(face.normal), color).data());
+		for (unsigned int j = 2; j < face.numEdges; ++j)
+		{
+			glVertex3fv(face.edge->tail->position.v);
+			glVertex3fv(face.edge->next->tail->position.v);
+			glVertex3fv(edge->tail->position.v);
+			edge = edge->next;
+		}
+	}
+	glEnd();
 }
 
 
@@ -386,6 +447,26 @@ void DebugDraw::DrawFilledCone(const Matrix4f& modelMatrix, float radius, float 
 //-----------------------------------------------------------------------------
 // Internal functions
 //-----------------------------------------------------------------------------
+
+Color DebugDraw::GetShadedColor(const Vector3f& normal, const Color& color)
+{
+	float lightAmount = normal.Dot(-m_lightDirection);
+	lightAmount = (lightAmount + 1.0f) * 0.5f;
+	return Color::Lerp(Color::BLACK, color, lightAmount);
+}
+
+void DebugDraw::BeginImmediate(const Matrix4f& transform)
+{
+	glUseProgram(0);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadMatrixf(m_viewProjection.m);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixf(transform.m);
+
+	glLineWidth(m_lineWidth);
+	glPointSize(m_pointSize);
+}
 
 void DebugDraw::BeginDrawWire()
 {

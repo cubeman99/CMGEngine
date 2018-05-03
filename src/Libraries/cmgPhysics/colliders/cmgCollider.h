@@ -3,6 +3,7 @@
 
 #include <cmgMath/types/cmgMatrix3f.h>
 #include <cmgMath/types/cmgMatrix4f.h>
+#include <cmgMath/types/cmgRay.h>
 #include <cmgMath/cmgMathLib.h>
 
 class RigidBody;
@@ -17,7 +18,8 @@ enum class ColliderType
 
 	k_sphere = 0,
 	k_box,
-	k_plane,
+	k_polygon,
+	k_convexMesh,
 
 	k_cylinder,
 	k_cone,
@@ -56,6 +58,8 @@ public:
 
 
 	void CalcDerivedData();
+
+	virtual bool CastBoundedRay(const Ray& ray, float& inOutDistance, Vector3f& outNormal) const { return false; }
 
 
 protected:

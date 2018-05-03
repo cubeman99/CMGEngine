@@ -107,6 +107,7 @@ struct Polytope
 	unsigned int m_numFaces;
 	PolytopeFace* m_faces;
 
+	// Internal data used in EPA.
 	std::list<PolytopeEdge> m_edges;
 
 	Polytope();

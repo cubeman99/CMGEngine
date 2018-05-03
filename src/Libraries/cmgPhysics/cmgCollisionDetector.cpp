@@ -4,7 +4,6 @@
 #include <cmgMath/types/cmgRay.h>
 #include <cmgPhysics/cmgGJK.h>
 
-
 CollisionDetector::CollisionDetector()
 {
 
@@ -19,21 +18,17 @@ void CollisionDetector::DetectCollision(RigidBody* one, RigidBody* two, Collisio
 	if (one->m_inverseMass == 0.0f && two->m_inverseMass == 0.0f)
 		return;
 
-	if (one->GetCollider() == nullptr || two->GetCollider() == nullptr)
-		return;
-
-	DetectCollision(one->GetCollider(), two->GetCollider(), collisionData);
-	
-	//for (auto it1 = one->primitives_begin(); it1 != one->primitives_end(); ++it1)
-	//{
-	//	for (auto it2 = two->primitives_begin(); it2 != two->primitives_end(); ++it2)
-	//	{
-	//		DetectCollision(*it1, *it2, collisionData);
-	//	}
-	//}
+	for (auto it1 = one->colliders_begin(); it1 != one->colliders_end(); ++it1)
+	{
+		for (auto it2 = two->colliders_begin(); it2 != two->colliders_end(); ++it2)
+		{
+			DetectCollision(*it1, *it2, collisionData);
+		}
+	}
 }
 
-void CollisionDetector::DetectCollision(Collider* a, Collider* b, CollisionData* collisionData)
+void CollisionDetector::DetectCollision(
+	Collider* a, Collider* b, CollisionData* collisionData)
 {
 	Simplex simplex;
 	bool gjkResult = GJK::TestIntersection(a, b, &simplex);
@@ -45,15 +40,65 @@ void CollisionDetector::DetectCollision(Collider* a, Collider* b, CollisionData*
 		{
 			collisionData->firstBody = a->GetBody();
 			collisionData->secondBody = b->GetBody();
+
 			collisionData->numContacts = 1;
 			collisionData->contacts[0].body[0]			= a->GetBody();
 			collisionData->contacts[0].body[1]			= b->GetBody();
 			collisionData->contacts[0].contactNormal	= epaResult.normal;
 			collisionData->contacts[0].penetration		= epaResult.depth;
 			collisionData->contacts[0].contactPoint		= epaResult.contactPoint;
+			collisionData->contacts[0].worldPositionA	= epaResult.contactPointA;
+			collisionData->contacts[0].worldPositionB	= epaResult.contactPointB;
+			collisionData->contacts[0].localPositionA	= a->GetBody()->GetWorldToBody().TransformAffine(epaResult.contactPointA);
+			collisionData->contacts[0].localPositionB	= b->GetBody()->GetWorldToBody().TransformAffine(epaResult.contactPointB);
+			collisionData->contacts[0].localNormal		= b->GetBody()->GetWorldToBody().Rotate(epaResult.normal);
+	
 		}
 	}
 }
+
+
+void CollisionDetector::GenerateContactsEPA(
+	Collider* a, Collider* b, CollisionData* collisionData, const EPAResult& epa)
+{
+	ColliderType typeA = a->GetType();
+	ColliderType typeB = b->GetType();
+	
+	if (typeA == ColliderType::k_box &&
+		typeB == ColliderType::k_box)
+	{
+		BoxCollider* boxA = (BoxCollider*) a;
+		BoxCollider* boxB = (BoxCollider*) b;
+		BoxCollider* boxes[2] = { boxA, boxB };
+
+		// Identify the reference face.
+		unsigned int refFaceIndex;
+		BoxCollider* refFaceBox;
+		unsigned int axisIndex;
+		float maxDot = -FLT_MAX;
+		for (unsigned int i = 0; i < 6; ++i)
+		{
+			axisIndex = i % 3;
+			BoxCollider* box = boxes[i / 3];
+			Vector3f axis = box->GetShapeToWorld().col[axisIndex].xyz;
+
+			float dot = axis.Dot(epa.normal);
+			if (dot > maxDot)
+			{
+				refFaceBox = box;
+				refFaceIndex = i * 2;
+				maxDot = dot;
+			}
+			if (-dot > maxDot)
+			{
+				refFaceBox = box;
+				refFaceIndex = (i * 2) + 1;
+				maxDot = -dot;
+			}
+		}
+	}
+}
+
 
 
 void CollisionDetector::DetectCollision(CollisionPrimitive* one, CollisionPrimitive* two, CollisionData* collisionData)

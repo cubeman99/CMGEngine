@@ -23,6 +23,9 @@ set(CMG_PHYSICS_SOURCE_FILES
 	cmgGJK.h
 	cmgGJK.cpp
 
+	cmgQuickHull.h
+	cmgQuickHull.cpp
+
 	colliders/cmgCollider.h
 	colliders/cmgCollider.cpp
 	colliders/cmgBoxCollider.h
@@ -31,8 +34,14 @@ set(CMG_PHYSICS_SOURCE_FILES
 	colliders/cmgSphereCollider.cpp
 	colliders/cmgCylinderCollider.h
 	colliders/cmgCylinderCollider.cpp
+	colliders/cmgCapsuleCollider.h
+	colliders/cmgCapsuleCollider.cpp
 	colliders/cmgConeCollider.h
 	colliders/cmgConeCollider.cpp
+	colliders/cmgPolygonCollider.h
+	colliders/cmgPolygonCollider.cpp
+	colliders/cmgConvexMeshCollider.h
+	colliders/cmgConvexMeshCollider.cpp
 )
 
 cmg_install_library(cmgPhysics "${CMG_PHYSICS_SOURCE_FILES}")
