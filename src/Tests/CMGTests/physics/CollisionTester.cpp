@@ -41,7 +41,7 @@ void CollisionTestApp::OnInitialize()
 	m_shader->CompileAndLink();
 
 	// Load font.
-	m_font = SpriteFont::LoadFont(Path(ASSETS_PATH "font_console.png"), 16, 8, 12, 0);
+	m_font = SpriteFont::LoadSpriteFont(Path(ASSETS_PATH "font_console.png"), 16, 8, 12, 0);
 
 	m_simulationPaused = false;
 	m_simulationSpeed = 1.0f;

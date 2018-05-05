@@ -5,7 +5,6 @@
 #include <cmgMath/cmg_math.h>
 #include <physics/PrimitiveMeshes.h>
 #include "Car.h"
-#include "SpriteFont.h"
 #include "Graphics.h"
 #include "Pacejka.h"
 #include "TestMeshes.h"

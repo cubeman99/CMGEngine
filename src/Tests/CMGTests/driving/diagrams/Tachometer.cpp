@@ -26,9 +26,9 @@ void Tachometer::Draw(Graphics& g, const Vector2f& position, float radius)
 	// Draw RPM text.
 	Vector2f textPos = position + Vector2f(0, radius * 0.3f);
 	Color mphLabelColor(80, 80, 80);
-	g.DrawString("RPM", textPos, mphLabelColor, TextAlign::k_centered);
+	g.DrawString("RPM", textPos, mphLabelColor, TextAlign::CENTERED);
 	textPos.y += radius * 0.15f;
-	g.DrawString("x 1000", textPos, mphLabelColor, TextAlign::k_centered);
+	g.DrawString("x 1000", textPos, mphLabelColor, TextAlign::CENTERED);
 	
 	// Draw gear number text.
 	std::string numberNames[] =
@@ -42,7 +42,7 @@ void Tachometer::Draw(Graphics& g, const Vector2f& position, float radius)
 		"7th Gear",
 	};
 	textPos += Vector2f(0, radius * 0.25f);
-	g.DrawString(numberNames[m_gearNumber - 1], textPos, Color::WHITE, TextAlign::k_centered);
+	g.DrawString(numberNames[m_gearNumber - 1], textPos, Color::WHITE, TextAlign::CENTERED);
 }
 
 

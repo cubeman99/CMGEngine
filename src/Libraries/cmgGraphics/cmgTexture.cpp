@@ -206,7 +206,7 @@ Texture::Texture()
 Texture::Texture(const TextureParams& params)
 	: Texture()
 {
-	m_params = params;
+	SetParams(params);
 }
 
 Texture::~Texture()

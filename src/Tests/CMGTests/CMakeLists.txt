@@ -34,8 +34,6 @@ set(CMG_GENERIC_TESTS
 	driving/Graph.cpp
 	driving/Graphics.h
 	driving/Graphics.cpp
-	driving/SpriteFont.h
-	driving/SpriteFont.cpp
 )
 
 add_executable(CMGTests

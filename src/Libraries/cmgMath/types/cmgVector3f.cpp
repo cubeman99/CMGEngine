@@ -8,29 +8,29 @@
 
 
 //-----------------------------------------------------------------------------
-// Vector3f constants.
+// Constants
 //-----------------------------------------------------------------------------
 
-const Vector3f Vector3f::ZERO		= Vector3f(0.0f, 0.0f, 0.0f);
-const Vector3f Vector3f::ONE		= Vector3f(1.0f, 1.0f, 1.0f);
+const Vector3f Vector3f::ZERO = Vector3f(0.0f, 0.0f, 0.0f);
+const Vector3f Vector3f::ONE = Vector3f(1.0f, 1.0f, 1.0f);
 
-const Vector3f Vector3f::UNITX		= Vector3f(1.0f, 0.0f, 0.0f);
-const Vector3f Vector3f::UNITY		= Vector3f(0.0f, 1.0f, 0.0f);
-const Vector3f Vector3f::UNITZ		= Vector3f(0.0f, 0.0f, 1.0f);
-const Vector3f Vector3f::NEG_UNITX	= Vector3f(-1.0f, 0.0f, 0.0f);
-const Vector3f Vector3f::NEG_UNITY	= Vector3f(0.0f, -1.0f, 0.0f);
-const Vector3f Vector3f::NEG_UNITZ	= Vector3f(0.0f, 0.0f, -1.0f);
+const Vector3f Vector3f::UNITX = Vector3f(1.0f, 0.0f, 0.0f);
+const Vector3f Vector3f::UNITY = Vector3f(0.0f, 1.0f, 0.0f);
+const Vector3f Vector3f::UNITZ = Vector3f(0.0f, 0.0f, 1.0f);
+const Vector3f Vector3f::NEG_UNITX = Vector3f(-1.0f, 0.0f, 0.0f);
+const Vector3f Vector3f::NEG_UNITY = Vector3f(0.0f, -1.0f, 0.0f);
+const Vector3f Vector3f::NEG_UNITZ = Vector3f(0.0f, 0.0f, -1.0f);
 
-const Vector3f Vector3f::RIGHT   = Vector3f::UNITX;
-const Vector3f Vector3f::LEFT    = Vector3f::NEG_UNITX;
-const Vector3f Vector3f::UP      = Vector3f::UNITY;
-const Vector3f Vector3f::DOWN    = Vector3f::NEG_UNITY;
-const Vector3f Vector3f::BACK    = Vector3f::UNITZ;
+const Vector3f Vector3f::RIGHT = Vector3f::UNITX;
+const Vector3f Vector3f::LEFT = Vector3f::NEG_UNITX;
+const Vector3f Vector3f::UP = Vector3f::UNITY;
+const Vector3f Vector3f::DOWN = Vector3f::NEG_UNITY;
+const Vector3f Vector3f::BACK = Vector3f::UNITZ;
 const Vector3f Vector3f::FORWARD = Vector3f::NEG_UNITZ;
 
 
 //-----------------------------------------------------------------------------
-// Constructors.
+// Constructors
 //-----------------------------------------------------------------------------
 
 // Construct a vector with uninitialized components.
@@ -39,115 +39,138 @@ Vector3f::Vector3f()
 }
 
 // Construct a vector with the given components.
-Vector3f::Vector3f(float x, float y, float z) :
-	x(x), y(y), z(z)
+Vector3f::Vector3f(float x, float y, float z)
+	: x(x), y(y), z(z)
 {
 }
 
 // Contruct a 3d vector from a 2d vector with a specified z-component.
-Vector3f::Vector3f(const Vector2f& vec2, float z) :
-	x(vec2.x), y(vec2.y), z(z)
+Vector3f::Vector3f(const Vector2f& vec2, float z)
+	: x(vec2.x), y(vec2.y), z(z)
 {
 }
 
-Vector3f::Vector3f(const Point3i& p) :
-	x((float) p.x), y((float) p.y), z((float) p.z)
+// Cast an integer vector to a float vector.
+Vector3f::Vector3f(const Point3i& p)
+	: x((float) p.x), y((float) p.y), z((float) p.z)
 {
 }
 
-// Construct a vector with all components equal to the given value.
-Vector3f::Vector3f(float value) :
-	x(value), y(value), z(value)
+// Construct a vector with all components set to a single value.
+Vector3f::Vector3f(float value)
+	: x(value), y(value), z(value)
 {
 }
-
 
 
 //-----------------------------------------------------------------------------
-// Accessors.
+// Accessors
 //-----------------------------------------------------------------------------
 
 // Access an indexed component.
 float Vector3f::operator [](int index) const
 {
 	CMG_ASSERT_MSG(index >= 0 && index < 3, "Invalid component index.");
-	return (&x)[index];
+	return v[index];
 }
 
 // Modify an indexed component.
 float& Vector3f::operator [](int index)
 {
 	CMG_ASSERT_MSG(index >= 0 && index < 3, "Invalid component index.");
-	return (&x)[index];
+	return v[index];
 }
 
 // Return the xy-components of this vector.
-Vector2f Vector3f::GetXY() const { return Vector2f(x, y); }
+const Vector2f& Vector3f::GetXY() const
+{
+	return xy;
+}
 
 // Return the xz-components of this vector.
-Vector2f Vector3f::GetXZ() const { return Vector2f(x, z); }
+Vector2f Vector3f::GetXZ() const
+{
+	return Vector2f(x, z);
+}
 
 // Return the yz-components of this vector.
-Vector2f Vector3f::GetYZ() const { return Vector2f(y, z); }
+Vector2f Vector3f::GetYZ() const
+{
+	return Vector2f(y, z);
+}
 
 // Return the yx-components of this vector.
-Vector2f Vector3f::GetYX() const { return Vector2f(y, x); }
+Vector2f Vector3f::GetYX() const
+{
+	return Vector2f(y, x);
+}
 
 // Return the zx-components of this vector.
-Vector2f Vector3f::GetZX() const { return Vector2f(z, x); }
+Vector2f Vector3f::GetZX() const
+{
+	return Vector2f(z, x);
+}
 
 // Return the zy-components of this vector.
-Vector2f Vector3f::GetZY() const { return Vector2f(z, y); }
+Vector2f Vector3f::GetZY() const
+{
+	return Vector2f(z, y);
+}
 
-// Return the length of this vector.
+// Calculate the length of this vector.
 float Vector3f::Length() const
 {
 	return Math::Sqrt((x * x) + (y * y) + (z * z));
 }
 
-// Return the squared-length of this vector.
+// Calculate the squared-length of this vector.
 float Vector3f::LengthSquared() const
 {
 	return ((x * x) + (y * y) + (z * z));
 }
 
+// Compute the dot product of this vector with another vector.
 float Vector3f::Dot(const Vector3f& vOther) const
 {
 	return Vector3f::Dot(*this, vOther);
 }
 
+// Compute the cross product of this vector with another vector.
 Vector3f Vector3f::Cross(const Vector3f& vOther) const
 {
 	return Vector3f::Cross(*this, vOther);
 }
 
+// Compute the distance between this vector and another vector.
 float Vector3f::DistTo(const Vector3f& vOther) const
 {
 	return Vector3f::Dist(*this, vOther);
 }
 
+// Compute the squared-distance between this vector and another vector.
 float Vector3f::DistToSqr(const Vector3f& vOther) const
 {
 	return Vector3f::DistSqr(*this, vOther);
 }
 
+// Get the components of this vector as a float array.
 float* Vector3f::data()
 {
-	return  &x;
+	return  v;
 }
 
+// Get the components of this vector as a constant float array.
 const float* Vector3f::data() const
 {
-	return &x;
+	return v;
 }
 
 
-
 //-----------------------------------------------------------------------------
-// Mutators.
+// Mutators
 //-----------------------------------------------------------------------------
 
-// Set this vector's components to zero.
+// Set all the components of this vector to zero.
 Vector3f& Vector3f::SetZero()
 {
 	x = 0.0f;
@@ -221,7 +244,8 @@ Vector3f& Vector3f::Rotate(const Vector3f& axis, float angle)
 	return *this;
 }
 
-// Rotate this vector by a matrix (Assuming it has a w-component of 0).
+// Rotate this vector by a 4x4 rotation matrix (Assuming the vector has a
+// w-component of 0).
 Vector3f& Vector3f::Rotate(const Matrix4f& mRotation)
 {
 	Vector3f result;
@@ -239,7 +263,8 @@ Vector3f& Vector3f::Transform(const Matrix3f& transform)
 	return *this;
 }
 
-// Transform this vector by a 4D matrix (Pretending it has a w-component of 1).
+// Transform this vector by a 4D matrix (Assuming the vector has a w-component
+// of 1).
 Vector3f& Vector3f::Transform(const Matrix4f& transform)
 {
 	Vector3f result;
@@ -249,9 +274,8 @@ Vector3f& Vector3f::Transform(const Matrix4f& transform)
 }
 
 
-
 //-----------------------------------------------------------------------------
-// Unary operators.
+// Unary Operators
 //-----------------------------------------------------------------------------
 
 // Return the inverse of this vector.
@@ -300,7 +324,7 @@ void Vector3f::operator /=(const Vector3f& v)
 	z /= v.z;
 }
 
-// Divide by a denominator
+// Divide by a scalar.
 void Vector3f::operator /=(float denominator)
 {
 	x /= denominator;
@@ -309,36 +333,41 @@ void Vector3f::operator /=(float denominator)
 }
 
 
-
 //-----------------------------------------------------------------------------
-// Binary operators.
+// Binary Operators
 //-----------------------------------------------------------------------------
 
+// Compute the sum with another vector.
 Vector3f Vector3f::operator +(const Vector3f& other) const
 {
 	return Vector3f(x + other.x, y + other.y, z + other.z);
 }
 
+// Compute the difference with another vector.
 Vector3f Vector3f::operator -(const Vector3f& other) const
 {
 	return Vector3f(x - other.x, y - other.y, z - other.z);
 }
 
+// Compute the product with another vector.
 Vector3f Vector3f::operator *(const Vector3f& other) const
 {
 	return Vector3f(x * other.x, y * other.y, z * other.z);
 }
 
+// Compute the division with another vector.
 Vector3f Vector3f::operator /(const Vector3f& other) const
 {
 	return Vector3f(x / other.x, y / other.y, z / other.z);
 }
 
+// Compute the product with a scalar.
 Vector3f Vector3f::operator *(float scalar) const
 {
 	return Vector3f(x * scalar, y * scalar, z * scalar);
 }
 
+// Compute the division with a scalar.
 Vector3f Vector3f::operator /(float invScalar) const
 {
 	float scalar = 1.0f / invScalar;
@@ -354,7 +383,7 @@ Vector3f operator *(float scalar, const Vector3f& a)
 // Returns the quotient of a numerater and a vector.
 Vector3f operator /(float numerator, const Vector3f& v)
 {
-	return Vector3f(v.x  / numerator, v.y / numerator, v.z / numerator);
+	return Vector3f(v.x / numerator, v.y / numerator, v.z / numerator);
 }
 
 // Create a string representation.
@@ -365,9 +394,8 @@ std::ostream& operator <<(std::ostream &out, const Vector3f& v)
 }
 
 
-
 //-----------------------------------------------------------------------------
-// Static methods.
+// Static Methods
 //-----------------------------------------------------------------------------
 
 // Returns a normalized vector.

@@ -307,12 +307,12 @@ void Graphics::DrawArrow(const Vector3f& point, const Vector3f& size, const Vect
 	glLineWidth(1.0f);
 }
 
-void Graphics::DrawString(const String& text, const Vector2f& position, const Color& color, int align)
+void Graphics::DrawString(const String& text, const Vector2f& position, const Color& color, TextAlign align)
 {
 	DrawString(m_font, text, position, color, align);
 }
 
-void Graphics::DrawString(const SpriteFont* font, const String& text, const Vector2f& position, const Color& color, int align)
+void Graphics::DrawString(const SpriteFont* font, const String& text, const Vector2f& position, const Color& color, TextAlign align)
 {
 	float scale = 1.0f;
 
@@ -326,13 +326,13 @@ void Graphics::DrawString(const SpriteFont* font, const String& text, const Vect
 
 	// Change cursor position based on alignment.
 	Vector2f stringSize = MeasureString(font, text);
-	if (align & TextAlign::k_right)
+	if ((int) align & (int) TextAlign::RIGHT)
 		cursor.x -= stringSize.x;
-	if (!(align & TextAlign::k_left))
+	if (!((int) align & (int) TextAlign::LEFT))
 		cursor.x -= (int) (stringSize.x * 0.5f);
-	if (align & TextAlign::k_bottom)
+	if ((int) align & (int) TextAlign::BOTTOM)
 		cursor.y -= stringSize.y;
-	else if (!(align & TextAlign::k_top))
+	else if (!((int) align & (int) TextAlign::TOP))
 		cursor.y -= (int) (stringSize.y * 0.5f);
 
 	glBindTexture(GL_TEXTURE_2D, font->GetTexture()->GetGLTextureID());

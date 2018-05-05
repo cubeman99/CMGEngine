@@ -5,7 +5,6 @@
 #include <cmgMath/cmg_math.h>
 #include <cmgPhysics/cmg_physics.h>
 #include "PrimitiveMeshes.h"
-#include <driving/SpriteFont.h>
 #include <graphics/DebugDraw.h>
 
 

@@ -5,7 +5,6 @@
 #include <cmgGraphics/cmg_graphics.h>
 #include <cmgMath/cmg_math.h>
 #include "Graph.h"
-#include "SpriteFont.h"
 
 
 struct Trail
@@ -45,28 +44,28 @@ struct Trail
 };
 
 
-struct TextAlign
-{
-	enum
-	{
-		k_center	= 0x0,
-		k_middle	= 0x0,
-		k_top		= 0x1,
-		k_bottom	= 0x2,
-		k_left		= 0x4,
-		k_right		= 0x8,
-
-		k_top_left		= k_top | k_left,
-		k_top_right		= k_top | k_right,
-		k_top_center	= k_top | k_center,
-		k_bottom_left	= k_bottom | k_left,
-		k_bottom_right	= k_bottom | k_right,
-		k_bottom_center	= k_bottom | k_center,
-		k_middle_left	= k_middle | k_left,
-		k_middle_right	= k_middle | k_right,
-		k_centered		= k_middle | k_center,
-	};
-};
+//struct TextAlign
+//{
+//	enum
+//	{
+//		k_center	= 0x0,
+//		k_middle	= 0x0,
+//		k_top		= 0x1,
+//		k_bottom	= 0x2,
+//		k_left		= 0x4,
+//		k_right		= 0x8,
+//
+//		k_top_left		= k_top | k_left,
+//		k_top_right		= k_top | k_right,
+//		k_top_center	= k_top | k_center,
+//		k_bottom_left	= k_bottom | k_left,
+//		k_bottom_right	= k_bottom | k_right,
+//		k_bottom_center	= k_bottom | k_center,
+//		k_middle_left	= k_middle | k_left,
+//		k_middle_right	= k_middle | k_right,
+//		k_centered		= k_middle | k_center,
+//	};
+//};
 
 
 class Graphics
@@ -95,8 +94,8 @@ public:
 	void DrawPoint(const Vector3f& point, const Color& color, float size);
 	void DrawArrow(const Vector3f& point, const Vector3f& size, const Color& color, float arrowRadius, float lineThickness = 2.0f);
 	void DrawArrow(const Vector3f& point, const Vector3f& size, const Vector3f& perpendicularDir, const Color& color, float arrowRadius, float lineThickness = 2.0f);
-	void DrawString(const String& text, const Vector2f& position, const Color& color, int align = TextAlign::k_top_left);
-	void DrawString(const SpriteFont* font, const String& text, const Vector2f& position, const Color& color, int align = TextAlign::k_top_left);
+	void DrawString(const String& text, const Vector2f& position, const Color& color, TextAlign align = TextAlign::TOP_LEFT);
+	void DrawString(const SpriteFont* font, const String& text, const Vector2f& position, const Color& color, TextAlign align = TextAlign::TOP_LEFT);
 	
 	Vector2f MeasureString(const String& text);
 	Vector2f MeasureString(const SpriteFont* font, const String& text);

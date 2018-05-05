@@ -19,6 +19,10 @@ set(CMG_GRAPHICS_SOURCE_FILES
 	cmgVertexData.cpp
 	cmgMesh.h
 	cmgMesh.cpp
+	cmgSpriteFont.h
+	cmgSpriteFont.cpp
+	cmgBuiltInFonts.h
+	cmgBuiltInFonts.cpp
 	
 	scene/cmgScene.h
 	scene/cmgScene.cpp

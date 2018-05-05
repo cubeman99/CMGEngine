@@ -79,7 +79,7 @@ void DrivingApp::OnInitialize()
 	m_shader->CompileAndLink();
 
 	// Load font.
-	m_font = SpriteFont::LoadFont(Path(ASSETS_PATH "font_console.png"), 16, 8, 12, 0);
+	m_font = SpriteFont::LoadSpriteFont(Path(ASSETS_PATH "font_console.png"), 16, 8, 12, 0);
 	
 	m_frameIndex = 0;
 	m_graphics.Initialize(GetWindow(), m_font);
@@ -437,8 +437,8 @@ void DrivingApp::OnRender()
 	Vector2f barLabelOffset(0.0f, (barSize.y * 0.5f) + 20.0f);
 	m_graphics.DrawBar(gasBarPos - (barSize * 0.5f), barSize, m_car.m_throttleAmount, Color::GREEN, Color::WHITE);
 	m_graphics.DrawBar(breakBarPos - (barSize * 0.5f), barSize, m_car.m_handBreakAmount, Color::RED, Color::WHITE);
-	m_graphics.DrawString("Gas", gasBarPos + barLabelOffset, Color::GREEN, TextAlign::k_centered);
-	m_graphics.DrawString("Break", breakBarPos + barLabelOffset, Color::RED, TextAlign::k_centered);
+	m_graphics.DrawString("Gas", gasBarPos + barLabelOffset, Color::GREEN, TextAlign::CENTERED);
+	m_graphics.DrawString("Break", breakBarPos + barLabelOffset, Color::RED, TextAlign::CENTERED);
 }
 
 void DrivingApp::DrawWireFrameBox(const Vector3f& halfSize, const Color& color)

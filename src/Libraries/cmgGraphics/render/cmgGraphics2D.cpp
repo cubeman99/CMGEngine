@@ -169,6 +169,108 @@ void Graphics2D::DrawTexture(Texture* texture, const Rect2f& source, const Rect2
 }
 
 
+//-----------------------------------------------------------------------------
+// Strings
+//-----------------------------------------------------------------------------
+
+Vector2f Graphics2D::MeasureString(const SpriteFont* font, const String& string)
+{
+	Vector2f cursor(0, 0);
+	Vector2f size(0, 0);
+
+	for (const char* charPtr = string.c_str(); *charPtr != '\0'; charPtr++)
+	{
+		unsigned char c = (unsigned char) *charPtr;
+
+		if (c == '\n')
+		{
+			cursor.x = 0.0f;
+			cursor.y += font->m_charHeight;
+		}
+		else
+		{
+			cursor.x += font->m_charWidth;
+		}
+
+		size.x = Math::Max(size.x, cursor.x);
+		size.y = Math::Max(size.y, cursor.y + font->m_charHeight);
+	}
+
+	return size;
+}
+
+void Graphics2D::DrawString(SpriteFont* font, const String& string,
+	const Vector2f& position, const Color& color, TextAlign align)
+{
+	float scale = 1.0f;
+
+	Texture* texture = font->GetTexture();
+	Vector2f texSize((float) texture->GetWidth(),
+		(float) texture->GetHeight());
+	Vector2f charSize = Vector2f(
+		(float) font->m_charWidth, (float) font->m_charHeight) / texSize;
+	Vector2f cursor = position;
+	Vector2f screenCharSize = Vector2f(
+		font->m_charWidth * scale, font->m_charHeight * scale);
+	Vector2f texCoord;
+	int row, col, x, y;
+
+	// Change cursor position based on alignment
+	Vector2f stringSize = MeasureString(font, string);
+	if ((int) align & (int) TextAlign::RIGHT)
+		cursor.x -= stringSize.x;
+	if (!((int) align & (int) TextAlign::LEFT))
+		cursor.x -= (int) (stringSize.x * 0.5f);
+	if ((int) align & (int) TextAlign::BOTTOM)
+		cursor.y -= stringSize.y;
+	else if (!((int) align & (int) TextAlign::TOP))
+		cursor.y -= (int) (stringSize.y * 0.5f);
+	
+	gl_Transform(m_transformation);
+	glBindTexture(GL_TEXTURE_2D, font->GetTexture()->GetGLTextureID());
+	glBegin(GL_QUADS);
+	glColor4ubv(color.data());
+
+	for (const char* charPtr = string.c_str(); *charPtr != '\0'; charPtr++)
+	{
+		unsigned char c = (unsigned char) *charPtr;
+
+		if (c == '\n')
+		{
+			cursor.x = position.x;
+			cursor.y += font->m_charHeight * scale;
+		}
+		else
+		{
+			col = c % font->m_charsPerRow;
+			row = c / font->m_charsPerRow;
+			x   = col * (font->m_charWidth  + font->m_charSpacing);
+			y   = row * (font->m_charHeight + font->m_charSpacing);
+			texCoord.x = x / (float) font->GetTexture()->GetWidth();
+			texCoord.y = y / (float) font->GetTexture()->GetHeight();
+
+			glTexCoord2f(texCoord.x, texCoord.y);
+			glVertex2f(cursor.x, cursor.y);
+			glTexCoord2f(texCoord.x + charSize.x, texCoord.y);
+			glVertex2f(cursor.x + screenCharSize.x, cursor.y);
+			glTexCoord2f(texCoord.x + charSize.x, texCoord.y + charSize.y);
+			glVertex2f(cursor.x + screenCharSize.x, cursor.y + screenCharSize.y);
+			glTexCoord2f(texCoord.x, texCoord.y + charSize.y);
+			glVertex2f(cursor.x, cursor.y + screenCharSize.y);
+
+			cursor.x += font->m_charWidth * scale;
+		}
+	}
+
+	glEnd();
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+
+//-----------------------------------------------------------------------------
+// Rectangles
+//-----------------------------------------------------------------------------
+
 void Graphics2D::DrawRect(float x, float y, float width, float height, const Color& color)
 {
 	gl_Transform(m_transformation);

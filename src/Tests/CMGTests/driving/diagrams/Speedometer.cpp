@@ -98,7 +98,7 @@ void Gauge::Draw(Graphics& g, const Vector2f& position, float radius)
 		str << i;
 		textPos.x = (float) ((int) textPos.x);
 		textPos.y = (float) ((int) textPos.y);
-		g.DrawString(str.str(), textPos, tickTextColor, TextAlign::k_centered);
+		g.DrawString(str.str(), textPos, tickTextColor, TextAlign::CENTERED);
 	}
 	
 	// Draw spindle.
@@ -138,7 +138,7 @@ void Speedometer::Draw(Graphics& g, const Vector2f& position, float radius)
 	// Draw MPH text.
 	Vector2f textPos = position + Vector2f(0, radius * 0.6f);
 	Color mphLabelColor(80, 80, 80);
-	g.DrawString("MPH", textPos, mphLabelColor, TextAlign::k_centered);
+	g.DrawString("MPH", textPos, mphLabelColor, TextAlign::CENTERED);
 }
 
 

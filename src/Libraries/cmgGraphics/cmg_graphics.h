@@ -6,6 +6,8 @@
 
 #include <cmgGraphics/types/cmgColor.h>
 
+#include <cmgGraphics/cmgSpriteFont.h>
+#include <cmgGraphics/cmgBuiltInFonts.h>
 #include <cmgGraphics/cmgTexture.h>
 #include <cmgGraphics/cmgTextureParams.h>
 #include <cmgGraphics/cmgImageFormat.h>
