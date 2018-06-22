@@ -399,7 +399,7 @@ unsigned int CollisionDetector::CollideBoxAndBox(
 				bool startPointInBack = (clipPlane.GetSide(startPoint) == SIDE_BACK);
 				bool endPointInBack = (clipPlane.GetSide(endPoint) == SIDE_BACK);
 
-				Ray ray(endPoint - startPoint, startPoint);
+				Ray ray(startPoint, Vector3f::Normalize(endPoint - startPoint));
 				clipPlane.CastRay(ray, PLANE_SIDE_BOTH, intersection);
 				
 				if (startPointInBack && endPointInBack)

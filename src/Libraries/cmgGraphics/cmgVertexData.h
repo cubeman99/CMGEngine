@@ -490,29 +490,29 @@ void VertexBuffer::SetVertices(int numVertices, const T* vertices)
 		glEnableVertexAttribArray(index);
 		glVertexAttribPointer(index, 3, GL_FLOAT, GL_FALSE, sizeOfVertex, (void*) offset);
 		offset += sizeof(Vector3f);
-		index++;
 	}
+		index++;
 	if (m_vertexType & VertexType::k_tex_coord)
 	{
 		glEnableVertexAttribArray(index);
 		glVertexAttribPointer(index, 2, GL_FLOAT, GL_FALSE, sizeOfVertex, (void*) offset);
 		offset += sizeof(Vector2f);
-		index++;
 	}
+		index++;
 	if (m_vertexType & VertexType::k_normal)
 	{
 		glEnableVertexAttribArray(index);
 		glVertexAttribPointer(index, 3, GL_FLOAT, GL_FALSE, sizeOfVertex, (void*) offset);
 		offset += sizeof(Vector3f);
-		index++;
 	}
+		index++;
 	if (m_vertexType & VertexType::k_color)
 	{
 		glEnableVertexAttribArray(index);
 		glVertexAttribPointer(index, 4, GL_FLOAT, GL_FALSE, sizeOfVertex, (void*) offset);
 		offset += sizeof(Vector4f);
-		index++;
 	}
+		index++;
 	// TODO: Bone and TBN attributes.
 
 	glBindVertexArray(0);

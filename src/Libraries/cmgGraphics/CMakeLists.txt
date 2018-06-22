@@ -23,7 +23,11 @@ set(CMG_GRAPHICS_SOURCE_FILES
 	cmgSpriteFont.cpp
 	cmgBuiltInFonts.h
 	cmgBuiltInFonts.cpp
-	
+	cmgPrimitiveMeshes.h
+	cmgPrimitiveMeshes.cpp
+	cmgDebugDraw.h
+	cmgDebugDraw.cpp
+		
 	scene/cmgScene.h
 	scene/cmgScene.cpp
 	scene/cmgSceneNode.h

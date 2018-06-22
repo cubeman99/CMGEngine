@@ -1,8 +1,10 @@
 #ifndef _CMG_CORE_ARRAY_H_
 #define _CMG_CORE_ARRAY_H_
 
+#include <cmgCore/cmgBase.h>
 #include <vector>
 #include <set>
+#include <map>
 
 
 template <typename T>
@@ -21,6 +23,16 @@ class Array : public std::vector<T>
 {
 public:
 	Array() {}
+
+private:
+
+};
+
+template <typename K, typename V>
+class Map : public std::map<K, V>
+{
+public:
+	Map() {}
 
 private:
 

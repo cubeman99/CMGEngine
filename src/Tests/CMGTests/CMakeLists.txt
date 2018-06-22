@@ -8,11 +8,6 @@ set(CMG_GENERIC_TESTS
 	physics/PhysicsApp.cpp
 	physics/CollisionTester.h
 	physics/CollisionTester.cpp
-	physics/PrimitiveMeshes.h
-	physics/PrimitiveMeshes.cpp
-
-	graphics/DebugDraw.h
-	graphics/DebugDraw.cpp
 
 	driving/DrivingEngine.h
 	driving/DrivingEngine.cpp

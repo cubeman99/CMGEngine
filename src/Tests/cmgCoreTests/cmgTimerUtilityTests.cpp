@@ -4,7 +4,7 @@
 #include <cmgCore/time/cmgTimer.h>
 #include <Windows.h>
 
-
+/*
 //-----------------------------------------------------------------------------
 // Timer tests
 //-----------------------------------------------------------------------------
@@ -301,3 +301,4 @@ TEST(ProfileSection, Print)
 	// Print out the profiling info.
 	root.Print(std::cout);
 }
+*/

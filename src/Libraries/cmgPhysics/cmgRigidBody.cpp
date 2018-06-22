@@ -189,6 +189,7 @@ void RigidBody::IntegrateAngular(float dt)
 	
 	m_angularAcceleration = m_inverseInertiaTensorWorld * m_torque;
 	//m_torque.SetZero(); // clear torque accumulator
+	m_angularVelocity += m_angularVelocityAccumulator + (m_angularAcceleration * dt);
 	
 	// First-order angular velocity integration
 	Quaternion angularVelocityQuat;
@@ -196,7 +197,6 @@ void RigidBody::IntegrateAngular(float dt)
 	angularVelocityQuat.w = 0.0f;
 	m_orientation += (angularVelocityQuat * m_orientation) * (dt * 0.5f);
 	//m_angularVelocity += m_angularAcceleration * dt;
-	m_angularVelocity += m_angularVelocityAccumulator + (m_angularAcceleration * dt);
 
 	// Rotate the body's origin around its center of mass.
 	Vector3f momentArm = m_position - m_centerOfMassWorld;

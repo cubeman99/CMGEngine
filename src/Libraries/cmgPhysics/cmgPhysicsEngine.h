@@ -37,9 +37,11 @@ public:
 	inline bool GetEnableFriction() const { return m_enableFriction; }
 	inline bool GetEnableRestitution() const { return m_enableRestitution; }
 
+	// Setters
 	inline void SetNumIterations(unsigned int numIterations) { m_numIterations = numIterations; }
 	inline void SetEnableFriction(bool enableFriction) { m_enableFriction = enableFriction; }
 	inline void SetEnableRestitution(bool enableRestitution) { m_enableRestitution = enableRestitution; }
+	void SetGravity(const Vector3f& gravity);
 	
 	void SolveCollision(CollisionData* collision);
 	void PositionalCorrection(CollisionData* collision, float invDT);

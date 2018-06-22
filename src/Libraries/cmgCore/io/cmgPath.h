@@ -9,6 +9,7 @@ class Path
 public:
 	Path();
 	Path(const String& path);
+	Path(const char* path);
 
 	String GetFileName() const;
 	String GetFileNameWithoutExtension() const;

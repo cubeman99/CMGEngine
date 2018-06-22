@@ -99,22 +99,25 @@ public:
 		// Rigid body origin must be aligned with the center of mass.
 		//m_physicsMesh.ShiftOriginToCenterOfMass();
 
-		// Calculate the inverse inertia tensor from the geometry.
-		if (m_inverseMass == 0.0f)
-		{
-			m_inverseInertiaTensor.SetZero();
-		}
-		else
-		{
-			m_inverseInertiaTensor = m_colliders[0]->CalcInertiaTensor(1.0f / m_inverseMass);
-			m_inverseInertiaTensor.Invert();
-			//m_physicsMesh.CalcInverseInertiaTensor(
-				//1.0f / m_inverseMass, m_inverseInertiaTensor);
-		}
-
-		m_centerOfMass.SetZero();
 		if (m_colliders.size() > 0)
-			m_centerOfMass = m_colliders[0]->GetCenterOfMassOffset();
+		{
+			// Calculate the inverse inertia tensor from the geometry.
+			if (m_inverseMass == 0.0f)
+			{
+				m_inverseInertiaTensor.SetZero();
+			}
+			else
+			{
+				m_inverseInertiaTensor = m_colliders[0]->CalcInertiaTensor(1.0f / m_inverseMass);
+				m_inverseInertiaTensor.Invert();
+				//m_physicsMesh.CalcInverseInertiaTensor(
+					//1.0f / m_inverseMass, m_inverseInertiaTensor);
+			}
+
+			m_centerOfMass.SetZero();
+			if (m_colliders.size() > 0)
+				m_centerOfMass = m_colliders[0]->GetCenterOfMassOffset();
+		}
 	}
 
 private:

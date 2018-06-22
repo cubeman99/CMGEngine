@@ -1,14 +1,8 @@
-#ifndef _DEBUG_DRAW_H_
-#define _DEBUG_DRAW_H_
+#ifndef _CMG_GRAPHICS_DEBUG_DRAW_H_
+#define _CMG_GRAPHICS_DEBUG_DRAW_H_
 
 #include <cmgGraphics/cmg_graphics.h>
-#include <cmgPhysics/colliders/cmgSphereCollider.h>
-#include <cmgPhysics/colliders/cmgBoxCollider.h>
-#include <cmgPhysics/colliders/cmgCylinderCollider.h>
-#include <cmgPhysics/colliders/cmgConeCollider.h>
-#include <cmgPhysics/colliders/cmgCapsuleCollider.h>
-#include <cmgPhysics/colliders/cmgPolygonCollider.h>
-#include <cmgPhysics/colliders/cmgConvexMeshCollider.h>
+#include <cmgPhysics/cmg_physics.h>
 
 
 class DebugDraw
@@ -59,14 +53,18 @@ public:
 	void DrawWireCone(const Matrix4f& modelMatrix, float radius, float height, const Color& color);
 	void DrawFilledCone(const Matrix4f& modelMatrix, float radius, float height, const Color& color);
 
+	void DrawLine(const Matrix4f& modelMatrix, const Vector3f& p1, const Vector3f& p2, const Color& color, float width = 1.0f);
+	void DrawPoint(const Matrix4f& modelMatrix, const Vector3f& point, const Color& color, float size = 1.0f);
+
 	Color GetShadedColor(const Vector3f& normal, const Color& color);
 
 	void BeginImmediate(const Matrix4f& transform = Matrix4f::IDENTITY);
+	
+	void DrawMesh(Mesh* mesh, const Matrix4f& modelMatrix, const Color& color);
 
 private:
 	void BeginDrawWire();
 	void BeginDrawFill();
-	void DrawMesh(Mesh* mesh, const Matrix4f& modelMatrix, const Color& color);
 	
 	// Graphics options
 	Matrix4f m_viewProjection;
@@ -88,4 +86,4 @@ private:
 };
 
 
-#endif // _DEBUG_DRAW_H_
+#endif // _CMG_GRAPHICS_DEBUG_DRAW_H_

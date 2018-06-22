@@ -3,6 +3,7 @@ set(CMG_CORE_TESTS
 	cmgCoreTestsMain.cpp
 	cmgLogUtilityTests.cpp
 	cmgTimerUtilityTests.cpp
+	cmgECSTests.cpp
 )
 
 add_executable(cmgCoreTests

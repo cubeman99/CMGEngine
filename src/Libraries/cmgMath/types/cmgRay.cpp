@@ -2,7 +2,7 @@
 
 
 //-----------------------------------------------------------------------------
-// Ray constants.
+// Constants
 //-----------------------------------------------------------------------------
 
 const Ray Ray::ORIGINX(Vector3f::UNITX, Vector3f::ZERO); // A ray at the origin pointing in the +X direction.
@@ -12,7 +12,7 @@ const Ray Ray::ORIGINZ(Vector3f::UNITZ, Vector3f::ZERO); // A ray at the origin 
 
 
 //-----------------------------------------------------------------------------
-// Constructors.
+// Constructors
 //-----------------------------------------------------------------------------
 
 // Construct a ray with uninitialized components.
@@ -21,17 +21,17 @@ Ray::Ray()
 }
 
 // Construct a ray with the given direction and origin.
-Ray::Ray(const Vector3f& vDirection, const Vector3f& vOrigin) :
-	direction(vDirection),
-	origin(vOrigin)
+Ray::Ray(const Vector3f& origin, const Vector3f& direction)
+	: origin(origin)
+	, direction(direction)
 {
-	direction.Normalize();
+	this->direction.Normalize();
 }
 
 
 
 //-----------------------------------------------------------------------------
-// Accessors.
+// Getters
 //-----------------------------------------------------------------------------
 
 // Return the point at the given distance along the ray.
@@ -43,7 +43,7 @@ Vector3f Ray::GetPoint(float distance) const
 
 
 //-----------------------------------------------------------------------------
-// Mutators.
+// Setters
 //-----------------------------------------------------------------------------
 
 Ray& Ray::SetDirection(float x, float y, float z)
@@ -63,10 +63,10 @@ Ray& Ray::SetOrigin(float x, float y, float z)
 }
 
 // Set the direction and origin of this ray.
-Ray& Ray::Set(const Vector3f& vDirection, const Vector3f& vOrigin)
+Ray& Ray::Set(const Vector3f& origin, const Vector3f& direction)
 {
-	direction = vDirection;
-	origin = vOrigin;
+	this->origin = origin;
+	this->direction = direction;
 	return *this;
 }
 

@@ -1,5 +1,5 @@
-#include "DebugDraw.h"
-#include "physics/PrimitiveMeshes.h"
+#include "cmgDebugDraw.h"
+#include "cmgPrimitiveMeshes.h"
 
 
 //-----------------------------------------------------------------------------
@@ -443,6 +443,27 @@ void DebugDraw::DrawFilledCone(const Matrix4f& modelMatrix, float radius, float 
 }
 
 
+void DebugDraw::DrawLine(const Matrix4f& modelMatrix, const Vector3f& p1, const Vector3f& p2, const Color& color, float width)
+{
+	BeginImmediate(modelMatrix);
+	glLineWidth(width);
+	glBegin(GL_LINES);
+	glColor4ubv(color.data());
+	glVertex3fv(p1.v);
+	glVertex3fv(p2.v);
+	glEnd();
+}
+
+void DebugDraw::DrawPoint(const Matrix4f& modelMatrix, const Vector3f& point, const Color& color, float size)
+{
+	BeginImmediate(modelMatrix);
+	glPointSize(size);
+	glBegin(GL_POINTS);
+	glColor4ubv(color.data());
+	glVertex3fv(point.v);
+	glEnd();
+}
+
 
 //-----------------------------------------------------------------------------
 // Internal functions
@@ -484,7 +505,6 @@ void DebugDraw::BeginDrawFill()
 	glLoadMatrixf(m_viewProjection.m);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-
 }
 
 void DebugDraw::DrawMesh(Mesh* mesh, const Matrix4f& modelMatrix, const Color& color)

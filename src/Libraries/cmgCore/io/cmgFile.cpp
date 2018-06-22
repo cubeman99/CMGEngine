@@ -2,78 +2,19 @@
 #include <cmgCore/cmgAssert.h>
 
 
-/*
-// Yes, this is a lot of repetition but this is done only once and in
-// return we get type safety (that is, we will never have to find out at
-// run-time that we used incorrect file access parameters)
-
-FILE* DoOpen(const char* a_fileName,
-                file_modes::Read, file_modes::Ascii)
-{ return fopen(a_fileName, "r"); }
-
-FILE* DoOpen(const char* a_fileName,
-                file_modes::Read, file_modes::Binary)
-{ return fopen(a_fileName, "rb"); }
-
-FILE* DoOpen(const char* a_fileName,
-                file_modes::Write, file_modes::Ascii)
-{ return fopen(a_fileName, "w"); }
-
-FILE* DoOpen(const char* a_fileName,
-                file_modes::Write, file_modes::Binary)
-{ return fopen(a_fileName, "wb"); }
-
-FILE* DoOpen(const char* a_fileName,
-                file_modes::Append, file_modes::Ascii)
-{ return fopen(a_fileName, "a"); }
-
-FILE* DoOpen(const char* a_fileName,
-                file_modes::Append, file_modes::Binary)
-{ return fopen(a_fileName, "ab"); }
-
-FILE* DoOpen(const char* a_fileName,
-                file_modes::ReadAndWrite, file_modes::Ascii)
-{ return fopen(a_fileName, "r+"); }
-
-FILE* DoOpen(const char* a_fileName,
-                file_modes::ReadAndWrite, file_modes::Binary)
-{ return fopen(a_fileName, "r+b"); }
-
-FILE* DoOpen(const char* a_fileName,
-                file_modes::ReadAndWriteEmpty, file_modes::Ascii)
-{ return fopen(a_fileName, "w+"); }
-
-FILE* DoOpen(const char* a_fileName,
-                file_modes::ReadAndWriteEmpty, file_modes::Binary)
-{ return fopen(a_fileName, "w+b"); }
-
-FILE* DoOpen(const char* a_fileName,
-                file_modes::ReadAndAppend, file_modes::Ascii)
-{ return fopen(a_fileName, "a+"); }
-
-FILE* DoOpen(const char* a_fileName,
-                file_modes::ReadAndAppend, file_modes::Binary)
-{ return fopen(a_fileName, "a+b"); }
-
-	
-#define FILE_TEMP    typename T_AccessPolicy, typename T_FileFormat
-#define FILE_PARAMS  T_AccessPolicy, T_FileFormat
-#define FILE_TYPE    typename File
-*/
-
 //-----------------------------------------------------------------------------
 // Constructors & Destructor
 //-----------------------------------------------------------------------------
 	
-File::File(const Path& path) :
-	m_path(path),
-	m_file(nullptr)
+File::File(const Path& path)
+	: m_path(path)
+	, m_file(nullptr)
 {
 }
 
-File::File(const File& other) :
-	m_path(other.m_path),
-	m_file(nullptr)
+File::File(const File& other)
+	: m_path(other.m_path)
+	, m_file(nullptr)
 {
 }
 	
@@ -87,27 +28,27 @@ File::~File()
 // Open & Close
 //-----------------------------------------------------------------------------
 	
-Error File::Open(file_access access, file_type type)
+Error File::Open(FileAccess access, FileType type)
 {
-	if (type != FileType::k_binary && type != FileType::k_text)
+	if (type != FileType::BINARY && type != FileType::TEXT)
 		CMG_ASSERT_FALSE("Invalid file type (must be binary or text)");
 	if (!m_path.HasFilename())
 		return CMG_ERROR(CommonErrorTypes::k_path_incorrect);
 				
 	// Determine the open mode string.
 	const char* mode;
-	if (access == FileAccess::k_read)
-		mode = (type == FileType::k_binary ? "rb" : "r");
-	else if (access == FileAccess::k_write)
-		mode = (type == FileType::k_binary ? "wb" : "w");
-	else if (access == FileAccess::k_append)
-		mode = (type == FileType::k_binary ? "ab" : "a");
-	else if (access == FileAccess::k_read_and_write)
-		mode = (type == FileType::k_binary ? "r+b" : "r+");
-	else if (access == FileAccess::k_read_and_write_empty)
-		mode = (type == FileType::k_binary ? "w+b" : "w+");
-	else if (access == FileAccess::k_read_and_append)
-		mode = (type == FileType::k_binary ? "a+b" : "a+");
+	if (access == FileAccess::READ)
+		mode = (type == FileType::BINARY ? "rb" : "r");
+	else if (access == FileAccess::WRITE)
+		mode = (type == FileType::BINARY ? "wb" : "w");
+	else if (access == FileAccess::APPEND)
+		mode = (type == FileType::BINARY ? "ab" : "a");
+	else if (access == FileAccess::READ_AND_WRITE)
+		mode = (type == FileType::BINARY ? "r+b" : "r+");
+	else if (access == FileAccess::READ_AND_WRITE_EMPTY)
+		mode = (type == FileType::BINARY ? "w+b" : "w+");
+	else if (access == FileAccess::READ_AND_APPEND)
+		mode = (type == FileType::BINARY ? "a+b" : "a+");
 	else
 		CMG_ASSERT_FALSE("Invalid file access mode");
 		
@@ -146,24 +87,24 @@ Error File::Close()
 // Read & Write
 //-----------------------------------------------------------------------------
 	
-Error File::Read(unsigned char* destination, unsigned int size)
+Error File::Read(void* destination, unsigned int size)
 {
 	CMG_ASSERT_MSG(IsOpen(), "Attempting to read a file that is not open");
 
-	if (fread(destination, 1, size, m_file) != size)
+	if (fread((unsigned char*) destination, 1, size, m_file) != size)
 		return CMG_ERROR(CommonErrorTypes::k_file_read);
 
-	return CMG_ERROR_SUCCESS; 
+	return CMG_ERROR_SUCCESS;
 }
 	
-Error File::Write(const unsigned char* data, unsigned int size)
+Error File::Write(const void* data, unsigned int size)
 {
 	CMG_ASSERT_MSG(IsOpen(), "Attempting to write/append to a file that is not open");
 
-	if (fwrite(data, 1, size, m_file) != size)
+	if (fwrite((unsigned char*) data, 1, size, m_file) != size)
 		return CMG_ERROR(CommonErrorTypes::k_file_write);
 
-	return CMG_ERROR_SUCCESS; 
+	return CMG_ERROR_SUCCESS;
 }
 	
 Error File::GetContents(String& out)
@@ -229,7 +170,7 @@ Error File::OpenAndGetContents(const Path& path, String& out)
 {
 	Error error;
 	File file(path);
-	error = file.Open(FileAccess::k_read, FileType::k_text);
+	error = file.Open(FileAccess::READ, FileType::TEXT);
 	if (error.Failed())
 		return error;
 	return file.GetContents(out);
@@ -239,7 +180,7 @@ Error File::OpenAndGetContents(const Path& path, Array<unsigned char>& out)
 {
 	Error error;
 	File file(path);
-	error = file.Open(FileAccess::k_read, FileType::k_binary);
+	error = file.Open(FileAccess::READ, FileType::BINARY);
 	if (error.Failed())
 		return error;
 	return file.GetContents(out);

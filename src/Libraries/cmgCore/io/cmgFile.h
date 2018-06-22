@@ -8,64 +8,52 @@
 
 
 // Access policies
-struct FileAccess
+enum class FileAccess
 {
-	typedef int value_type;
-
-	enum
-	{
-		k_read,
-		k_write,
-		k_append,
-		k_read_and_write,
-		k_read_and_write_empty,
-		k_read_and_append,
-	};
+	READ,
+	WRITE,
+	APPEND,
+	READ_AND_WRITE,
+	READ_AND_WRITE_EMPTY,
+	READ_AND_APPEND,
 };
 	
-// File type policies
-struct FileType
-{
-	typedef int value_type;
 
-	enum
-	{
-		k_text,
-		k_binary,
-	};
+// File type policies
+enum class FileType
+{
+	TEXT,
+	BINARY,
 };
+
 
 // File
 class File
 {
-public:
-	typedef FileAccess::value_type	file_access;
-	typedef FileType::value_type	file_type;
-
 public:
 	File(const Path& path);
 	File(const File& other);
 	~File();
 
 	// Open & close.
-	Error	Open(file_access access, file_type type);
-	bool	IsOpen() const;
-	Error	Close();
+	Error Open(FileAccess access, FileType type);
+	bool IsOpen() const;
+	Error Close();
 
 	// Read & write.
-	Error	Read(unsigned char* destination, unsigned int size);
-	Error	Write(const unsigned char* data, unsigned int size);
-	Error	GetContents(String& out);
-	Error	GetContents(Array<unsigned char>& out);
+	Error Read(void* destination, unsigned int size);
+	Error Write(const void* data, unsigned int size);
+	Error GetContents(String& out);
+	Error GetContents(Array<unsigned char>& out);
 
 	static Error OpenAndGetContents(const Path& path, String& out);
 	static Error OpenAndGetContents(const Path& path, Array<unsigned char>& out);
 
 private:
-	Path		m_path;
-	FILE*		m_file;
-	file_access	m_fileType;
-	file_type	m_accessMode;
+	Path m_path;
+	FILE* m_file;
+	FileType m_fileType;
+	FileAccess m_accessMode;
 };
 
 

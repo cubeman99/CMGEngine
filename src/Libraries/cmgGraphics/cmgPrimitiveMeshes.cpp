@@ -1,12 +1,12 @@
-#include "PrimitiveMeshes.h"
+#include "cmgPrimitiveMeshes.h"
 #include <cmgMath/cmgMathLib.h>
 #include <cmgMath/types/cmgMatrix4f.h>
 #include <cmgMath/types/cmgVector2f.h>
 #include <map>
 
 
-typedef std::vector<VertexPosNormCol> VertexList;
-typedef std::vector<unsigned int> IndexList;
+typedef Array<VertexPosNormCol> VertexList;
+typedef Array<unsigned int> IndexList;
 
 
 

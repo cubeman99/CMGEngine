@@ -14,13 +14,20 @@ namespace
 // Constructors
 //-----------------------------------------------------------------------------
 
-Path::Path() :
-	m_path("")
+Path::Path()
+	: m_path("")
 {
 }
 
-Path::Path(const String& path) :
-	m_path(path)
+Path::Path(const String& path)
+	: m_path(path)
+{
+	// Replace backslashes with forward slashes
+	std::replace(m_path.begin(), m_path.end(), '\\', '/');
+}
+
+Path::Path(const char* path)
+	: m_path(path)
 {
 	// Replace backslashes with forward slashes
 	std::replace(m_path.begin(), m_path.end(), '\\', '/');
@@ -70,7 +77,7 @@ String Path::GetPathWithoutFileName() const
 bool Path::FileExists()
 {
 	File file(*this);
-	return file.Open(FileAccess::k_read, FileType::k_binary).Succeeded();
+	return file.Open(FileAccess::READ, FileType::BINARY).Succeeded();
 }
 
 bool Path::DirectoryExists() const

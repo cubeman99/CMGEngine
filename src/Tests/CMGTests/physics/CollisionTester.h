@@ -4,8 +4,6 @@
 #include <cmgApplication/cmg_application.h>
 #include <cmgMath/cmg_math.h>
 #include <cmgPhysics/cmg_physics.h>
-#include "PrimitiveMeshes.h"
-#include <graphics/DebugDraw.h>
 #include <cmgPhysics/cmgQuickHull.h>
 
 

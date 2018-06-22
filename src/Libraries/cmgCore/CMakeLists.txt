@@ -14,6 +14,9 @@ set(CMG_CORE_SOURCE_FILES
 	containers/cmgArray.h
 	containers/cmgArray.cpp
 
+	ecs/cmgECS.h
+	ecs/cmgECS.cpp
+
 	error/cmgError.h
 	error/cmgError.cpp
 

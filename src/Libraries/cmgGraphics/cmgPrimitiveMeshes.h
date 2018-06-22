@@ -1,5 +1,5 @@
-#ifndef _PRIMITIVE_MESHES_H_
-#define _PRIMITIVE_MESHES_H_
+#ifndef _CMG_GRAPHICS_PRIMITIVE_MESHES_H_
+#define _CMG_GRAPHICS_PRIMITIVE_MESHES_H_
 
 #include <vector>
 #include <cmgMath/types/cmgVector3f.h>
@@ -62,4 +62,4 @@ private:
 };
 
 
-#endif // _PRIMITIVE_MESHES_H_
+#endif // _CMG_GRAPHICS_PRIMITIVE_MESHES_H_

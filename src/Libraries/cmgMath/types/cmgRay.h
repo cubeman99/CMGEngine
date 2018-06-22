@@ -10,22 +10,22 @@ struct Ray
 	Vector3f direction;
 	Vector3f origin;
 	
-	// Constants.
+	// Constants
 	static const Ray ORIGINX; // A ray at the origin pointing in the +X direction.
 	static const Ray ORIGINY; // A ray at the origin pointing in the +Y direction.
 	static const Ray ORIGINZ; // A ray at the origin pointing in the +Z direction.
 
-	// Constructors.
+	// Constructors
 	Ray();
-	Ray(const Vector3f& vDirection, const Vector3f& vOrigin);
+	Ray(const Vector3f& origin, const Vector3f& direction);
 
-	// Accessors.
+	// Getters
 	Vector3f GetPoint(float distance) const;
 
-	// Mutators.
+	// Setters
 	Ray& SetDirection(float x, float y, float z);
 	Ray& SetOrigin(float x, float y, float z);
-	Ray& Set(const Vector3f& vDirection, const Vector3f& vOrigin);
+	Ray& Set(const Vector3f& origin, const Vector3f& direction);
 };
 
 

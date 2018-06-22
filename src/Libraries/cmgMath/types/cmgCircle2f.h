@@ -8,7 +8,11 @@
 // 2D floating-point circle.
 struct Circle2f
 {
-	Vector2f position;
+	union
+	{
+		struct { Vector2f position; };
+		struct { Vector2f center; };
+	};
 	float  radius;
 
 	// Constants.

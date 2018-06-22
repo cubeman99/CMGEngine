@@ -3,7 +3,6 @@
 
 #include <cmgCore/cmg_core.h>
 #include <cmgGraphics/cmg_graphics.h>
-#include <physics/PrimitiveMeshes.h>
 
 
 struct PolyMeshFace
