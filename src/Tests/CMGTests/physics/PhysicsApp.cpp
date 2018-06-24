@@ -27,6 +27,12 @@ PhysicsApp::PhysicsApp()
 
 void PhysicsApp::OnInitialize()
 {
+	InputManager* inputManager = GetInputManager();
+
+	Joystick* joystick = inputManager->AddDevice<Joystick>();
+
+
+
 	// Load meshes.
 	m_meshCube		= Primitives::CreateCube();
 	m_meshSphere	= Primitives::CreateIcoSphere(1.0f, 3);

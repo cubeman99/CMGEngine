@@ -204,11 +204,11 @@ int main(int argc, char* argv[])
 	srand((unsigned int) time(nullptr));
 
 	//TestApp app;
-	PhysicsApp app;
+	//PhysicsApp app;
 	//CollisionTestApp app;
-	app.Initialize("3D Physics Engine", 800, 600);
-	//DrivingApp app;
-	//app.Initialize("Vehicle Dynamics", 1200, 785);
+	//app.Initialize("3D Physics Engine", 800, 600);
+	DrivingApp app;
+	app.Initialize("Vehicle Dynamics", 1200, 785);
 	app.Run();
 	return 0;
 

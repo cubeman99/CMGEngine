@@ -87,6 +87,7 @@ private:
 	bool			m_enableCameraFollow;
 
 	// Resources
+	Joystick*		m_joystick;
 	Mesh*			m_meshWheel;
 	Mesh*			m_meshCube;
 	Mesh*			m_meshCarChassis;
