@@ -4,11 +4,8 @@
 #include <cmgCore/cmg_core.h>
 #include <cmgInput/cmgInputDevice.h>
 #include <vector>
-
 #include <Windows.h>
-#include <InitGuid.h> // Required to circumvent linking errors for dxguid.lib
-#define DIRECTINPUT_VERSION 0x0800 // removes the default warning
-#include <WinSDK/dinput.h>
+#include <cmgInput/cmgDirectInputIncludes.h>
 
 class Window;
 
@@ -72,6 +69,7 @@ private:
 
 	friend class Keyboard;
 	friend class Mouse;
+	friend class Joystick;
 };
 
 

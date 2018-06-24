@@ -131,7 +131,7 @@ namespace {
 		}
 	}
 };
-	
+
 Keyboard::Keyboard(InputManager* inputManager) :
 	m_windowHandle(inputManager->GetWindowHandle()),
 	m_directInput(inputManager->GetDirectInput()),

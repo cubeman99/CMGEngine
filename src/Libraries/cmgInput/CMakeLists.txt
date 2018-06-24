@@ -11,6 +11,9 @@ set(CMG_INPUT_SOURCE_FILES
 	cmgKeyboard.cpp
 	cmgMouse.h
 	cmgMouse.cpp
+	cmgJoystick.h
+	cmgJoystick.cpp
+	cmgDirectInputIncludes.h
 
 )
 

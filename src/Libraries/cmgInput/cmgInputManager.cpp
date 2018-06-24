@@ -3,6 +3,7 @@
 #include <cmgGraphics/cmgWindow.h>
 #include <cmgInput/cmgMouse.h>	
 #include <cmgInput/cmgKeyboard.h>
+#include <cmgInput/cmgJoystick.h>
 
 
 #define INPUT_MANAGER_IMPL_TEMP   typename T_ParentInputManager
@@ -145,7 +146,7 @@ InputDevice* InputManager::AddDevice(device_type type)
 	if (m_winInputDevices[type].empty())
 	{
 		CMG_ASSERT_FALSE("No input device found.");
-		return CMG_NULL;
+		return nullptr;
 	}
 		
 	// Find an unused device of the given type.
@@ -156,14 +157,21 @@ InputDevice* InputManager::AddDevice(device_type type)
 		if (!deviceInfo.m_inUse)
 		{
 			// Create the correct input device.
-			InputDevice* device = CMG_NULL;
+			InputDevice* device = nullptr;
 			if (type == InputDeviceType::k_keyboard)
 				device = new Keyboard(this);
 			else if (type == InputDeviceType::k_mouse)
 				device = new Mouse(this);
+			else if (type == InputDeviceType::k_joystick)
+				device = new Joystick(this);
+
+			if (device != nullptr)
+			{
+				printf("Added input device: %s\n", deviceInfo.m_deviceName.c_str());
+			}
 				
-			deviceInfo.m_inUse		= true;
-			deviceInfo.m_devicePtr	= device;
+			deviceInfo.m_inUse = true;
+			deviceInfo.m_devicePtr = device;
 			return device;
 		}
 	}
@@ -191,8 +199,8 @@ int InputManager::GetDeviceCount(device_type type)
 void InputManager::DoEnumerateDevices()
 {
 	// Enumerate input devices with our callback.
-	m_directInput->EnumDevices(CMG_NULL, &InputManager
-		::DoEnumerateCallback, this, DIEDFL_ATTACHEDONLY);
+	m_directInput->EnumDevices(CMG_NULL, &InputManager::DoEnumerateCallback,
+		this, DIEDFL_ATTACHEDONLY);
 
 	// Now add other devices that are dummies such as touch
 	InputDeviceInfo dummyInfo;
@@ -215,6 +223,7 @@ BOOL InputManager::DoEnumerateCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
 	info.m_deviceName	= lpddi->tszInstanceName;
 	info.m_inUse		= false;
 	info.m_devicePtr	= CMG_NULL;
+	printf("Device: %s\n", lpddi->tszInstanceName);
 		
 	if (GET_DIDEVICE_TYPE(lpddi->dwDevType) == DI8DEVTYPE_KEYBOARD)
 	{
@@ -244,13 +253,13 @@ BOOL InputManager::DoEnumerateCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
 
 template Keyboard*	InputManager::AddDevice<Keyboard>();
 template Mouse*		InputManager::AddDevice<Mouse>();
-//template Joystick*	InputManager::AddDevice<Joystick>();
+template Joystick*	InputManager::AddDevice<Joystick>();
 
 template Keyboard*	InputManager::GetDevice<Keyboard>(int index);
 template Mouse*		InputManager::GetDevice<Mouse>(int index);
-//template Joystick*	InputManager::GetDevice<Joystick>(int index);
+template Joystick*	InputManager::GetDevice<Joystick>(int index);
 	
 template int InputManager::GetDeviceCount<Keyboard>();
 template int InputManager::GetDeviceCount<Mouse>();
-//template int InputManager::GetDeviceCount<Joystick>();
+template int InputManager::GetDeviceCount<Joystick>();
 

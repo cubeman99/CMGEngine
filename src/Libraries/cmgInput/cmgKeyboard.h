@@ -2,10 +2,7 @@
 #define _CMG_KEYBOARD_H_
 
 #include <cmgInput/cmgInputDevice.h>
-
-#include <InitGuid.h> // Required to circumvent linking errors for dxguid.lib
-#define DIRECTINPUT_VERSION 0x0800 // removes the default warning
-#include <WinSDK/dinput.h>
+#include <cmgInput/cmgDirectInputIncludes.h>
 
 
 struct Keys

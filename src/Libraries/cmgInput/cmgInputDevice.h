@@ -1,6 +1,7 @@
 #ifndef _CMG_INPUT_DEVICE_H_
 #define _CMG_INPUT_DEVICE_H_
 
+#include <cmgCore/cmgBase.h>
 
 class InputManager;
 
