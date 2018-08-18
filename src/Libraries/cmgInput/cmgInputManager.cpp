@@ -163,7 +163,7 @@ InputDevice* InputManager::AddDevice(device_type type)
 			else if (type == InputDeviceType::k_mouse)
 				device = new Mouse(this);
 			else if (type == InputDeviceType::k_joystick)
-				device = new Joystick(this);
+				device = new Joystick(this, deviceInfo);
 
 			if (device != nullptr)
 			{
@@ -213,31 +213,50 @@ void InputManager::DoEnumerateDevices()
 	m_winInputDevices[InputDeviceType::k_touch_surface].push_back(dummyInfo);
 }
 
-BOOL InputManager::DoEnumerateCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
+BOOL InputManager::DoEnumerateCallback(LPCDIDEVICEINSTANCE instance, LPVOID pvRef)
 {
 	InputManager* inputMgr = static_cast<InputManager*>(pvRef);
 
 	InputDeviceInfo info;
-	info.m_productGuid	= lpddi->guidProduct;
-	info.m_deviceGuid	= lpddi->guidInstance;
-	info.m_deviceName	= lpddi->tszInstanceName;
+	info.m_productGuid	= instance->guidProduct;
+	info.m_deviceGuid	= instance->guidInstance;
+	info.m_deviceName	= instance->tszInstanceName;
 	info.m_inUse		= false;
 	info.m_devicePtr	= CMG_NULL;
-	printf("Device: %s\n", lpddi->tszInstanceName);
+	uint32 deviceType = GET_DIDEVICE_TYPE(instance->dwDevType);
+	String typeName = "UNKNOWN";
+	if (deviceType == DI8DEVTYPE_KEYBOARD)
+		typeName = "Keyboard";
+	else if (deviceType == DI8DEVTYPE_MOUSE)
+		typeName = "Mouse";
+	else if (deviceType == DI8DEVTYPE_DRIVING)
+		typeName = "Driving";
+	else if (deviceType == DI8DEVTYPE_JOYSTICK)
+		typeName = "Joystick";
+	else if (deviceType == DI8DEVTYPE_GAMEPAD)
+		typeName = "GamePad";
+	else if (deviceType == DI8DEVTYPE_FLIGHT)
+		typeName = "Flight";
+	else if (deviceType == DI8DEVTYPE_DEVICE)
+		typeName = "Device";
+	else if (deviceType == DI8DEVTYPE_DEVICECTRL)
+		typeName = "Device Controller";
+
+	printf("Device: %s (%s)\n", instance->tszInstanceName, typeName.c_str());
 		
-	if (GET_DIDEVICE_TYPE(lpddi->dwDevType) == DI8DEVTYPE_KEYBOARD)
+	if (deviceType == DI8DEVTYPE_KEYBOARD)
 	{
 		inputMgr->m_winInputDevices[InputDeviceType::k_keyboard].push_back(info);
 	}
-	else if (GET_DIDEVICE_TYPE(lpddi->dwDevType) == DI8DEVTYPE_MOUSE)
+	else if (deviceType == DI8DEVTYPE_MOUSE)
 	{
 		inputMgr->m_winInputDevices[InputDeviceType::k_mouse].push_back(info);
 	}
-	else if (GET_DIDEVICE_TYPE(lpddi->dwDevType) == DI8DEVTYPE_JOYSTICK ||
-				GET_DIDEVICE_TYPE(lpddi->dwDevType) == DI8DEVTYPE_GAMEPAD ||
-				GET_DIDEVICE_TYPE(lpddi->dwDevType) == DI8DEVTYPE_1STPERSON ||
-				GET_DIDEVICE_TYPE(lpddi->dwDevType) == DI8DEVTYPE_DRIVING ||
-				GET_DIDEVICE_TYPE(lpddi->dwDevType) == DI8DEVTYPE_FLIGHT)
+	else if (deviceType == DI8DEVTYPE_JOYSTICK ||
+		deviceType == DI8DEVTYPE_GAMEPAD ||
+		deviceType == DI8DEVTYPE_1STPERSON ||
+		deviceType == DI8DEVTYPE_DRIVING ||
+		deviceType == DI8DEVTYPE_FLIGHT)
 	{
 		inputMgr->m_winInputDevices[InputDeviceType::k_joystick].push_back(info);
 	}

@@ -4,6 +4,9 @@
 #include <cmgGraphics/types/cmgColor.h>
 #include <cmgCore/cmg_core.h>
 
+class Texture;
+class Sampler;
+
 
 //-----------------------------------------------------------------------------
 // UniformType - Data types for shader parameters.
@@ -86,10 +89,11 @@ private:
 class Shader
 {
 public:
+	friend class OpenGLRenderDevice;
 	//typedef ShaderType::value_type shader_type;
 
 public:
-	Shader();
+	Shader(OpenGLRenderDevice* device = nullptr);
 	~Shader();
 	
 	// Accessors.
@@ -103,6 +107,16 @@ public:
 			
 	Error AddStage(ShaderType type, const String& code, const String& fileName = "");
 	Error CompileAndLink();
+	
+	template<typename T>
+	Error SetUniform(const String& name, T value)
+	{
+		return m_device->SetShaderUniform(this, name, value);
+	}
+
+	Error SetSampler(const String& samplerName,
+		Texture* texture, Sampler* sampler, uint32 slot);
+	//Error SetUniformBuffer(const String& name, UniformBuffer* buffer);
 
 	inline unsigned int GetGLProgram() const { return m_glProgram; }
 
@@ -113,7 +127,8 @@ private:
 	Error Validate();
 	void GenerateUniforms();
 	
-private:
+public:
+	OpenGLRenderDevice* m_device;
 	String			m_shaderStageFileNames[(int) ShaderType::k_count];
 	bool			m_isLinked;
 	Array<Uniform>	m_uniforms;

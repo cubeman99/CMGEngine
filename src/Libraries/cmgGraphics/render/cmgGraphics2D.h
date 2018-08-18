@@ -5,6 +5,7 @@
 #include <cmgGraphics/cmgTexture.h>
 #include <cmgGraphics/cmgSpriteFont.h>
 #include <cmgGraphics/cmgShader.h>
+#include <cmgGraphics/render/cmgRenderTarget.h>
 #include <cmgGraphics/cmgWindow.h>
 #include <cmgMath/cmg_math.h>
 
@@ -34,9 +35,12 @@ class Graphics2D
 {
 public:
 	Graphics2D(Window* window);
-
-	void SetTransformation(const Matrix4f& transformation);
 	
+	void SetWindowOrthoProjection();
+	void SetProjection(const Matrix4f& projection);
+	void SetTransformation(const Matrix4f& transformation);
+	void SetRenderTarget(RenderTarget* renderTarget);
+
 	void Clear(const Color& clearColor);
 
 	//-----------------------------------------------------------------------------
@@ -85,10 +89,13 @@ public:
 
 
 private:
+	void ActivateRenderTarget();
+
 	VertexBuffer m_vertexBuffer;
 
 	static Shader* s_shader;
 
+	RenderTarget* m_renderTarget;
 	Matrix4f m_transformation;
 	Window* m_window;
 };

@@ -36,6 +36,7 @@ void DrivingApp::OnInitialize()
 	m_isPaused = false;
 	m_simulationSpeed = 1.0f;
 
+	m_wheel = GetInputManager()->AddDevice<Joystick>();
 	m_joystick = GetInputManager()->AddDevice<Joystick>();
 
 	// Longitudinal grip graphs.

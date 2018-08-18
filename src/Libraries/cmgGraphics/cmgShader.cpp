@@ -1,5 +1,8 @@
 #include "cmgShader.h"
 #include <cmgGraphics/cmgOpenGLIncludes.h>
+#include <cmgGraphics/render/cmgSampler.h>
+#include <cmgGraphics/cmgTexture.h>
+#include <cmgGraphics/render/cmgRenderDevice.h>
 #include <assert.h>
 
 
@@ -7,8 +10,9 @@
 // Constructor & destructor
 //-----------------------------------------------------------------------------
 
-Shader::Shader()
+Shader::Shader(OpenGLRenderDevice* device)
 	: m_isLinked(false)
+	, m_device(device)
 {
 	// Create the shader program
 	m_glProgram = glCreateProgram();
@@ -20,7 +24,7 @@ Shader::~Shader()
 {
 	// Delete the shader program.
 	glDeleteProgram(m_glProgram);
-		
+
 	// Delete the shader stages.
 	for (int i = 0; i < (int) ShaderType::k_count; ++i)
 	{
@@ -29,7 +33,7 @@ Shader::~Shader()
 	}
 }
 
-	
+
 
 //-----------------------------------------------------------------------------
 // Accessors
@@ -83,7 +87,7 @@ bool Shader::GetUniformLocation(const String& name, int& outUniformLocation) con
 	return false;
 }
 
-	
+
 //-----------------------------------------------------------------------------
 // Compiling and Linking
 //-----------------------------------------------------------------------------
@@ -111,7 +115,7 @@ Error Shader::AddStage(ShaderType type, const String& code, const String& fileNa
 	const GLchar* str[1] = { code.c_str() };
 	GLint lengths[1] = { code.length() };
 	glShaderSource(shaderGL, 1, str, lengths);
-		
+
 	// Attach the shader stage to the shader program.
 	glAttachShader(m_glProgram, shaderGL);
 	m_glShaderStages[(int) type] = shaderGL;
@@ -119,7 +123,7 @@ Error Shader::AddStage(ShaderType type, const String& code, const String& fileNa
 	m_isLinked = false;
 	return CMG_ERROR_SUCCESS;
 }
-	
+
 Error Shader::CompileAndLink()
 {
 	Error error;
@@ -153,6 +157,13 @@ Error Shader::CompileAndLink()
 
 	m_isLinked = true;
 	return CMG_ERROR_SUCCESS;
+}
+
+Error Shader::SetSampler(const String& samplerName,
+	Texture* texture, Sampler* sampler, uint32 slot)
+{
+	return m_device->SetShaderSampler(this, samplerName, texture, sampler,
+		slot);
 }
 
 
@@ -277,7 +288,7 @@ Error Shader::Validate()
 
 	return CMG_ERROR_SUCCESS;
 }
-	
+
 void Shader::GenerateUniforms()
 {
 	// Find the number of uniforms and the max uniform name length.
@@ -289,7 +300,7 @@ void Shader::GenerateUniforms()
 	GLchar* uniformName = new char[maxNameLength + 1];
 
 	int samplerSlot = 0;
-		
+
 	// Create a list of all shader parameters.
 	for (int i = 0; i < numUniforms; ++i)
 	{
@@ -340,6 +351,6 @@ void Shader::GenerateUniforms()
 		}
 	}
 
-	delete [] uniformName;
+	delete[] uniformName;
 }
 

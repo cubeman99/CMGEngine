@@ -269,7 +269,7 @@ void Graphics::DrawGraph(const Graph& graph, const Vector2f& position, const Vec
 
 void Graphics::DrawBar(const Vector2f& pos, const Vector2f& size, float fillAmount, const Color& fillColor, const Color& outlineColor)
 {
-	FillRect(Vector2f(pos.x, pos.y - size.y * (1.0f - fillAmount)),
+	FillRect(Vector2f(pos.x, pos.y + size.y * (1.0f - fillAmount)),
 			 Vector2f(size.x, size.y * fillAmount), fillColor);
 	DrawRect(pos, size, outlineColor);
 }

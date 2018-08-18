@@ -50,6 +50,7 @@ public:
 	static Mesh* CreateCube();
 	static Mesh* CreateIcosahedron(float radoius, bool smooth = true);
 
+	static Mesh* CreateQuad();
 	//static void CreateUVSphere(float radius, unsigned int rings, unsigned int segments);
 	static Mesh* CreateIcoSphere(float radius, unsigned int subdivisions, bool smooth = true);
 	static Mesh* CreateHexaSphere(float radius, unsigned int subdivisions, bool smooth = true);

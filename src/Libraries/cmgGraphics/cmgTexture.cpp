@@ -40,17 +40,17 @@ namespace
 			return GL_REPEAT;
 		case TextureWrap::MIRROR_REPEAT:
 			return GL_MIRRORED_REPEAT;
-		//case TextureWrap::MIRROR_CLAMP_TO_EDGE:
+			//case TextureWrap::MIRROR_CLAMP_TO_EDGE:
 			//return GL_MIRROR_CLAMP_TO_EDGE; //TODO: Figure this out.
 		}
 		return GL_CLAMP_TO_BORDER;
 	}
 
 	GLenum TranslateMinMagFilter(TextureFilterOptions::value_type minMagFilter,
-									TextureFilterOptions::value_type mipmapFilter)
+		TextureFilterOptions::value_type mipmapFilter)
 	{
 		//CMG_ASSERT(minMagFilter != TextureFilterOptions::NONE,
-			//"You must specify a min and mag filter!");
+		//"You must specify a min and mag filter!");
 
 		if (minMagFilter == TextureFilterOptions::LINEAR)
 		{
@@ -74,7 +74,7 @@ namespace
 		return GL_LINEAR;
 	}
 
-	GLenum GetGLPixelTransferFormat(PixelTransferFormat::value_type format)
+	GLenum GetGLPixelTransferFormat(PixelTransferFormat format)
 	{
 		switch (format)
 		{
@@ -120,7 +120,7 @@ namespace
 		return GL_RGBA;
 	}
 
-	GLenum GetGLInternalFormat(PixelInternalFormat::value_type format)
+	GLenum GetGLInternalFormat(PixelInternalFormat format)
 	{
 		switch (format)
 		{
@@ -142,7 +142,7 @@ namespace
 		return GL_RGBA;
 	}
 
-	GLenum GetGLPixelType(PixelType::value_type type)
+	GLenum GetGLPixelType(PixelType type)
 	{
 		switch (type)
 		{
@@ -185,7 +185,7 @@ namespace
 	}
 };
 
-	
+
 //-----------------------------------------------------------------------------
 // Constructor & destructor.
 //-----------------------------------------------------------------------------
@@ -244,7 +244,7 @@ int Texture::GetDepth() const
 //-----------------------------------------------------------------------------
 // Pixel Read & Write
 //-----------------------------------------------------------------------------
-	
+
 //-----------------------------------------------------------------------------
 // Pixel Read
 
@@ -252,13 +252,14 @@ int Texture::GetDepth() const
 // The pixels will be stored in left-to-right, top-to-bottom order.
 void Texture::ReadPixels(Color* pixels) const
 {
-	ReadPixels(PixelTransferFormat::RGBA, PixelType::TYPE_UNSIGNED_BYTE, pixels);
+	ReadPixels(PixelTransferFormat::RGBA,
+		PixelType::TYPE_UNSIGNED_BYTE, pixels);
 }
 
 // Store the texture's pixel data in the provided pixel map in a specified
 // format. The pixels will be stored in left-to-right, top-to-bottom order.
-void Texture::ReadPixels(pixel_format format, pixel_type type,
-							void* pixels) const
+void Texture::ReadPixels(PixelTransferFormat format, PixelType type,
+	void* pixels) const
 {
 	ReadPixels(0, format, type, pixels);
 }
@@ -273,8 +274,8 @@ void Texture::ReadPixels(int mipmapLevel, Color* pixels) const
 
 // Store the texture's pixel data in the provided pixel map in a specified
 // format. The pixels will be stored in left-to-right, top-to-bottom order.
-void Texture::ReadPixels(int mipmapLevel, pixel_format format,
-							pixel_type type, void* pixels) const
+void Texture::ReadPixels(int mipmapLevel, PixelTransferFormat format, PixelType type,
+	void* pixels) const
 {
 	GLenum target = GetGLTextureTarget();
 	glBindTexture(target, m_glTextureId);
@@ -287,8 +288,8 @@ void Texture::ReadPixels(int mipmapLevel, pixel_format format,
 //-----------------------------------------------------------------------------
 // Cubemap Face Write
 
-void Texture::WriteFacePixels(cubemap_face_index face, int width,
-								int height, const Color* pixels)
+void Texture::WriteFacePixels(cubemap_face_index face, int width, int height,
+	const Color* pixels)
 {
 	WriteFacePixelsAtLevel(face, 0, width, height,
 		PixelTransferFormat::RGBA,
@@ -297,9 +298,8 @@ void Texture::WriteFacePixels(cubemap_face_index face, int width,
 	//	GenerateMipMaps();
 }
 
-void Texture::WriteFacePixels(cubemap_face_index face, int width,
-								int height, pixel_format format,
-								pixel_type type, const void* pixelData)
+void Texture::WriteFacePixels(cubemap_face_index face, int width, int height,
+	PixelTransferFormat format, PixelType type, const void* pixelData)
 {
 	WriteFacePixelsAtLevel(face, 0, width, height,
 		format, type, pixelData);
@@ -308,7 +308,7 @@ void Texture::WriteFacePixels(cubemap_face_index face, int width,
 }
 
 void Texture::WriteFacePixelsAtLevel(cubemap_face_index face, int mipmapLevel,
-								int width, int height, const Color* pixels)
+	int width, int height, const Color* pixels)
 {
 	WriteFacePixelsAtLevel(face, mipmapLevel, width, height,
 		PixelTransferFormat::RGBA,
@@ -316,21 +316,21 @@ void Texture::WriteFacePixelsAtLevel(cubemap_face_index face, int mipmapLevel,
 }
 
 void Texture::WriteFacePixelsAtLevel(cubemap_face_index face, int mipmapLevel,
-								int width, int height, pixel_format format,
-								pixel_type type, const void* pixelData)
+	int width, int height, PixelTransferFormat format, PixelType type,
+	const void* pixelData)
 {
 	//CMG_ASSERT(m_params.GetTarget() == TextureTarget::TEXTURE_CUBE_MAP,
-		//"Texture must be a cubemap to modify face pixels.");
+	//"Texture must be a cubemap to modify face pixels.");
 	//CMG_ASSERT(width == height, "Cube map face images must have a square size");
 
 	if (mipmapLevel == 0)
 	{
-		m_width  = width;
+		m_width = width;
 		m_height = height;
 	}
 
-	GLenum target		= GetGLTextureTarget();
-	GLenum faceTarget	= GetGLCubeMapFaceTarget(face);
+	GLenum target = GetGLTextureTarget();
+	GLenum faceTarget = GetGLCubeMapFaceTarget(face);
 	glBindTexture(target, m_glTextureId);
 	glTexImage2D(faceTarget, mipmapLevel,
 		GetGLInternalFormat(m_params.GetInternalFormat()),
@@ -338,7 +338,7 @@ void Texture::WriteFacePixelsAtLevel(cubemap_face_index face, int mipmapLevel,
 		GetGLPixelType(type), pixelData);
 }
 
-	
+
 //-----------------------------------------------------------------------------
 // 1D Texture Write
 
@@ -350,29 +350,30 @@ void Texture::WritePixels1D(int width, const Color* pixels)
 		GenerateMipMaps();
 }
 
-void Texture::WritePixels1D(int width, pixel_format format,
-							pixel_type type, const void* pixelData)
+void Texture::WritePixels1D(int width, PixelTransferFormat format,
+	PixelType type, const void* pixelData)
 {
 	WritePixelsAtLevel1D(0, width, format, type, pixelData);
 	if (m_params.AutoGenMipMaps())
 		GenerateMipMaps();
 }
 
-void Texture::WritePixelsAtLevel1D(int mipmapLevel, int width, const Color* pixels)
+void Texture::WritePixelsAtLevel1D(int mipmapLevel, int width,
+	const Color* pixels)
 {
 	WritePixelsAtLevel1D(mipmapLevel, width, PixelTransferFormat::RGBA,
 		PixelType::TYPE_UNSIGNED_BYTE, pixels);
 }
 
-void Texture::WritePixelsAtLevel1D(int mipmapLevel, int width, pixel_format format,
-							pixel_type type, const void* pixelData)
+void Texture::WritePixelsAtLevel1D(int mipmapLevel, int width,
+	PixelTransferFormat format, PixelType type, const void* pixelData)
 {
 	//CMG_ASSERT(m_params.GetTarget() == TextureTarget::TEXTURE_1D,
-		//"Texture target must be 1D to modify pixels like this.");
+	//"Texture target must be 1D to modify pixels like this.");
 
 	if (mipmapLevel == 0)
 	{
-		m_width  = width;
+		m_width = width;
 	}
 
 	GLenum target = GetGLTextureTarget();
@@ -383,7 +384,7 @@ void Texture::WritePixelsAtLevel1D(int mipmapLevel, int width, pixel_format form
 		GetGLPixelType(type), pixelData);
 }
 
-	
+
 //-----------------------------------------------------------------------------
 // 2D Texture Write
 
@@ -395,8 +396,8 @@ void Texture::WritePixels2D(int width, int height, const Color* pixels)
 		GenerateMipMaps();
 }
 
-void Texture::WritePixels2D(int width, int height, pixel_format format,
-							pixel_type type, const void* pixelData)
+void Texture::WritePixels2D(int width, int height, PixelTransferFormat format,
+	PixelType type, const void* pixelData)
 {
 	WritePixelsAtLevel2D(0, width, height, format, type, pixelData);
 	if (m_params.AutoGenMipMaps())
@@ -404,34 +405,33 @@ void Texture::WritePixels2D(int width, int height, pixel_format format,
 }
 
 void Texture::WritePixelsAtLevel2D(int mipmapLevel, int width, int height,
-							const Color* pixels)
+	const Color* pixels)
 {
 	WritePixelsAtLevel2D(mipmapLevel, width, height,
 		PixelTransferFormat::RGBA, PixelType::TYPE_UNSIGNED_BYTE, pixels);
 }
 
 void Texture::WritePixelsAtLevel2D(int mipmapLevel, int width, int height,
-							pixel_format format, pixel_type type,
-							const void* pixelData)
+	PixelTransferFormat format, PixelType type, const void* pixelData)
 {
 	//CMG_ASSERT(m_params.GetTarget() == TextureTarget::TEXTURE_2D,
-		//"Texture target must be 2D to modify pixels like this.");
+	//"Texture target must be 2D to modify pixels like this.");
 
 	if (mipmapLevel == 0)
 	{
-		m_width  = width;
+		m_width = width;
 		m_height = height;
 	}
 
 	GLenum target = GetGLTextureTarget();
 	glBindTexture(target, m_glTextureId);
-	glTexImage2D(target, mipmapLevel, 
+	glTexImage2D(target, mipmapLevel,
 		GetGLInternalFormat(m_params.GetInternalFormat()),
 		width, height, 0, GetGLPixelTransferFormat(format),
 		GetGLPixelType(type), pixelData);
 }
 
-	
+
 //-----------------------------------------------------------------------------
 // 3D Texture Write
 
@@ -445,8 +445,7 @@ void Texture::WritePixels3D(int width, int height, int depth, const Color* pixel
 }
 
 void Texture::WritePixels3D(int width, int height, int depth,
-							pixel_format format, pixel_type type,
-							const void* pixelData)
+	PixelTransferFormat format, PixelType type, const void* pixelData)
 {
 	WritePixelsAtLevel3D(0, width, height, depth, format, type, pixelData);
 	if (m_params.AutoGenMipMaps())
@@ -454,7 +453,7 @@ void Texture::WritePixels3D(int width, int height, int depth,
 }
 
 void Texture::WritePixelsAtLevel3D(int mipmapLevel, int width, int height,
-							int depth, const Color* pixels)
+	int depth, const Color* pixels)
 {
 	WritePixelsAtLevel3D(mipmapLevel, width, height, depth,
 		PixelTransferFormat::RGBA,
@@ -462,18 +461,17 @@ void Texture::WritePixelsAtLevel3D(int mipmapLevel, int width, int height,
 }
 
 void Texture::WritePixelsAtLevel3D(int mipmapLevel, int width, int height,
-							int depth, pixel_format format,
-							pixel_type type,
-							const void* pixelData)
+	int depth, PixelTransferFormat format, PixelType type,
+	const void* pixelData)
 {
 	//CMG_ASSERT(m_params.GetTarget() == TextureTarget::TEXTURE_3D,
-		//"Texture target must be 3D to modify pixels like this.");
+	//"Texture target must be 3D to modify pixels like this.");
 
 	if (mipmapLevel == 0)
 	{
-		m_width  = width;
+		m_width = width;
 		m_height = height;
-		m_depth  = depth;
+		m_depth = depth;
 	}
 
 	GLenum target = GetGLTextureTarget();
@@ -498,12 +496,12 @@ void Texture::GenerateMipMaps()
 	int size = Math::Max(m_width, m_height);
 	m_numMipMaps = (int) Math::Log2((float) size) + 1;
 }
-	
+
 
 //-----------------------------------------------------------------------------
 // Texture Parameters
 //-----------------------------------------------------------------------------
-	
+
 const TextureParams& Texture::GetParams() const
 {
 	return m_params;
@@ -524,7 +522,7 @@ void Texture::SetParams(const TextureParams& params)
 		TranslateTextureWrap(m_params.GetWrapT()));
 	glTexParameteri(target, GL_TEXTURE_WRAP_R,
 		TranslateTextureWrap(m_params.GetWrapR()));
-		
+
 	// Min-Mag Filtering.
 	auto minFilter = m_params.GetMinFilter();
 	auto magFilter = m_params.GetMagFilter();
@@ -549,17 +547,17 @@ void Texture::SetParams(const TextureParams& params)
 	}
 }
 
-	
+
 //-----------------------------------------------------------------------------
 // Factory functions.
 //-----------------------------------------------------------------------------
-	
+
 void Texture::InitRenderTarget()
 {
 	// The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
 	glGenFramebuffers(1, &m_glFrameBufferId);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_glFrameBufferId);
-	
+
 	// Setup the depth buffer.
 	glGenRenderbuffers(1, &m_glDepthBufferId);
 	glBindRenderbuffer(GL_RENDERBUFFER, m_glDepthBufferId);
@@ -576,17 +574,17 @@ void Texture::InitRenderTarget()
 	// Set the texture as our color attachement #0.
 	//glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, pTexture->m_glTextureId, 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_glTextureId, 0);
-	
+
 	// Set the list of draw buffers.
 	GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
 	glDrawBuffers(1, drawBuffers);
-	
+
 	// Check that our framebuffer is ok.
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
-	
+
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -629,11 +627,28 @@ Texture* Texture::LoadTexture(const std::string& fileName, const TextureParams& 
 	return texture;
 }
 
+Error Texture::SaveTexture(Texture* texture, const Path& path)
+{
+	// Retreive the pixel data
+	Array<uint8> image;
+	image.resize(texture->GetWidth() * texture->GetHeight() * 4);
+	texture->ReadPixels(PixelTransferFormat::RGBA,
+		PixelType::TYPE_UNSIGNED_BYTE, image.data());
+
+	// Encode and save the image as PNG
+	uint32 error = lodepng::encode(path.GetPath(), image,
+		texture->GetWidth(), texture->GetHeight());
+	if (error)
+		return CMG_ERROR_FAILURE;
+	else
+		return CMG_ERROR_SUCCESS;
+}
+
 
 //-----------------------------------------------------------------------------
 // Private methods
 //-----------------------------------------------------------------------------
-	
+
 void Texture::DoBindTexture()
 {
 	glBindTexture(GetGLTextureTarget(), m_glTextureId);

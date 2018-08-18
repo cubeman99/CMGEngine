@@ -17,9 +17,12 @@
 #include <cmgGraphics/cmgPrimitiveMeshes.h>
 #include <cmgGraphics/cmgDebugDraw.h>
 
+#include <cmgGraphics/render/cmgRenderDevice.h>
+#include <cmgGraphics/render/cmgRenderTarget.h>
 #include <cmgGraphics/render/cmgRenderer.h>
 #include <cmgGraphics/render/cmgRenderParams.h>
 #include <cmgGraphics/render/cmgGraphics2D.h>
+#include <cmgGraphics/render/cmgSampler.h>
 
 
 #endif // _CMG_GRAPHICS_INCLUDE_ALL_H_

@@ -134,7 +134,6 @@ public:
 	typedef TextureTarget::value_type			texture_target_type;
 	typedef TextureFilterOptions::value_type	texture_filter_options_type;
 	typedef TextureWrap::value_type				texture_wrap_type;
-	typedef PixelInternalFormat::value_type		pixel_internal_format_type;
 
 public:
 	TextureParams();
@@ -142,16 +141,16 @@ public:
 	//-----------------------------------------------------------------------------
 	// Getters.
 
-	texture_target_type			GetTarget()			const { return m_target; }
-	texture_filter_options_type	GetMinFilter()		const { return m_minFilter; }
-	texture_filter_options_type	GetMagFilter()		const { return m_magFilter; }
-	texture_filter_options_type	GetMipMapFilter()	const { return m_mipFilter; }
-	texture_wrap_type			GetWrapS()			const { return m_wrapS; }
-	texture_wrap_type			GetWrapT()			const { return m_wrapT; }
-	texture_wrap_type			GetWrapR()			const { return m_wrapR; }
-	pixel_internal_format_type	GetInternalFormat()	const { return m_internalFormat; }
-	bool						AutoGenMipMaps()	const { return m_autoGenMipMaps; }
-	bool						UseAnisotropy()		const { return m_anisotropy; }
+	texture_target_type GetTarget() const { return m_target; }
+	texture_filter_options_type GetMinFilter() const { return m_minFilter; }
+	texture_filter_options_type GetMagFilter() const { return m_magFilter; }
+	texture_filter_options_type GetMipMapFilter() const { return m_mipFilter; }
+	texture_wrap_type GetWrapS() const { return m_wrapS; }
+	texture_wrap_type GetWrapT() const { return m_wrapT; }
+	texture_wrap_type GetWrapR() const { return m_wrapR; }
+	PixelInternalFormat GetInternalFormat() const { return m_internalFormat; }
+	bool AutoGenMipMaps() const { return m_autoGenMipMaps; }
+	bool UseAnisotropy() const { return m_anisotropy; }
 
 	//-----------------------------------------------------------------------------
 	// Setters.
@@ -163,7 +162,7 @@ public:
 	void SetWrapS(texture_wrap_type wrapS)								{ m_wrapS = wrapS; }
 	void SetWrapT(texture_wrap_type wrapT)								{ m_wrapT = wrapT; }
 	void SetWrapR(texture_wrap_type wrapR)								{ m_wrapR = wrapR; }
-	void SetInternalFormat(pixel_internal_format_type internalFormat)	{ m_internalFormat = internalFormat; }
+	void SetInternalFormat(PixelInternalFormat internalFormat)	{ m_internalFormat = internalFormat; }
 	void SetAutoGenMipMaps(bool autoGenMipMaps)							{ m_autoGenMipMaps = autoGenMipMaps; }
 	void SetAnisotropy(bool anisotropy)									{ m_anisotropy = anisotropy; }
 
@@ -176,17 +175,17 @@ public:
 	void SetWrap(texture_wrap_type wrap);
 
 private:
-	texture_target_type			m_target;
-	texture_filter_options_type	m_minFilter;		// Minimize filter.
-	texture_filter_options_type	m_magFilter;		// Magnify filter.
-	texture_filter_options_type	m_mipFilter;		// Mipmap filter.
-	texture_wrap_type			m_wrapS;
-	texture_wrap_type			m_wrapT;
-	texture_wrap_type			m_wrapR;
+	texture_target_type m_target;
+	texture_filter_options_type m_minFilter;		// Minimize filter
+	texture_filter_options_type m_magFilter;		// Magnify filter
+	texture_filter_options_type m_mipFilter;		// Mipmap filter
+	texture_wrap_type m_wrapS;
+	texture_wrap_type m_wrapT;
+	texture_wrap_type m_wrapR;
 
-	pixel_internal_format_type	m_internalFormat;
-	bool						m_autoGenMipMaps;	// Automatically generate mipmaps.
-	bool						m_anisotropy;
+	PixelInternalFormat m_internalFormat;
+	bool m_autoGenMipMaps;	// Automatically generate mipmaps
+	bool m_anisotropy;
 };
 
 

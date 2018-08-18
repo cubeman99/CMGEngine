@@ -753,6 +753,29 @@ static void Subdivide(VertexList& vertices, IndexList& indices, unsigned int sub
 	}
 }
 
+Mesh* Primitives::CreateQuad()
+{
+	Array<VertexPosTex> vertices;
+	vertices.push_back(VertexPosTex(Vector3f(-1, 1, 0), Vector2f(0, 1)));
+	vertices.push_back(VertexPosTex(Vector3f(1, 1, 0), Vector2f(1, 1)));
+	vertices.push_back(VertexPosTex(Vector3f(1, -1, 0), Vector2f(1, 0)));
+	vertices.push_back(VertexPosTex(Vector3f(-1, -1, 0), Vector2f(0, 0)));
+
+	IndexList indices;
+	indices.push_back(0);
+	indices.push_back(1);
+	indices.push_back(2);
+	indices.push_back(0);
+	indices.push_back(2);
+	indices.push_back(3);
+
+	Mesh* mesh = new Mesh();
+	mesh->GetVertexData()->BufferVertices((int) vertices.size(), vertices.data());
+	mesh->GetIndexData()->BufferIndices((int) indices.size(), indices.data());
+	mesh->SetIndices(0, 6);
+	return mesh;
+}
+
 Mesh* Primitives::CreateIcoSphere(float radius, unsigned int subdivisions, bool smooth)
 {
 	VertexList vertices;

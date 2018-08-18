@@ -88,6 +88,7 @@ private:
 
 	// Resources
 	Joystick*		m_joystick;
+	Joystick*		m_wheel;
 	Mesh*			m_meshWheel;
 	Mesh*			m_meshCube;
 	Mesh*			m_meshCarChassis;

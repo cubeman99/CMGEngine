@@ -33,12 +33,18 @@ set(CMG_GRAPHICS_SOURCE_FILES
 	scene/cmgSceneNode.h
 	scene/cmgSceneNode.cpp
 
+	render/cmgRenderDevice.h
+	render/cmgRenderDevice.cpp
 	render/cmgRenderParams.h
 	render/cmgRenderParams.cpp
 	render/cmgRenderer.h
 	render/cmgRenderer.cpp
 	render/cmgGraphics2D.h
 	render/cmgGraphics2D.cpp
+	render/cmgRenderTarget.h
+	render/cmgRenderTarget.cpp
+	render/cmgSampler.h
+	render/cmgSampler.cpp
 
 	third_party/glew/GLEW.H
 	third_party/glew/GLEW.C
