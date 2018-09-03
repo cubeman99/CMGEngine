@@ -83,7 +83,7 @@ void Application::Run()
 		if (m_isQuitRequested)
 			break;
 
-		m_inputManager.ResetAll();
+		//m_inputManager.ResetAll();
 		m_inputManager.UpdateAll();
 
 		float timeDelta = 0.016f;

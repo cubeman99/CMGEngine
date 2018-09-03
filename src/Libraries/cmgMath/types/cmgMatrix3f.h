@@ -63,44 +63,48 @@ struct Matrix3f
 	
 	// Matrix operations
 
-	float			GetDeterminant() const;
-	Matrix3f&		Transpose();
-	Matrix3f		GetTranspose() const;
-	Matrix3f&		Negate();
-	Matrix3f		operator -() const;
-	Matrix3f&		Invert();
-	Matrix3f		GetInverse() const;
+	float GetDeterminant() const;
+	Matrix3f& Transpose();
+	Matrix3f GetTranspose() const;
+	Matrix3f& Negate();
+	Matrix3f operator -() const;
+	Matrix3f& Invert();
+	Matrix3f GetInverse() const;
 	
 	// Matrix to Matrix operations
 
-	Matrix3f&		operator =(const Matrix3f& other);
-	void			operator +=(const Matrix3f& other);
-	void			operator -=(const Matrix3f& other);
-	void			operator *=(const Matrix3f& other);
-	bool			operator ==(const Matrix3f& other) const;
-	bool			operator !=(const Matrix3f& other) const;
-	Matrix3f		operator +(const Matrix3f& other) const;
-	Matrix3f		operator -(const Matrix3f& other) const;
-	Matrix3f		operator *(const Matrix3f& other) const;
-	Matrix3f		operator *(float scalar) const;
+	Matrix3f& operator =(const Matrix3f& other);
+	void operator +=(const Matrix3f& other);
+	void operator -=(const Matrix3f& other);
+	void operator *=(const Matrix3f& other);
+	bool operator ==(const Matrix3f& other) const;
+	bool operator !=(const Matrix3f& other) const;
+	Matrix3f operator +(const Matrix3f& other) const;
+	Matrix3f operator -(const Matrix3f& other) const;
+	Matrix3f operator *(const Matrix3f& other) const;
+	Matrix3f operator *(float scalar) const;
 
-	// Matrix to Vector operations.
+	// Matrix to Vector operations
 	
 	Vector3f		Transform(const Vector3f& vec) const;
 	Vector3f		TransformTranspose(const Vector3f& vec) const;
 
-	void			TransformVector(const Vector2f& inVec, Vector2f& outVec) const;
-	Vector2f		TransformVector(const Vector2f& vec) const;
-	void			TransformVector(const Vector3f& inVec, Vector3f& outVec) const;
-	Vector3f		TransformVector(const Vector3f& vec) const;
-	void			RotateVector(const Vector2f& inVec, Vector2f& outVec) const;
-	Vector2f		RotateVector(const Vector2f& vec) const;
-	void			RotateVector(const Vector3f& inVec, Vector3f& outVec) const;
-	Vector3f		RotateVector(const Vector3f& vec) const;
-	void			Multiply2x2(const Vector2f& inVec, Vector2f& outVec) const;
-	Vector2f		Multiply2x2(const Vector2f& vec) const;
-	Vector2f		operator *(const Vector2f& vec) const;
-	Vector3f		operator *(const Vector3f& vec) const;
+	void TransformVector(const Vector2f& inVec, Vector2f& outVec) const;
+	Vector2f TransformVector(const Vector2f& vec) const;
+	void TransformVector(const Vector3f& inVec, Vector3f& outVec) const;
+	Vector3f TransformVector(const Vector3f& vec) const;
+	void RotateVector(const Vector2f& inVec, Vector2f& outVec) const;
+	Vector2f RotateVector(const Vector2f& vec) const;
+	void RotateVector(const Vector3f& inVec, Vector3f& outVec) const;
+	Vector3f RotateVector(const Vector3f& vec) const;
+	void Multiply2x2(const Vector2f& inVec, Vector2f& outVec) const;
+	Vector2f Multiply2x2(const Vector2f& vec) const;
+	Vector2f operator *(const Vector2f& vec) const;
+	Vector3f operator *(const Vector3f& vec) const;
+
+	// Conversions
+
+	Quaternion ToQuaternion() const;
 
 	// Matrix creation
 

@@ -126,6 +126,11 @@ public:
 			};
 		};
 		uint32 index;
+
+		Axis()
+		{
+
+		}
 	};
 
 	struct POV

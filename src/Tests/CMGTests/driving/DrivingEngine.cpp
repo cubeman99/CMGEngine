@@ -5,7 +5,7 @@
 using namespace std;
 
 
-#define ASSETS_PATH "C:/Workspace/C++/Framework Projects/CMGEngine/assets/"
+#define ASSETS_PATH "C:/Workspace/c++/cmg/CMGEngine/assets/"
 //#define ASSETS_PATH "C:/Users/david.jordan/Desktop/CMGEngine/assets/"
 //#define ASSETS_PATH "assets/"
 
@@ -37,7 +37,8 @@ void DrivingApp::OnInitialize()
 	m_simulationSpeed = 1.0f;
 
 	m_wheel = GetInputManager()->AddDevice<Joystick>();
-	m_joystick = GetInputManager()->AddDevice<Joystick>();
+	m_joystick = nullptr;
+	//m_joystick = GetInputManager()->AddDevice<Joystick>();
 
 	// Longitudinal grip graphs.
 	for (float slipRatio = -4.0f; slipRatio <= 4.0f; slipRatio += 0.1f)
@@ -114,7 +115,7 @@ void DrivingApp::OnUpdate(float timeDelta)
 {
 	Keyboard* keyboard = GetKeyboard();
 	Mouse* mouse = GetMouse();
-	
+
 	bool simulateSingleFrame = false;
 
 	m_frameIndex++;
@@ -141,7 +142,7 @@ void DrivingApp::OnUpdate(float timeDelta)
 	if (keyboard->IsKeyPressed(Keys::insert))
 		m_enableCameraFollow = !m_enableCameraFollow;
 	// F4: Toggle fullscreen mode
-	if (keyboard->IsKeyPressed(Keys::f4) || m_joystick->IsButtonPressed(Joystick::Buttons::Start))
+	if (keyboard->IsKeyPressed(Keys::f4) || (m_joystick != nullptr && m_joystick->IsButtonPressed(Joystick::Buttons::Start)))
 		GetWindow()->SetFullscreen(!GetWindow()->IsFullscreen());
 	// Enter: Reset simulation.
 	if (keyboard->IsKeyPressed(Keys::enter))
@@ -169,21 +170,21 @@ void DrivingApp::OnUpdate(float timeDelta)
 	//	m_camera.m_position += Vector3f::UP * moveAmount;
 	//if (keyboard->IsKeyDown(Keys::q))
 	//	m_camera.m_position += Vector3f::DOWN * moveAmount;
-	
+
 	MouseState currState = mouse->GetMouseState();
 	MouseState prevState = mouse->GetPrevMouseState();
 
 	// Camera rotation.
 	if (mouse->IsButtonDown(MouseButtons::right))
 	{
-		Vector2f mouseDelta((float) (currState.x - prevState.x), (float) (currState.y - prevState.y));
-		
+		Vector2f mouseDelta((float)(currState.x - prevState.x), (float)(currState.y - prevState.y));
+
 		rotateAmount = 0.005f;
 		m_camera.m_orientation.Rotate(Vector3f::UP, -mouseDelta.x * rotateAmount);
 		m_camera.m_orientation.Rotate(m_camera.m_orientation.GetLeft(), mouseDelta.y * rotateAmount);
 	}
-	
-	if (m_joystick->GetState().rightStick.Length() > 0.18f)
+
+	if (m_joystick != nullptr && m_joystick->GetState().rightStick.Length() > 0.18f)
 	{
 		rotateAmount = 0.05f;
 		m_camera.m_orientation.Rotate(Vector3f::UP, -m_joystick->GetState().rightStick.x * rotateAmount);
@@ -194,7 +195,7 @@ void DrivingApp::OnUpdate(float timeDelta)
 	int wheelDelta = currState.z - prevState.z;
 	if (wheelDelta != 0)
 	{
-		m_camera.m_distance *= Math::Pow(0.85f, (float) wheelDelta);
+		m_camera.m_distance *= Math::Pow(0.85f, (float)wheelDelta);
 	}
 
 	// 1: Rotate car 90 degrees to the left.
@@ -214,12 +215,16 @@ void DrivingApp::OnUpdate(float timeDelta)
 		m_car.m_velocity.y += 10;
 
 	// Steering controls.
-	float maxWheelAngle = 60.0f * Math::DEG_TO_RAD;
-	if (m_joystick->GetState().leftStick.Length() > 0.18f)
-		m_car.m_steeringAngle = -m_joystick->GetState().leftStick.x * maxWheelAngle;
-	else
-		m_car.m_steeringAngle = 0.0f;
-	/*int turnAmount = 0;
+	if (m_joystick != nullptr)
+	{
+		float maxWheelAngle = 60.0f * Math::DEG_TO_RAD;
+		if (m_joystick->GetState().leftStick.Length() > 0.18f)
+			m_car.m_steeringAngle = -m_joystick->GetState().leftStick.x * maxWheelAngle;
+		else
+			m_car.m_steeringAngle = 0.0f;
+	}
+
+	int turnAmount = 0;
 	if (keyboard->IsKeyDown(Keys::right) || keyboard->IsKeyDown(Keys::d))
 		turnAmount -= 1;
 	if (keyboard->IsKeyDown(Keys::left) || keyboard->IsKeyDown(Keys::a))
@@ -235,7 +240,7 @@ void DrivingApp::OnUpdate(float timeDelta)
 	else
 	{
 		m_car.m_steeringAngle *= 0.9f;
-	}*/
+	}
 
 	// Up: Throttle (gas pedal).
 	if (keyboard->IsKeyDown(Keys::up) || keyboard->IsKeyDown(Keys::w))
@@ -255,15 +260,23 @@ void DrivingApp::OnUpdate(float timeDelta)
 	else
 		m_car.m_handBreakAmount = 0.0f;
 
-	m_car.m_throttleAmount = m_joystick->GetState().rightTrigger;
-	m_car.m_reverseAmount = m_joystick->GetState().leftTrigger;
-	m_car.m_handBreakAmount = m_joystick->GetState().a ? 1.0f : 0.0f;
+	if (m_joystick != nullptr)
+	{
+		m_car.m_throttleAmount = m_joystick->GetState().rightTrigger;
+		m_car.m_reverseAmount = m_joystick->GetState().leftTrigger;
+		m_car.m_handBreakAmount = m_joystick->GetState().a ? 1.0f : 0.0f;
+
+		if (m_joystick->IsButtonPressed(Joystick::Buttons::DPadRight))
+			m_car.ShiftUp();
+		if (m_joystick->IsButtonPressed(Joystick::Buttons::DPadLeft))
+			m_car.ShiftDown();
+	}
 
 	// X: Shift up.
-	if (keyboard->IsKeyPressed(Keys::x) || m_joystick->IsButtonPressed(Joystick::Buttons::DPadRight))
+	if (keyboard->IsKeyPressed(Keys::x))
 		m_car.ShiftUp();
 	// Z: Shift down.
-	if (keyboard->IsKeyPressed(Keys::z) || m_joystick->IsButtonPressed(Joystick::Buttons::DPadLeft))
+	if (keyboard->IsKeyPressed(Keys::z))
 		m_car.ShiftDown();
 
 	// Update camera to follow car.

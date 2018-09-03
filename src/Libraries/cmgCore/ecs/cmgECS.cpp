@@ -1,5 +1,6 @@
 #include "cmgECS.h"
 #include "cmgAssert.h"
+#include <cmgMath/cmgMathLib.h>
 
 
 Array<BaseECSComponent::ComponentTypeInfo>* BaseECSComponent::componentTypes = nullptr;
@@ -47,9 +48,92 @@ ECS::~ECS()
 	}
 
 	// Delete all entities
-	for(uint32 i = 0; i < m_entities.size(); i++)
+	for (uint32 i = 0; i < m_entities.size(); i++)
 		delete m_entities[i];
 	m_entities.clear();
+}
+
+BaseECSComponent* ECS::GetComponentInternal(Entity& entity,
+	Array<uint8>& array, uint32 componentID)
+{
+	for (uint32 i = 0; i < entity.components.size(); i++)
+	{
+		if (entity.components[i].id == componentID)
+		{
+			return (BaseECSComponent*) &array[entity.components[i].offset];
+		}
+	}
+	return nullptr;
+}
+
+void ECS::UpdateSystems(ECSSystemList& systems, float deltaTime)
+{
+	Array<BaseECSComponent*> componentParam;
+	Array<Array<uint8>*> componentArrays;
+	for (uint32 i = 0; i < systems.size(); i++)
+	{
+		const Array<uint32>& componentTypes = systems[i]->GetComponentTypes();
+		if (componentTypes.size() == 1)
+		{
+			size_t typeSize = BaseECSComponent::GetTypeSize(componentTypes[0]);
+			Array<uint8>& componentList = m_components[componentTypes[0]];
+			for (uint32 j = 0; j < componentList.size(); j += typeSize)
+			{
+				BaseECSComponent* component = (BaseECSComponent*) &componentList[j];
+				systems[i]->UpdateComponents(deltaTime, &component);
+			}
+		}
+		else
+		{
+			UpdateSystemWithMultipleComponents(i, systems, deltaTime,
+				componentTypes, componentParam, componentArrays);
+		}
+	}
+}
+
+void ECS::UpdateSystemWithMultipleComponents(uint32 index, ECSSystemList& systems, float delta,
+	const Array<uint32>& componentTypes, Array<BaseECSComponent*>& componentParam,
+	Array<Array<uint8>*>& componentArrays)
+{
+	const Array<uint32>& componentFlags = systems[index]->GetComponentFlags();
+
+	componentParam.resize(Math::Max(componentParam.size(), componentTypes.size()));
+	componentArrays.resize(Math::Max(componentArrays.size(), componentTypes.size()));
+	for (uint32 i = 0; i < componentTypes.size(); i++)
+	{
+		componentArrays[i] = &m_components[componentTypes[i]];
+	}
+	uint32 minSizeIndex = findLeastCommonComponent(componentTypes, componentFlags);
+
+	size_t typeSize = BaseECSComponent::GetTypeSize(componentTypes[minSizeIndex]);
+	Array<uint8>& array = *componentArrays[minSizeIndex];
+	for (uint32 i = 0; i < array.size(); i += typeSize)
+	{
+		componentParam[minSizeIndex] = (BaseECSComponent*)&array[i];
+		Entity* entity = (Entity*) componentParam[minSizeIndex]->entity;
+
+		bool isValid = true;
+		for (uint32 j = 0; j < componentTypes.size(); j++)
+		{
+			if (j == minSizeIndex)
+			{
+				continue;
+			}
+
+			componentParam[j] = GetComponentInternal(*entity,
+				*componentArrays[j], componentTypes[j]);
+			if (componentParam[j] == nullptr && (componentFlags[j] & BaseECSSystem::FLAG_OPTIONAL) == 0)
+			{
+				isValid = false;
+				break;
+			}
+		}
+
+		if (isValid)
+		{
+			systems[index]->updateComponents(delta, &componentParam[0]);
+		}
+	}
 }
 
 
@@ -89,7 +173,7 @@ void ECS::RemoveEntity(EntityHandle handle)
 	// Delete all the entity's components from memory
 	for (uint32 i = 0; i < entity->components.size(); i++)
 	{
-		DoRemoveComponent(entity->components[i].id, 
+		DoRemoveComponent(entity->components[i].id,
 			entity->components[i].offset);
 	}
 
@@ -128,7 +212,7 @@ void ECS::DoRemoveComponent(uint32 componentId, uint32 dataOffset)
 		(pool.data() + lastComponentOffset);
 	memcpy(removedComponent, shiftedComponent, size);
 	pool.resize(lastComponentOffset);
-	
+
 	// Update the reference to the shifted component's offset
 	Entity* entity = (Entity*) shiftedComponent->entity;
 	for (uint32 i = 0; i < entity->components.size(); i++)

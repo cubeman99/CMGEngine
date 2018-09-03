@@ -7,6 +7,7 @@
 #include <cmgInput/cmgKeyboard.h>
 #include <cmgInput/cmgMouse.h>
 #include <cmgInput/cmgJoystick.h>
+#include <cmgInput/cmgInputControl.h>
 
 
 #endif // _CMG_INPUT_INCLUDE_ALL_H_

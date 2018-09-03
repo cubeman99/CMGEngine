@@ -80,19 +80,14 @@ void Joystick::Update()
 
 	using namespace std;
 
-	//cout << "JOYSTICK STATE:" << endl;
 	for (Axis* axis : m_axes)
 	{
 		axis->x = (float) (&state.lX)[axis->index] / 1000.0f;
-		//axis.value = 0.0f;
-		//cout << "  " << axis.index << ": " << axis.x << endl;
 	}
 	for (Button* button : m_buttons)
 	{
 		button->down = (state.rgbButtons[button->index] > 0);
 		m_xboxState.buttons[button->index] = button->down;
-
-		cout << "Button" << button->index << " " << (button->down ? "TRUE" : "false") << endl;
 	}
 	for (POV* pov : m_povs)
 	{

@@ -3,7 +3,7 @@
 
 #include <cmgInput/cmgInputDevice.h>
 #include <cmgInput/cmgDirectInputIncludes.h>
-
+#include <cmgCore/containers/cmgArray.h>
 
 struct Keys
 {
@@ -44,7 +44,12 @@ struct Keys
 	typedef int value_type;
 };
 
-
+class IKeyboardEventHandler
+{
+public:
+	virtual void OnKeyDown(uint32 key) {}
+	virtual void OnKeyUp(uint32 key) {}
+};
 
 class Keyboard : public InputDevice
 {
@@ -65,19 +70,22 @@ public:
 	bool IsKeyDown(key_type key) const;
 	bool IsKeyPressed(key_type key) const;
 	bool IsKeyReleased(key_type key) const;
+
+	void AddEventHandler(IKeyboardEventHandler* handler);
 		
 private:
 	void DoInitialize();
 
 private:
-	IDirectInput8*			m_directInput;
-	IDirectInputDevice8*	m_keyboard;
-	HWND					m_windowHandle;
+	IDirectInput8* m_directInput;
+	IDirectInputDevice8* m_keyboard;
+	HWND m_windowHandle;
 
-	bool					m_buffer[Keys::count];
-	bool					m_bufferPrev[Keys::count];
-	static const DWORD		s_bufferSize = 256;
-	unsigned char			m_rawBuffer[s_bufferSize];
+	bool m_buffer[Keys::count];
+	bool m_bufferPrev[Keys::count];
+	static const DWORD s_bufferSize = 256;
+	uint8 m_rawBuffer[s_bufferSize];
+	Array<IKeyboardEventHandler*> m_eventHandlers;
 };
 
 

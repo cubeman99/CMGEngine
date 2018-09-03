@@ -6,9 +6,9 @@
 // Constructor & destructor
 //-----------------------------------------------------------------------------
 
-DebugDraw::DebugDraw() :
-	m_viewProjection(Matrix4f::IDENTITY),
-	m_shaded(false)
+DebugDraw::DebugDraw()
+	: m_viewProjection(Matrix4f::IDENTITY)
+	, m_shaded(false)
 {
 	String vertexSource = "#version 410"
 		"\n"   "layout (location = 0) in vec3 vertPosition;"
@@ -37,7 +37,7 @@ DebugDraw::DebugDraw() :
 	m_shaderShadedColor->AddStage(ShaderType::k_vertex_shader, vertexSource);
 	m_shaderShadedColor->AddStage(ShaderType::k_fragment_shader, fragmentSource);
 	m_shaderShadedColor->CompileAndLink();
-	
+
 	vertexSource = "#version 410"
 		"\n"   "layout (location = 0) in vec3 vertPosition;"
 		"\n"   "uniform mat4 u_mvp;"
@@ -69,7 +69,7 @@ DebugDraw::DebugDraw() :
 	Primitives::InitializeSphere();
 	Primitives::InitializeCylinder();
 	Primitives::InitializeCone();
-	
+
 	attribs[0].data = Primitives::GetCubePositions();
 	attribs[1].data = Primitives::GetCubeNormals();
 	attribs[2].data = Primitives::GetCubeTexCoords();
@@ -79,7 +79,7 @@ DebugDraw::DebugDraw() :
 	m_meshCube->GetVertexData()->BufferVertices(Primitives::GetCubeVertexCount(), attribs, 4);
 	m_meshCube->GetIndexData()->BufferIndices(0, nullptr);
 	m_meshCube->SetIndices(0, Primitives::GetCubeVertexCount());
-		
+
 	attribs[0].data = Primitives::GetSpherePositions();
 	attribs[1].data = Primitives::GetSphereNormals();
 	attribs[2].data = Primitives::GetSphereTexCoords();
@@ -89,7 +89,7 @@ DebugDraw::DebugDraw() :
 	m_meshSphere->GetVertexData()->BufferVertices(Primitives::GetSphereVertexCount(), attribs, 4);
 	m_meshSphere->GetIndexData()->BufferIndices(Primitives::GetSphereIndexCount(), Primitives::GetSphereIndices());
 	m_meshSphere->SetIndices(0, Primitives::GetSphereIndexCount());
-		
+
 	attribs[0].data = Primitives::GetCylinderPositions();
 	attribs[1].data = Primitives::GetCylinderNormals();
 	attribs[2].data = Primitives::GetCylinderTexCoords();
@@ -99,7 +99,7 @@ DebugDraw::DebugDraw() :
 	m_meshCylinder->GetVertexData()->BufferVertices(Primitives::GetCylinderVertexCount(), attribs, 4);
 	m_meshCylinder->GetIndexData()->BufferIndices(Primitives::GetCylinderIndexCount(), Primitives::GetCylinderIndices());
 	m_meshCylinder->SetIndices(0, Primitives::GetCylinderIndexCount());
-		
+
 	attribs[0].data = Primitives::GetConePositions();
 	attribs[1].data = Primitives::GetConeNormals();
 	attribs[2].data = Primitives::GetConeTexCoords();
@@ -109,7 +109,7 @@ DebugDraw::DebugDraw() :
 	m_meshCone->GetVertexData()->BufferVertices(Primitives::GetConeVertexCount(), attribs, 4);
 	m_meshCone->GetIndexData()->BufferIndices(Primitives::GetConeIndexCount(), Primitives::GetConeIndices());
 	m_meshCone->SetIndices(0, Primitives::GetConeIndexCount());
-	
+
 	m_meshSphereLowRes = nullptr;
 }
 
@@ -378,13 +378,13 @@ void DebugDraw::DrawFilledCylinder(const Matrix4f& modelMatrix,
 	Vector3f right = (Math::Abs(up.x) < Math::Abs(up.z) ? Vector3f::UNITX : Vector3f::UNITZ);
 	right = up.Cross(right).Normalize();
 	Vector3f back = right.Cross(up).Normalize();
-	
+
 	Matrix4f cylinderModelMatrix = Matrix4f::IDENTITY;
 	cylinderModelMatrix.c0.xyz = right * radius;
 	cylinderModelMatrix.c1.xyz = up * (height * 0.5f);
 	cylinderModelMatrix.c2.xyz = back * radius;
 	cylinderModelMatrix.c3.xyz = (p0 + p1) * 0.5f;
-	
+
 	DrawMesh(m_meshCylinder, modelMatrix *
 		cylinderModelMatrix, color);
 }
@@ -421,13 +421,13 @@ void DebugDraw::DrawFilledCapsule(const Matrix4f& modelMatrix,
 	Vector3f right = (Math::Abs(up.x) < Math::Abs(up.z) ? Vector3f::UNITX : Vector3f::UNITZ);
 	right = up.Cross(right).Normalize();
 	Vector3f back = right.Cross(up).Normalize();
-	
+
 	Matrix4f cylinderModelMatrix = Matrix4f::IDENTITY;
 	cylinderModelMatrix.c0.xyz = right;
 	cylinderModelMatrix.c1.xyz = up;
 	cylinderModelMatrix.c2.xyz = back;
 	cylinderModelMatrix.c3.xyz = (p0 + p1) * 0.5f;
-	
+
 	DrawFilledCapsule(modelMatrix *
 		cylinderModelMatrix, radius, height * 0.5f, color);
 }
@@ -462,6 +462,66 @@ void DebugDraw::DrawPoint(const Matrix4f& modelMatrix, const Vector3f& point, co
 	glColor4ubv(color.data());
 	glVertex3fv(point.v);
 	glEnd();
+}
+
+void DebugDraw::DrawGrid(const Matrix4f& modelMatrix,
+	const Vector3f& center, float squareSize, uint32 majorCount,
+	float minorLineWidth, float majorLineWidth,
+	const Color& minorLineColor, const Color& majorLineColor, float gridSize)
+{
+	BeginImmediate(modelMatrix);
+
+	// Snap the grid radius to the square size.
+	float gridRadius = Math::Ceil(gridSize / squareSize) * squareSize;
+
+	float startX = center.x - gridRadius;
+	float startZ = center.z - gridRadius;
+	int indexX = (int) Math::Floor(startX / (squareSize));
+	int indexZ = (int) Math::Floor(startZ / (squareSize));
+	startX = indexX * squareSize;
+	startZ = indexZ * squareSize;
+	float endX = startX + (gridRadius * 2.0f);
+	float endZ = startZ + (gridRadius * 2.0f);
+	float x = startX;
+	float z = startZ;
+	Color color;
+
+	// Draw a grid of perpendicular lines
+	glDepthMask(false);
+	glBegin(GL_LINES);
+	for (; x < center.x + gridRadius;
+		x += squareSize, z += squareSize, indexX++, indexZ++)
+	{
+		// Draw line along z-axis
+		if (indexX % majorCount == 0)
+		{
+			glColor4ubv(majorLineColor.data());
+			glLineWidth(majorLineWidth);
+		}
+		else
+		{
+			glColor4ubv(minorLineColor.data());
+			glLineWidth(minorLineWidth);
+		}
+		glVertex3f(x, center.y, startZ);
+		glVertex3f(x, center.y, endZ);
+
+		// Draw line along x-axis
+		if (indexZ % majorCount == 0)
+		{
+			glColor4ubv(majorLineColor.data());
+			glLineWidth(majorLineWidth);
+		}
+		else
+		{
+			glColor4ubv(minorLineColor.data());
+			glLineWidth(minorLineWidth);
+		}
+		glVertex3f(startX, center.y, z);
+		glVertex3f(endX, center.y, z);
+	}
+	glEnd();
+	glDepthMask(true);
 }
 
 

@@ -34,11 +34,15 @@ struct ObjFace
 	{}
 };
 
-Mesh* Mesh::Load(const Path& path)
+Error Mesh::Load(const Path& path, Mesh*& outMesh)
 {
 	String fileContents;
-	if (File::OpenAndGetContents(path, fileContents).Failed())
-		return nullptr;
+	Error openError = File::OpenAndGetContents(path, fileContents);
+	if (openError.Failed())
+	{
+		openError.Uncheck();
+		return openError;
+	}
 
 	Array<Vector3f> positions;
 	Array<Vector3f> normals;
@@ -135,5 +139,6 @@ Mesh* Mesh::Load(const Path& path)
 	mesh->GetVertexData()->BufferVertices((int) vertices.size(), vertices.data());
 	mesh->GetIndexData()->BufferIndices((int) indices.size(), indices.data());
 	mesh->SetIndices(0, indices.size());
-	return mesh;
+	outMesh = mesh;
+	return CMG_ERROR_SUCCESS;
 }

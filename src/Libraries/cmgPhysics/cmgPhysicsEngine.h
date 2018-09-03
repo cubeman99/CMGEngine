@@ -32,7 +32,8 @@ public:
 	inline CollisionCache* GetCollisionCache() { return &m_collisionCache; }
 	inline CollisionDetector* GetCollisionDetector() { return &m_collisionDetector; }
 	inline ProfileSection* GetProfiler() { return &m_profiler; }
-	
+	inline const Vector3f& GetGravity() const { return m_gravity; }
+
 	inline unsigned int GetNumIterations() const { return m_numIterations; }
 	inline bool GetEnableFriction() const { return m_enableFriction; }
 	inline bool GetEnableRestitution() const { return m_enableRestitution; }

@@ -113,7 +113,7 @@ Error Shader::AddStage(ShaderType type, const String& code, const String& fileNa
 
 	// Set the shader's source code.
 	const GLchar* str[1] = { code.c_str() };
-	GLint lengths[1] = { code.length() };
+	GLint lengths[1] = { (GLint) code.length() };
 	glShaderSource(shaderGL, 1, str, lengths);
 
 	// Attach the shader stage to the shader program.

@@ -53,8 +53,14 @@ public:
 	void DrawWireCone(const Matrix4f& modelMatrix, float radius, float height, const Color& color);
 	void DrawFilledCone(const Matrix4f& modelMatrix, float radius, float height, const Color& color);
 
+	// Simple Shapes
 	void DrawLine(const Matrix4f& modelMatrix, const Vector3f& p1, const Vector3f& p2, const Color& color, float width = 1.0f);
 	void DrawPoint(const Matrix4f& modelMatrix, const Vector3f& point, const Color& color, float size = 1.0f);
+
+	void DrawGrid(const Matrix4f& modelMatrix, const Vector3f& center,
+		float squareSize, uint32 majorCount, float minorLineWidth,
+		float majorLineWidth, const Color& minorLineColor,
+		const Color& majorLineColor, float gridSize);
 
 	Color GetShadedColor(const Vector3f& normal, const Color& color);
 

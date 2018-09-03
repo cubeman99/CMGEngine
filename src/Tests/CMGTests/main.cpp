@@ -1,13 +1,8 @@
 
 #include <stdio.h>
-#include "TestApp.h"
-#include "physics/PhysicsApp.h"
-#include "physics/CollisionTester.h"
-#include "driving/DrivingEngine.h"
 #include <sstream>
-
 #include <gtest/gtest.h>
-
+#include <cmgMath/cmg_math.h>
 
 using namespace std;
 
@@ -201,17 +196,6 @@ TEST(Matrix4f, Matrix4f_Inverse)
 
 int main(int argc, char* argv[])
 {
-	srand((unsigned int) time(nullptr));
-
-	//TestApp app;
-	//PhysicsApp app;
-	//CollisionTestApp app;
-	//app.Initialize("3D Physics Engine", 800, 600);
-	DrivingApp app;
-	app.Initialize("Vehicle Dynamics", 1200, 785);
-	app.Run();
-	return 0;
-
-	//::testing::InitGoogleTest(&argc, argv);
-	//return RUN_ALL_TESTS();
+	::testing::InitGoogleTest(&argc, argv);
+	return RUN_ALL_TESTS();
 }

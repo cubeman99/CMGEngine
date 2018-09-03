@@ -27,7 +27,7 @@ private:
 		inline void SetPrimitiveType(VertexPrimitiveType::value_type type) { m_primitiveType = type; }
 
 		// Static methods
-		static Mesh* Load(const Path& path);
+		static Error Load(const Path& path, Mesh*& mesh);
 
 	private:
 		// Prevent copying

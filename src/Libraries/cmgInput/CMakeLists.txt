@@ -14,7 +14,7 @@ set(CMG_INPUT_SOURCE_FILES
 	cmgJoystick.h
 	cmgJoystick.cpp
 	cmgDirectInputIncludes.h
-
+	cmgInputControl.h
 )
 
 cmg_install_library(cmgInput "${CMG_INPUT_SOURCE_FILES}")

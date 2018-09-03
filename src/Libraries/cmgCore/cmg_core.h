@@ -15,6 +15,7 @@
 #include <cmgCore/string/cmgString.h>
 
 #include <cmgCore/containers/cmgArray.h>
+#include <cmgCore/ecs/cmgECS.h>
 
 
 #endif // _CMG_CORE_INCLUDE_ALL_H_

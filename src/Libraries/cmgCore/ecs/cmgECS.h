@@ -120,12 +120,12 @@ const ECSComponentFreeFunction ECSComponent<T>::FREE_FUNCTION(
 class BaseECSSystem
 {
 public:
-	BaseECSSystem(const Array<uint32>& componentTypesIn)
-		: m_componentTypes(componentTypesIn)
+	BaseECSSystem(const Array<uint32>& componentTypesIn) :
+		m_componentTypes(componentTypesIn)
 	{
 	}
 
-	virtual void UpdateComponents(float delta, BaseECSComponent** components, size_t numComponents)
+	virtual void UpdateComponents(float timeDelta, BaseECSComponent** components)
 	{
 	}
 
@@ -136,6 +136,31 @@ public:
 
 private:
 	Array<uint32> m_componentTypes;
+};
+
+class ECSSystemList
+{
+public:
+	inline bool addSystem(BaseECSSystem& system)
+	{
+		//if (!system.IsValid())
+		//{
+		//	return false;
+		//}
+		systems.push_back(&system);
+		return true;
+	}
+	inline size_t size()
+	{
+		return systems.size();
+	}
+	inline BaseECSSystem* operator[](uint32 index)
+	{
+		return systems[index];
+	}
+	bool removeSystem(BaseECSSystem& system);
+private:
+	Array<BaseECSSystem*> systems;
 };
 
 
@@ -149,8 +174,6 @@ public:
 	// Entity methods
 	EntityHandle CreateEntity(const BaseECSComponent* components,
 		const uint32* componentIds, size_t numComponents);
-
-	EntityHandle CreateEntity();
 	template <class T1>
 	EntityHandle CreateEntity(const T1& component1);
 	template <class T1, class T2>
@@ -172,18 +195,10 @@ public:
 	bool HasComponent(EntityHandle entity);
 
 	// System methods
-	inline void AddSystem(BaseECSSystem& system)
-	{
-		m_systems.push_back(&system);
-	}
-	void UpdateSystems(float deltaTime);
+	void UpdateSystems(ECSSystemList& systems, float deltaTime);
 	void RemoveSystem(BaseECSSystem& system);
 
 private:
-	uint32 DoCreateComponent(EntityHandle entity, uint32 componentId,
-		const BaseECSComponent* component);
-	void DoRemoveComponent(uint32 componentId, uint32 dataOffset);
-
 	struct EntityComponent
 	{
 		uint32 id;
@@ -196,7 +211,16 @@ private:
 		Array<EntityComponent> components;
 	};
 
-	Array<BaseECSSystem*> m_systems;
+	EntityHandle CreateEntity();
+	uint32 DoCreateComponent(EntityHandle entity, uint32 componentId,
+		const BaseECSComponent* component);
+	void DoRemoveComponent(uint32 componentId, uint32 dataOffset);
+	void UpdateSystemWithMultipleComponents(uint32 index, ECSSystemList& systems, float delta,
+		const Array<uint32>& componentTypes, Array<BaseECSComponent*>& componentParam,
+		Array<Array<uint8>*>& componentArrays);
+	BaseECSComponent* GetComponentInternal(Entity& entity, Array<uint8>& array, uint32 componentID);
+
+	//Array<BaseECSSystem*> m_systems;
 	Map<uint32, Array<uint8>> m_components;
 	Array<Entity*> m_entities;
 };

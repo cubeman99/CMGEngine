@@ -172,7 +172,10 @@ Error File::OpenAndGetContents(const Path& path, String& out)
 	File file(path);
 	error = file.Open(FileAccess::READ, FileType::TEXT);
 	if (error.Failed())
+	{
+		error.Uncheck();
 		return error;
+	}
 	return file.GetContents(out);
 }
 	
