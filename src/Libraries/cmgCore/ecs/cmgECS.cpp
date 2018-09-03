@@ -3,32 +3,6 @@
 #include <cmgMath/cmgMathLib.h>
 
 
-Array<BaseECSComponent::ComponentTypeInfo>* BaseECSComponent::componentTypes = nullptr;
-
-
-
-Array<BaseECSComponent::ComponentTypeInfo>& BaseECSComponent::GetComponentTypes()
-{
-	if (componentTypes == nullptr)
-		componentTypes = new Array<ComponentTypeInfo>();
-	return *componentTypes;
-}
-
-uint32 BaseECSComponent::RegisterComponentType(
-	ECSComponentCreateFunction createFunction,
-	ECSComponentFreeFunction freeFunction, size_t size)
-{
-	uint32 componentId = GetComponentTypes().size();
-	ComponentTypeInfo typeInfo;
-	typeInfo.createFunction = createFunction;
-	typeInfo.freeFunction = freeFunction;
-	typeInfo.size = size;
-	GetComponentTypes().push_back(typeInfo);
-	printf("Registering %d\n", GetComponentTypes().size());
-	return componentId;
-}
-
-
 ECS::ECS()
 {
 }
@@ -103,13 +77,13 @@ void ECS::UpdateSystemWithMultipleComponents(uint32 index, ECSSystemList& system
 	{
 		componentArrays[i] = &m_components[componentTypes[i]];
 	}
-	uint32 minSizeIndex = findLeastCommonComponent(componentTypes, componentFlags);
+	uint32 minSizeIndex = FindLeastCommonComponent(componentTypes, componentFlags);
 
 	size_t typeSize = BaseECSComponent::GetTypeSize(componentTypes[minSizeIndex]);
 	Array<uint8>& array = *componentArrays[minSizeIndex];
 	for (uint32 i = 0; i < array.size(); i += typeSize)
 	{
-		componentParam[minSizeIndex] = (BaseECSComponent*)&array[i];
+		componentParam[minSizeIndex] = (BaseECSComponent*) &array[i];
 		Entity* entity = (Entity*) componentParam[minSizeIndex]->entity;
 
 		bool isValid = true;
@@ -131,7 +105,7 @@ void ECS::UpdateSystemWithMultipleComponents(uint32 index, ECSSystemList& system
 
 		if (isValid)
 		{
-			systems[index]->updateComponents(delta, &componentParam[0]);
+			systems[index]->UpdateComponents(delta, &componentParam[0]);
 		}
 	}
 }
@@ -224,4 +198,24 @@ void ECS::DoRemoveComponent(uint32 componentId, uint32 dataOffset)
 			return;
 		}
 	}
+}
+
+uint32 ECS::FindLeastCommonComponent(const Array<uint32>& componentTypes, const Array<uint32>& componentFlags)
+{
+	uint32 minSize = (uint32) -1;
+	uint32 minIndex = (uint32) -1;
+	for (uint32 i = 0; i < componentTypes.size(); i++)
+	{
+		if ((componentFlags[i] & BaseECSSystem::FLAG_OPTIONAL) != 0)
+			continue;
+
+		size_t typeSize = BaseECSComponent::GetTypeSize(componentTypes[i]);
+		uint32 size = m_components[componentTypes[i]].size() / typeSize;
+		if (size <= minSize)
+		{
+			minSize = size;
+			minIndex = i;
+		}
+	}
+	return minIndex;
 }

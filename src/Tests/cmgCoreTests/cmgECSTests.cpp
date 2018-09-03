@@ -3,7 +3,6 @@
 #include <gtest/gtest.h>
 #include <cmgCore/ecs/cmgECS.h>
 
-//BEGIN EXAMPLE CODE
 
 struct ECSTestComponentA : public ECSComponent<ECSTestComponentA>
 {
@@ -17,6 +16,7 @@ struct ECSTestComponentB : public ECSComponent<ECSTestComponentB>
 	uint32 y;
 };
 
+
 //-----------------------------------------------------------------------------
 // ECS tests
 //-----------------------------------------------------------------------------
@@ -25,6 +25,7 @@ TEST(ECSComponent, SIZE)
 {
 	EXPECT_EQ(sizeof(ECSTestComponentA), ECSTestComponentA::SIZE);
 	EXPECT_EQ(sizeof(ECSTestComponentB), ECSTestComponentB::SIZE);
+
 }
 
 TEST(ECSComponent, ID)

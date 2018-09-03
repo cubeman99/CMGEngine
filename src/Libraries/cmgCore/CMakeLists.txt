@@ -16,6 +16,10 @@ set(CMG_CORE_SOURCE_FILES
 
 	ecs/cmgECS.h
 	ecs/cmgECS.cpp
+	ecs/cmgECSComponent.h
+	ecs/cmgECSComponent.cpp
+	ecs/cmgECSSystem.h
+	ecs/cmgECSSystem.cpp
 
 	error/cmgError.h
 	error/cmgError.cpp
