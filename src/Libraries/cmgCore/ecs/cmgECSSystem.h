@@ -3,7 +3,7 @@
 
 #include <cmgCore/containers/cmgArray.h>
 #include <cmgCore/ecs/cmgECSComponent.h>
-#include <tuple>
+
 
 class BaseECSSystem
 {
@@ -15,14 +15,11 @@ public:
 	};
 
 public:
-	BaseECSSystem(const Array<uint32>& componentTypesIn) :
-		m_componentTypes(componentTypesIn)
+	BaseECSSystem()
 	{
 	}
 
-	virtual void UpdateComponents(float timeDelta, BaseECSComponent** components)
-	{
-	}
+	bool IsValid();
 
 	inline const Array<uint32>& GetComponentTypes()
 	{
@@ -34,6 +31,25 @@ public:
 		return m_componentFlags;
 	}
 
+	virtual void UpdateComponents(float timeDelta,
+		BaseECSComponent** components)
+	{
+	}
+
+protected:
+	void AddComponentType(uint32 componentType, uint32 componentFlag = FLAG_NONE)
+	{
+		m_componentTypes.push_back(componentType);
+		m_componentFlags.push_back(componentFlag);
+	}
+
+	template <class T_Component>
+	void AddComponentType(uint32 componentFlag = FLAG_NONE)
+	{
+		m_componentTypes.push_back(T_Component::ID);
+		m_componentFlags.push_back(componentFlag);
+	}
+
 private:
 	Array<uint32> m_componentTypes;
 	Array<uint32> m_componentFlags;
@@ -42,26 +58,30 @@ private:
 class ECSSystemList
 {
 public:
-	inline bool addSystem(BaseECSSystem& system)
+	inline bool AddSystem(BaseECSSystem& system)
 	{
-		//if (!system.IsValid())
-		//{
-		//	return false;
-		//}
-		systems.push_back(&system);
+		if (!system.IsValid())
+		{
+			return false;
+		}
+		m_systems.push_back(&system);
 		return true;
 	}
-	inline size_t size()
+
+	inline size_t Size()
 	{
-		return systems.size();
+		return m_systems.size();
 	}
+
 	inline BaseECSSystem* operator[](uint32 index)
 	{
-		return systems[index];
+		return m_systems[index];
 	}
-	bool removeSystem(BaseECSSystem& system);
+
+	bool RemoveSystem(BaseECSSystem& system);
+
 private:
-	Array<BaseECSSystem*> systems;
+	Array<BaseECSSystem*> m_systems;
 };
 
 

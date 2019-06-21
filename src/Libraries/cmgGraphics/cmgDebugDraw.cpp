@@ -476,8 +476,8 @@ void DebugDraw::DrawGrid(const Matrix4f& modelMatrix,
 
 	float startX = center.x - gridRadius;
 	float startZ = center.z - gridRadius;
-	int indexX = (int) Math::Floor(startX / (squareSize));
-	int indexZ = (int) Math::Floor(startZ / (squareSize));
+	int indexX = (int) Math::Floor(startX / squareSize);
+	int indexZ = (int) Math::Floor(startZ / squareSize);
 	startX = indexX * squareSize;
 	startZ = indexZ * squareSize;
 	float endX = startX + (gridRadius * 2.0f);
@@ -493,7 +493,7 @@ void DebugDraw::DrawGrid(const Matrix4f& modelMatrix,
 		x += squareSize, z += squareSize, indexX++, indexZ++)
 	{
 		// Draw line along z-axis
-		if (indexX % majorCount == 0)
+		if (Math::Wrap(indexX, (int) majorCount) == 0)
 		{
 			glColor4ubv(majorLineColor.data());
 			glLineWidth(majorLineWidth);
@@ -507,7 +507,7 @@ void DebugDraw::DrawGrid(const Matrix4f& modelMatrix,
 		glVertex3f(x, center.y, endZ);
 
 		// Draw line along x-axis
-		if (indexZ % majorCount == 0)
+		if (Math::Wrap(indexZ, (int) majorCount) == 0)
 		{
 			glColor4ubv(majorLineColor.data());
 			glLineWidth(majorLineWidth);
@@ -595,13 +595,13 @@ void DebugDraw::DrawMesh(Mesh* mesh, const Matrix4f& modelMatrix, const Color& c
 
 	if (mesh->GetIndexData()->GetCount() == 0)
 	{
-		// Draw non indexed.
+		// Draw non indexed
 		glDrawArrays(GL_TRIANGLES, mesh->GetFirstIndex(),
 			mesh->GetNumIndices());
 	}
 	else
 	{
-		// Draw indexed.
+		// Draw indexed
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,
 			mesh->GetIndexData()->GetIndexBuffer()->GetGLIndexBuffer());
 		glDrawElements(GL_TRIANGLES, mesh->GetNumIndices(),

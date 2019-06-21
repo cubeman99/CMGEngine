@@ -8,6 +8,14 @@
 
 
 template <typename T>
+using Set = std::set<T>;
+template <typename T>
+using Array = std::vector<T>;
+template <typename K, typename V>
+using Map = std::map<K, V>;
+
+/*
+template <typename T>
 class Set : public std::set<T>
 {
 public:
@@ -16,7 +24,6 @@ public:
 private:
 
 };
-
 
 template <typename T>
 class Array : public std::vector<T>
@@ -37,6 +44,6 @@ public:
 private:
 
 };
-
+*/
 
 #endif // _CMG_CORE_ARRAY_H_

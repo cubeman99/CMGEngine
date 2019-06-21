@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <ctime>
+#include <cmgCore/containers/cmgArray.h>
 
 
 //-----------------------------------------------------------------------------
@@ -56,6 +57,25 @@ public:
 	inline static int NextInt(int min, int max)
 	{
 		return (min + (rand() % (max - min)));
+	}
+
+	// Choose random element from a list
+	template <typename T>
+	inline static T Choose(Array<T>& list)
+	{
+		CMG_ASSERT(list.size() > 0);
+		return list[NextInt(list.size())];
+	}
+
+	// Choose random element from a set
+	template <typename T>
+	inline static T ChooseFromSet(Set<T>& set)
+	{
+		CMG_ASSERT(set.size() > 0);
+		int index = NextInt((int) set.size());
+		auto it = set.begin();
+		std::advance(it, index);
+		return *it;
 	}
 };
 

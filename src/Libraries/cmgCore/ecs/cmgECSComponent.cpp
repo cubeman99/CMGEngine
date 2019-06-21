@@ -23,7 +23,6 @@ uint32 BaseECSComponent::RegisterComponentType(
 	typeInfo.freeFunction = freeFunction;
 	typeInfo.size = size;
 	GetComponentTypes().push_back(typeInfo);
-	printf("Registering %d\n", GetComponentTypes().size());
 	return componentId;
 }
 

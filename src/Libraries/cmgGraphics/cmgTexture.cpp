@@ -595,12 +595,23 @@ void Texture::InitRenderTarget()
 
 Texture* Texture::LoadTexture(const std::string& fileName, const TextureParams& params)
 {
-	// Read the PNG file's contents into an array.
-	Array<unsigned char> fileData;
-	if (File::OpenAndGetContents(fileName, fileData).Failed())
-		return nullptr;
+	Texture* texture;
+	LoadTexture(texture, fileName, params).Ignore();
+	return texture;
+}
 
-	// Decode the PNG file data into pixels.
+Error Texture::LoadTexture(Texture*& outTexture, const std::string& fileName, const TextureParams& params)
+{
+	// Read the PNG file's contents into an array
+	Array<unsigned char> fileData;
+	Error error = File::OpenAndGetContents(fileName, fileData);
+	if (error.Failed())
+	{
+		error.Uncheck();
+		return error;
+	}
+
+	// Decode the PNG file data into pixels
 	unsigned int width;
 	unsigned int height;
 	std::vector<unsigned char> imageData;
@@ -611,20 +622,20 @@ Texture* Texture::LoadTexture(const std::string& fileName, const TextureParams& 
 	{
 		std::cerr << "lodepng_decode32 failed: "
 			<< lodepng_error_text(lodePngState.error) << std::endl;
-		return nullptr;
+		return CMG_ERROR(CommonErrorTypes::k_file_corrupt);
 	}
 
-	// Create the texture.
+	// Create the texture
 	TextureParams texParams = params;
 	texParams.SetTarget(TextureTarget::TEXTURE_2D);
-	Texture* texture = new Texture();
-	texture->SetParams(texParams);
-	texture->WritePixels2D(width, height,
+	outTexture = new Texture();
+	outTexture->SetParams(texParams);
+	outTexture->WritePixels2D(width, height,
 		PixelTransferFormat::RGBA,
 		PixelType::TYPE_UNSIGNED_BYTE,
 		imageData.data());
 
-	return texture;
+	return CMG_ERROR_SUCCESS;
 }
 
 Error Texture::SaveTexture(Texture* texture, const Path& path)

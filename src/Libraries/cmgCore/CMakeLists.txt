@@ -18,6 +18,8 @@ set(CMG_CORE_SOURCE_FILES
 	ecs/cmgECS.cpp
 	ecs/cmgECSComponent.h
 	ecs/cmgECSComponent.cpp
+	ecs/cmgECSComponentPool.h
+	ecs/cmgECSComponentPool.cpp
 	ecs/cmgECSSystem.h
 	ecs/cmgECSSystem.cpp
 

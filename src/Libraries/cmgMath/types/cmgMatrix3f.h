@@ -120,27 +120,28 @@ struct Matrix3f
 	Matrix3f& InitRotation(const Vector3f& axis, float angle);
 	Matrix3f& InitRotation(const Quaternion& rotation);
 	Matrix3f& InitSkewSymmetric(const Vector3f& v);
-	static Matrix3f	CreateIdentity();
-	static Matrix3f	CreateTranslation(float x, float y);
-	static Matrix3f	CreateTranslation(const Vector2f& translation);
-	static Matrix3f	CreateScale3(float scale);
-	static Matrix3f	CreateScale(float x, float y);
-	static Matrix3f	CreateScale(float x, float y, float z);
-	static Matrix3f	CreateScale(const Vector2f& scale);
-	static Matrix3f	CreateScale(const Vector3f& scale);
-	static Matrix3f	CreateRotation(float angle);
-	static Matrix3f	CreateRotation(const Vector2f& origin, float angle);
-	static Matrix3f	CreateRotation(const Vector3f& axis, float angle);
-	static Matrix3f	CreateRotation(const Quaternion& rotation);
-	static Matrix3f	CreateSkewSymmetric(const Vector3f& v);
+	static Matrix3f CreateIdentity();
+	static Matrix3f CreateTranslation(float x, float y);
+	static Matrix3f CreateTranslation(const Vector2f& translation);
+	static Matrix3f CreateScale3(float scale);
+	static Matrix3f CreateScale(float x, float y);
+	static Matrix3f CreateScale(float x, float y, float z);
+	static Matrix3f CreateScale(const Vector2f& scale);
+	static Matrix3f CreateScale(const Vector3f& scale);
+	static Matrix3f CreateRotation(float angle);
+	static Matrix3f CreateRotation(const Vector2f& origin, float angle);
+	static Matrix3f CreateRotation(const Vector3f& axis, float angle);
+	static Matrix3f CreateRotation(const Quaternion& rotation);
+	static Matrix3f CreateSkewSymmetric(const Vector3f& v);
+	static Matrix3f CreateLookAt(const Vector3f& forward, const Vector3f& up);
 	
 	// Static matrix operations.
-	static Matrix3f	Multiply(const Matrix3f& left, const Matrix3f& right);
-	static void		Multiply(const Matrix3f& left, const Matrix3f& right, Matrix3f& outResult);
-	static Matrix3f	Lerp(const Matrix3f& a, const Matrix3f& b, float t);
-	static void		Lerp(const Matrix3f& a, const Matrix3f& b, float t, Matrix3f& outResult);
-	static void		Transpose(const Matrix3f& inMat, Matrix3f& outResult);
-	static void		Invert(const Matrix3f& inMat, Matrix3f& outResult);
+	static Matrix3f Multiply(const Matrix3f& left, const Matrix3f& right);
+	static void Multiply(const Matrix3f& left, const Matrix3f& right, Matrix3f& outResult);
+	static Matrix3f Lerp(const Matrix3f& a, const Matrix3f& b, float t);
+	static void Lerp(const Matrix3f& a, const Matrix3f& b, float t, Matrix3f& outResult);
+	static void Transpose(const Matrix3f& inMat, Matrix3f& outResult);
+	static void Invert(const Matrix3f& inMat, Matrix3f& outResult);
 };
 
 

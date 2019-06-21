@@ -8,6 +8,7 @@ class InputControl
 public:
 	InputControl();
 
+	void SetAmount(float amount);
 	void AddAmount(float amount);
 	float GetAmount() const;
 
@@ -23,6 +24,11 @@ inline InputControl::InputControl() :
 inline void InputControl::AddAmount(float amount)
 {
 	m_amount += amount;
+}
+
+inline void InputControl::SetAmount(float amount)
+{
+	m_amount = amount;
 }
 
 inline float InputControl::GetAmount() const

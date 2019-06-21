@@ -16,6 +16,42 @@ struct ECSTestComponentB : public ECSComponent<ECSTestComponentB>
 	uint32 y;
 };
 
+class ECSTestSystemA : public BaseECSSystem
+{
+public:
+	ECSTestSystemA() : BaseECSSystem()
+	{
+		AddComponentType<ECSTestComponentA>();
+	}
+
+	virtual void UpdateComponents(float delta, BaseECSComponent** components)
+	{
+		ECSTestComponentA* a = (ECSTestComponentA*) components[0];
+		a->x++;
+		a->y--;
+	}
+};
+
+class ECSTestSystemAB : public BaseECSSystem
+{
+public:
+	ECSTestSystemAB() : BaseECSSystem()
+	{
+		AddComponentType<ECSTestComponentA>();
+		AddComponentType<ECSTestComponentB>();
+	}
+
+	virtual void UpdateComponents(float delta, BaseECSComponent** components)
+	{
+		ECSTestComponentA* a = (ECSTestComponentA*) components[0];
+		ECSTestComponentB* b = (ECSTestComponentB*) components[1];
+		a->x += 5;
+		a->y -= 4;
+		b->x *= 2;
+		b->y /= 2;
+	}
+};
+
 
 //-----------------------------------------------------------------------------
 // ECS tests
@@ -120,5 +156,69 @@ TEST(ECS, AddGetHasComponent)
 
 	ecs.RemoveComponent<ECSTestComponentA>(entity);
 	EXPECT_FALSE(ecs.HasComponent<ECSTestComponentA>(entity));
+}
+
+
+TEST(ECS, UpdateSystems)
+{
+	ECS ecs;
+	ECSTestComponentA* aa;
+	ECSTestSystemA system;
+	ECSSystemList systems;
+	ECSTestComponentA a;
+
+	a.x = 3;
+	a.y = 7;
+
+	systems.AddSystem(system);
+
+	EntityHandle entity = ecs.CreateEntity(a);
+
+	aa = ecs.GetComponent<ECSTestComponentA>(entity);
+	EXPECT_EQ(aa->x, 3);
+	EXPECT_EQ(aa->y, 7);
+
+	ecs.UpdateSystems(systems, 1.0f);
+
+	aa = ecs.GetComponent<ECSTestComponentA>(entity);
+	EXPECT_EQ(aa->x, 4);
+	EXPECT_EQ(aa->y, 6);
+}
+
+
+TEST(ECS, UpdateSystemWithMultipleComponents)
+{
+	ECS ecs;
+	ECSTestComponentA* aa;
+	ECSTestComponentB* bb;
+	ECSTestSystemAB system;
+	ECSSystemList systems;
+	ECSTestComponentA a;
+	ECSTestComponentB b;
+
+	a.x = 3;
+	a.y = 7;
+	b.x = 8;
+	b.y = 8;
+
+	systems.AddSystem(system);
+
+	EntityHandle entity = ecs.CreateEntity(a, b);
+
+	aa = ecs.GetComponent<ECSTestComponentA>(entity);
+	bb = ecs.GetComponent<ECSTestComponentB>(entity);
+	EXPECT_EQ(aa->x, 3);
+	EXPECT_EQ(aa->y, 7);
+	EXPECT_EQ(bb->x, 8);
+	EXPECT_EQ(bb->y, 8);
+
+	ecs.UpdateSystems(systems, 1.0f);
+
+	aa = ecs.GetComponent<ECSTestComponentA>(entity);
+	bb = ecs.GetComponent<ECSTestComponentB>(entity);
+	EXPECT_EQ(aa->x, 8);
+	EXPECT_EQ(aa->y, 3);
+	EXPECT_EQ(bb->x, 16);
+	EXPECT_EQ(bb->y, 4);
 }
 

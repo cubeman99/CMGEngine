@@ -15,6 +15,7 @@
 #include <cmgCore/string/cmgString.h>
 
 #include <cmgCore/containers/cmgArray.h>
+#include <cmgCore/log/cmgLogging.h>
 #include <cmgCore/ecs/cmgECS.h>
 
 

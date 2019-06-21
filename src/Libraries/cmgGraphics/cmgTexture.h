@@ -78,6 +78,7 @@ public:
 	void InitRenderTarget();
 
 	static Texture* LoadTexture(const std::string& fileName, const TextureParams& params = TextureParams());
+	static Error LoadTexture(Texture*& outTexture, const std::string& fileName, const TextureParams& params = TextureParams());
 	static Error SaveTexture(Texture* texture, const Path& path);
 
 

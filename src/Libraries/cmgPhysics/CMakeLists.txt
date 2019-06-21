@@ -3,6 +3,8 @@ set(CMG_PHYSICS_SOURCE_FILES
 	
 	cmg_physics.h
 
+	cmgMotionIntegrators.h
+
 	cmgRigidBody.h
 	cmgRigidBody.cpp
 
@@ -42,6 +44,8 @@ set(CMG_PHYSICS_SOURCE_FILES
 	colliders/cmgPolygonCollider.cpp
 	colliders/cmgConvexMeshCollider.h
 	colliders/cmgConvexMeshCollider.cpp
+
+	ecs/cmgPhysicsComponents.h
 )
 
 cmg_install_library(cmgPhysics "${CMG_PHYSICS_SOURCE_FILES}")

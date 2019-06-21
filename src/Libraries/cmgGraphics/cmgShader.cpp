@@ -168,6 +168,22 @@ Error Shader::SetSampler(const String& samplerName,
 
 
 //-----------------------------------------------------------------------------
+// Static methods
+//-----------------------------------------------------------------------------
+
+Error Shader::LoadShader(Shader*& outShader, const Path& vertexPath, const Path& fragmentPath)
+{
+	outShader = new Shader();
+	String vertexCode, fragmentCode;
+	File::OpenAndGetContents(vertexPath, vertexCode);
+	File::OpenAndGetContents(fragmentPath, fragmentCode);
+	outShader->AddStage(ShaderType::k_vertex_shader, vertexCode, "vertex shader");
+	outShader->AddStage(ShaderType::k_fragment_shader, fragmentCode, "fragment shader");
+	return outShader->CompileAndLink();
+}
+
+
+//-----------------------------------------------------------------------------
 // Private methods
 //-----------------------------------------------------------------------------
 

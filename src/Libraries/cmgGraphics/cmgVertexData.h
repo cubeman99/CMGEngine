@@ -297,16 +297,17 @@ class VertexBuffer
 	friend class Renderer;
 
 public:
-	// Constructors/destructor.
+	// Constructors/destructor
 	VertexBuffer();
 	~VertexBuffer();
 	
-	// Accessors.
+	// Accessors
 	int GetVertexCount() const;
 	inline unsigned int GetGLVertexBuffer() const { return m_glVertexBuffer; }
 	inline unsigned int GetGLVertexArray() const { return m_glVertexArray; }
 
-	// Mutators.
+	// Mutators
+	void SetVertices(int numVertices, const Vector3f* vertices);
 	template <class T>
 	void SetVertices(int numVertices, const T* vertices);
 
@@ -315,13 +316,14 @@ public:
 		const VertexAttributeInfo* attribs,
 		unsigned int numAttribs);
 
-
 private:
-	int				m_numVertices;		// Number of vertices in the buffer.
-	int				m_bufferSize;		// Size in bytes of the vertex buffer.
-	unsigned int	m_glVertexBuffer;	// OpenGL vertex buffer ID.
-	unsigned int	m_glVertexArray;	// OpenGL vertex array object ID.
-	unsigned int	m_vertexType;
+	void SetVerticesRaw(unsigned int vertexType, int sizeOfVertex, int numVertices, const void* vertices);
+
+	int m_numVertices; // Number of vertices in the buffer.
+	int m_bufferSize; // Size in bytes of the vertex buffer.
+	unsigned int m_glVertexBuffer; // OpenGL vertex buffer ID.
+	unsigned int m_glVertexArray; // OpenGL vertex array object ID.
+	unsigned int m_vertexType;
 };
 
 
@@ -391,6 +393,14 @@ public:
 		m_vertexBuffer.SetVertices(numVertices, vertices);
 	}
 
+	template <class T>
+	void BufferVertices(const Array<T>& vertices)
+	{
+		m_vertexStart = 0;
+		m_vertexCount = vertices.size();
+		m_vertexBuffer.SetVertices((int) vertices.size(), vertices.data());
+	}
+
 	void SetVertexRange(unsigned int start, unsigned int count)
 	{
 		m_vertexStart = start;
@@ -421,26 +431,16 @@ public:
 	IndexData();
 	IndexData(unsigned int start, unsigned int count);
 	~IndexData();
-		
-	void BufferIndices(unsigned int numIndices, const unsigned int* indices)
-	{
-		m_indexStart = 0;
-		m_indexCount = numIndices;
-		m_indexBuffer.SetIndices(numIndices, indices);
-	}
-
-	void SetIndexRange(unsigned int start, unsigned int count)
-	{
-		m_indexStart = start;
-		m_indexCount = count;
-	}
-
-	inline void SetIndexStart(unsigned int start) { m_indexStart = start; }
-	inline void SetIndexCount(unsigned int count) { m_indexCount = count; }
 
 	inline unsigned int GetStart() const { return m_indexStart; }
 	inline unsigned int GetCount() const { return m_indexCount; }
 	inline IndexBuffer* GetIndexBuffer() { return &m_indexBuffer; }
+
+	inline void SetIndexStart(unsigned int start) { m_indexStart = start; }
+	inline void SetIndexCount(unsigned int count) { m_indexCount = count; }
+	void BufferIndices(const Array<unsigned int>& indices);		
+	void BufferIndices(unsigned int numIndices, const unsigned int* indices);
+	void SetIndexRange(unsigned int start, unsigned int count);
 
 
 public:
@@ -458,66 +458,7 @@ public:
 template <class T>
 void VertexBuffer::SetVertices(int numVertices, const T* vertices)
 {
-	glBindBuffer(GL_ARRAY_BUFFER, m_glVertexBuffer);
-
-	// Buffer the vertex data.
-	int newBufferSize = numVertices * sizeof(T);
-	if (m_bufferSize < 0)
-	{
-		// Buffer new vertices.
-		glBufferData(GL_ARRAY_BUFFER, newBufferSize, vertices, GL_STATIC_DRAW);
-		m_bufferSize = newBufferSize;
-	}
-	else
-	{
-		// Buffer over existing vertices.
-		CMG_ASSERT_MSG(newBufferSize <= m_bufferSize,
-			"You cannot increase the buffer size"); // We mustn't increase the buffer size.
-		glBufferSubData(GL_ARRAY_BUFFER, 0, newBufferSize, vertices);
-	}
-		
-	// Set the attribute locations.
-	glBindVertexArray(m_glVertexArray);
-
-	unsigned int offset = 0;
-	unsigned int index = 0;
-	int sizeOfVertex = sizeof(T);
-
-	m_vertexType = T::kVertexType;
-
-	if (m_vertexType & VertexType::k_position)
-	{
-		glEnableVertexAttribArray(index);
-		glVertexAttribPointer(index, 3, GL_FLOAT, GL_FALSE, sizeOfVertex, (void*) offset);
-		offset += sizeof(Vector3f);
-	}
-		index++;
-	if (m_vertexType & VertexType::k_tex_coord)
-	{
-		glEnableVertexAttribArray(index);
-		glVertexAttribPointer(index, 2, GL_FLOAT, GL_FALSE, sizeOfVertex, (void*) offset);
-		offset += sizeof(Vector2f);
-	}
-		index++;
-	if (m_vertexType & VertexType::k_normal)
-	{
-		glEnableVertexAttribArray(index);
-		glVertexAttribPointer(index, 3, GL_FLOAT, GL_FALSE, sizeOfVertex, (void*) offset);
-		offset += sizeof(Vector3f);
-	}
-		index++;
-	if (m_vertexType & VertexType::k_color)
-	{
-		glEnableVertexAttribArray(index);
-		glVertexAttribPointer(index, 4, GL_FLOAT, GL_FALSE, sizeOfVertex, (void*) offset);
-		offset += sizeof(Vector4f);
-	}
-		index++;
-	// TODO: Bone and TBN attributes.
-
-	glBindVertexArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	m_numVertices = numVertices;
+	SetVerticesRaw(T::kVertexType, sizeof(T), numVertices, vertices);
 }
 
 

@@ -5,9 +5,10 @@
 #include <tuple>
 
 struct BaseECSComponent;
+
 typedef void* EntityHandle;
-typedef uint32(*ECSComponentCreateFunction)(Array<uint8>& memory,
-	EntityHandle entity, const BaseECSComponent* component);
+typedef BaseECSComponent* (*ECSComponentCreateFunction)(
+	void* location, const BaseECSComponent* component);
 typedef void(*ECSComponentFreeFunction)(BaseECSComponent* component);
 #define NULL_ENTITY_HANDLE nullptr
 
@@ -73,18 +74,10 @@ public:
 	static const size_t SIZE;
 };
 
-
 template <typename T_Component>
-uint32 ECSComponentCreate(Array<uint8>& memory,
-	EntityHandle entity, const BaseECSComponent* component)
+BaseECSComponent* ECSComponentCreate(void* location, const BaseECSComponent* component)
 {
-	// Reserve memeory for the component then invoke the copy constructor
-	uint32 index = memory.size();
-	memory.resize(index + T_Component::SIZE);
-	T_Component* newComponent = new (&memory[index])
-		T_Component(*(T_Component*) component);
-	newComponent->entity = entity;
-	return index;
+	return new (location) T_Component(*(T_Component*) component);
 }
 
 template <typename T_Component>

@@ -188,7 +188,7 @@ template <typename T>
 T Math::Remainder(T numerator, T denominator)
 {
 	// UNIMPLEMENTED FUNCTION!!!
-	return T(0);
+	return numerator % denominator;
 }
 
 template <typename T>
@@ -197,7 +197,7 @@ T Math::Wrap(T x, T y)
 	if (x > (T) 0)
 		return Remainder(x, y);
 	else
-		return return Remainder(y - Remainder(-x, y), y);
+		return Remainder(y - Remainder(-x, y), y);
 }
 	
 

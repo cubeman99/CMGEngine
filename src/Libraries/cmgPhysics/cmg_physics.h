@@ -2,6 +2,7 @@
 #define _CMG_PHYSICS_INCLUDE_ALL_H_
 
 
+#include <cmgPhysics/cmgMotionIntegrators.h>
 #include <cmgPhysics/cmgRigidBody.h>
 #include <cmgPhysics/cmgPhysicsEngine.h>
 #include <cmgPhysics/cmgPhysicsPrimitives.h>
@@ -14,6 +15,7 @@
 #include <cmgPhysics/colliders/cmgConeCollider.h>
 #include <cmgPhysics/colliders/cmgConvexMeshCollider.h>
 #include <cmgPhysics/colliders/cmgPolygonCollider.h>
+#include <cmgPhysics/ecs/cmgPhysicsComponents.h>
 
 
 #endif // _CMG_PHYSICS_INCLUDE_ALL_H_

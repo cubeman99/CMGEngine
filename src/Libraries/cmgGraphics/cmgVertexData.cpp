@@ -74,6 +74,75 @@ int VertexBuffer::GetVertexCount() const
 	return m_numVertices;
 }
 
+void VertexBuffer::SetVertices(int numVertices, const Vector3f* vertices)
+{
+	SetVerticesRaw(VertexType::k_position, sizeof(Vector3f), numVertices, vertices);
+}
+
+void VertexBuffer::SetVerticesRaw(unsigned int vertexType,
+	int sizeOfVertex, int numVertices, const void* vertices)
+{
+	glBindBuffer(GL_ARRAY_BUFFER, m_glVertexBuffer);
+
+	// Buffer the vertex data
+	int newBufferSize = numVertices * sizeOfVertex;
+	if (m_bufferSize != newBufferSize)
+	{
+		// Buffer new vertices
+		glBufferData(GL_ARRAY_BUFFER, newBufferSize, vertices, GL_STATIC_DRAW);
+		m_bufferSize = newBufferSize;
+	}
+	else
+	{
+		// Buffer over existing vertices
+		CMG_ASSERT_MSG(newBufferSize <= m_bufferSize,
+			"You cannot increase the buffer size"); // We mustn't increase the buffer size.
+		glBufferSubData(GL_ARRAY_BUFFER, 0, newBufferSize, vertices);
+	}
+
+	// Set the attribute locations
+	glBindVertexArray(m_glVertexArray);
+
+	unsigned int offset = 0;
+	unsigned int index = 0;
+
+	m_vertexType = vertexType;
+
+	if (m_vertexType & VertexType::k_position)
+	{
+		glEnableVertexAttribArray(index);
+		glVertexAttribPointer(index, 3, GL_FLOAT, GL_FALSE, sizeOfVertex, (void*) offset);
+		offset += sizeof(Vector3f);
+	}
+	index++;
+	if (m_vertexType & VertexType::k_tex_coord)
+	{
+		glEnableVertexAttribArray(index);
+		glVertexAttribPointer(index, 2, GL_FLOAT, GL_FALSE, sizeOfVertex, (void*) offset);
+		offset += sizeof(Vector2f);
+	}
+	index++;
+	if (m_vertexType & VertexType::k_normal)
+	{
+		glEnableVertexAttribArray(index);
+		glVertexAttribPointer(index, 3, GL_FLOAT, GL_FALSE, sizeOfVertex, (void*) offset);
+		offset += sizeof(Vector3f);
+	}
+	index++;
+	if (m_vertexType & VertexType::k_color)
+	{
+		glEnableVertexAttribArray(index);
+		glVertexAttribPointer(index, 4, GL_FLOAT, GL_FALSE, sizeOfVertex, (void*) offset);
+		offset += sizeof(Vector4f);
+	}
+	index++;
+	// TODO: Bone and TBN attributes.
+
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	m_numVertices = numVertices;
+}
+
 void VertexBuffer::BufferVertices(
 	unsigned int numVertices,
 	const VertexAttributeInfo* attribs,
@@ -188,5 +257,23 @@ IndexData::IndexData(unsigned int start, unsigned int count) :
 
 IndexData::~IndexData()
 {
+}
+
+void IndexData::BufferIndices(const Array<unsigned int>& indices)
+{
+	BufferIndices(indices.size(), indices.data());
+}
+
+void IndexData::BufferIndices(unsigned int numIndices, const unsigned int* indices)
+{
+	m_indexStart = 0;
+	m_indexCount = numIndices;
+	m_indexBuffer.SetIndices(numIndices, indices);
+}
+
+void IndexData::SetIndexRange(unsigned int start, unsigned int count)
+{
+	m_indexStart = start;
+	m_indexCount = count;
 }
 

@@ -26,6 +26,7 @@ public:
 	virtual void OnDropText(const String& text) {}
 
 
+	inline float GetFPS() { return m_perceivedFps; }
 	inline Window* GetWindow() { return &m_window; }
 	inline InputManager* GetInputManager() { return &m_inputManager; }
 	inline Mouse* GetMouse() { return m_mouse; }
@@ -37,6 +38,7 @@ private:
 	InputManager m_inputManager;
 	Keyboard* m_keyboard;
 	Mouse* m_mouse;
+	float m_perceivedFps;
 
 	bool m_isQuitRequested;
 	bool m_isInitialized;

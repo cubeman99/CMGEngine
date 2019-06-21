@@ -726,3 +726,16 @@ Matrix3f Matrix3f::CreateSkewSymmetric(const Vector3f& v)
 	result.InitSkewSymmetric(v);
 	return result;
 }
+
+Matrix3f Matrix3f::CreateLookAt(const Vector3f& forward, const Vector3f& up)
+{
+	Vector3f right = Vector3f::Cross(forward, up);
+	right.Normalize();
+	Vector3f newUp = Vector3f::Cross(right, forward);
+	newUp.Normalize();
+	Matrix3f result;
+	result.c0 = forward;
+	result.c1 = newUp;
+	result.c2 = right;
+	return result;
+}

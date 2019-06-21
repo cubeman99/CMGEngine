@@ -114,6 +114,8 @@ namespace
 
 };
 
+Shader* Renderer::s_defaultShader = nullptr;
+
 
 Renderer::Renderer() :
 	m_activeShader(nullptr),

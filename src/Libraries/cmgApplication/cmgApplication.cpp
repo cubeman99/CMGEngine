@@ -2,9 +2,10 @@
 #include <GL/GL.h>
 
 
-Application::Application() :
-	m_isInitialized(false),
-	m_isQuitRequested(false)
+Application::Application()
+	: m_isInitialized(false)
+	, m_isQuitRequested(false)
+	, m_perceivedFps(0.0f)
 {
 }
 

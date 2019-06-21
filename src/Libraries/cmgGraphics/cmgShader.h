@@ -120,6 +120,8 @@ public:
 
 	inline unsigned int GetGLProgram() const { return m_glProgram; }
 
+	static Error LoadShader(Shader*& outShader, const Path& vertexPath, const Path& fragmentPath);
+
 private:
 	Error Compile();
 	Error CompileStage(ShaderType stage);

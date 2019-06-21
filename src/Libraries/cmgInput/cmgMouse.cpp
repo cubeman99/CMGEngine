@@ -38,6 +38,9 @@ void Mouse::Reset()
 	
 void Mouse::Update()
 {
+	m_previousState = m_currentState;
+	m_currentState.buttons = 0;
+
 	// Get the mouse's device state.
 	HRESULT hRes = m_mouse->GetDeviceState(s_mouseBufferSize, &m_mouseBuffer);
 
