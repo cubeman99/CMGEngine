@@ -4,6 +4,8 @@ set(CMG_MATH_SOURCE_FILES
 	cmg_math.h
 	cmgMathLib.h
 	cmgMathLib.cpp
+
+	ecs/cmgTransformComponent.h
 	
 	noise/cmgNoise.h
 	noise/cmgNoise.cpp

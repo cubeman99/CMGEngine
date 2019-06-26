@@ -28,10 +28,7 @@ set(CMG_GRAPHICS_SOURCE_FILES
 	cmgDebugDraw.h
 	cmgDebugDraw.cpp
 		
-	scene/cmgScene.h
-	scene/cmgScene.cpp
-	scene/cmgSceneNode.h
-	scene/cmgSceneNode.cpp
+	ecs/cmgArcBall.h
 
 	render/cmgRenderDevice.h
 	render/cmgRenderDevice.cpp

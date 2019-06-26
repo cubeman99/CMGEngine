@@ -2,13 +2,9 @@
 #define _CMG_MATH_INCLUDE_ALL_H_
 
 
-// Math
 #include <cmgMath/cmgMathLib.h>
-
-// Noise
+#include <cmgMath/ecs/cmgTransformComponent.h>
 #include <cmgMath/noise/cmgNoise.h>
-
-// Types
 #include <cmgMath/types/cmgBBox2f.h>
 #include <cmgMath/types/cmgBounds.h>
 #include <cmgMath/types/cmgCircle2f.h>

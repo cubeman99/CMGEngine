@@ -542,36 +542,36 @@ Mesh* Primitives::CreateCube()
 {
 	float r = 1.0f;
 
-	VertexPosNorm vertices[] = {
-		VertexPosNorm(Vector3f(-r,  r, -r), Vector3f::UNITY), // Top
-		VertexPosNorm(Vector3f( r,  r, -r), Vector3f::UNITY),
-		VertexPosNorm(Vector3f( r,  r,  r), Vector3f::UNITY),
-		VertexPosNorm(Vector3f(-r,  r,  r), Vector3f::UNITY),
+	VertexPosTexNorm vertices[] = {
+		VertexPosTexNorm(Vector3f(-r,  r, -r), Vector2f(0.0f, 0.0f), Vector3f::UNITY), // Top
+		VertexPosTexNorm(Vector3f( r,  r, -r), Vector2f(1.0f, 0.0f), Vector3f::UNITY),
+		VertexPosTexNorm(Vector3f( r,  r,  r), Vector2f(1.0f, 1.0f), Vector3f::UNITY),
+		VertexPosTexNorm(Vector3f(-r,  r,  r), Vector2f(0.0f, 1.0f), Vector3f::UNITY),
 
-		VertexPosNorm(Vector3f(-r, -r,  r), Vector3f::NEG_UNITY), // Bottom
-		VertexPosNorm(Vector3f( r, -r,  r), Vector3f::NEG_UNITY),
-		VertexPosNorm(Vector3f( r, -r, -r), Vector3f::NEG_UNITY),
-		VertexPosNorm(Vector3f(-r, -r, -r), Vector3f::NEG_UNITY),
+		VertexPosTexNorm(Vector3f(-r, -r,  r), Vector2f(0.0f, 0.0f), Vector3f::NEG_UNITY), // Bottom
+		VertexPosTexNorm(Vector3f( r, -r,  r), Vector2f(1.0f, 0.0f), Vector3f::NEG_UNITY),
+		VertexPosTexNorm(Vector3f( r, -r, -r), Vector2f(1.0f, 1.0f), Vector3f::NEG_UNITY),
+		VertexPosTexNorm(Vector3f(-r, -r, -r), Vector2f(0.0f, 1.0f), Vector3f::NEG_UNITY),
 		
-		VertexPosNorm(Vector3f( r, -r,  r), Vector3f::UNITX), // Right
-		VertexPosNorm(Vector3f( r,  r,  r), Vector3f::UNITX),
-		VertexPosNorm(Vector3f( r,  r, -r), Vector3f::UNITX),
-		VertexPosNorm(Vector3f( r, -r, -r), Vector3f::UNITX),
+		VertexPosTexNorm(Vector3f( r, -r,  r), Vector2f(0.0f, 0.0f), Vector3f::UNITX), // Right
+		VertexPosTexNorm(Vector3f( r,  r,  r), Vector2f(1.0f, 0.0f), Vector3f::UNITX),
+		VertexPosTexNorm(Vector3f( r,  r, -r), Vector2f(1.0f, 1.0f), Vector3f::UNITX),
+		VertexPosTexNorm(Vector3f( r, -r, -r), Vector2f(0.0f, 1.0f), Vector3f::UNITX),
 
-		VertexPosNorm(Vector3f(-r, -r, -r), Vector3f::NEG_UNITX), // Left
-		VertexPosNorm(Vector3f(-r,  r, -r), Vector3f::NEG_UNITX),
-		VertexPosNorm(Vector3f(-r,  r,  r), Vector3f::NEG_UNITX),
-		VertexPosNorm(Vector3f(-r, -r,  r), Vector3f::NEG_UNITX),
+		VertexPosTexNorm(Vector3f(-r, -r, -r), Vector2f(0.0f, 0.0f), Vector3f::NEG_UNITX), // Left
+		VertexPosTexNorm(Vector3f(-r,  r, -r), Vector2f(1.0f, 0.0f), Vector3f::NEG_UNITX),
+		VertexPosTexNorm(Vector3f(-r,  r,  r), Vector2f(1.0f, 1.0f), Vector3f::NEG_UNITX),
+		VertexPosTexNorm(Vector3f(-r, -r,  r), Vector2f(0.0f, 1.0f), Vector3f::NEG_UNITX),
 		
-		VertexPosNorm(Vector3f( r, -r, -r), Vector3f::NEG_UNITZ), // Front
-		VertexPosNorm(Vector3f( r,  r, -r), Vector3f::NEG_UNITZ),
-		VertexPosNorm(Vector3f(-r,  r, -r), Vector3f::NEG_UNITZ),
-		VertexPosNorm(Vector3f(-r, -r, -r), Vector3f::NEG_UNITZ),
+		VertexPosTexNorm(Vector3f( r, -r, -r), Vector2f(0.0f, 0.0f), Vector3f::NEG_UNITZ), // Front
+		VertexPosTexNorm(Vector3f( r,  r, -r), Vector2f(1.0f, 0.0f), Vector3f::NEG_UNITZ),
+		VertexPosTexNorm(Vector3f(-r,  r, -r), Vector2f(1.0f, 1.0f), Vector3f::NEG_UNITZ),
+		VertexPosTexNorm(Vector3f(-r, -r, -r), Vector2f(0.0f, 1.0f), Vector3f::NEG_UNITZ),
 		
-		VertexPosNorm(Vector3f(-r, -r,  r), Vector3f::UNITZ), // Back
-		VertexPosNorm(Vector3f(-r,  r,  r), Vector3f::UNITZ),
-		VertexPosNorm(Vector3f( r,  r,  r), Vector3f::UNITZ),
-		VertexPosNorm(Vector3f( r, -r,  r), Vector3f::UNITZ),
+		VertexPosTexNorm(Vector3f(-r, -r,  r), Vector2f(0.0f, 0.0f), Vector3f::UNITZ), // Back
+		VertexPosTexNorm(Vector3f(-r,  r,  r), Vector2f(1.0f, 0.0f), Vector3f::UNITZ),
+		VertexPosTexNorm(Vector3f( r,  r,  r), Vector2f(1.0f, 1.0f), Vector3f::UNITZ),
+		VertexPosTexNorm(Vector3f( r, -r,  r), Vector2f(0.0f, 1.0f), Vector3f::UNITZ),
 	};
 
 	unsigned int indices[] = {

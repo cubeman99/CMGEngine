@@ -20,6 +20,7 @@ struct UniformType
 		k_unknown = -1,
 		k_texture = 0,
 		k_integer,
+		k_unsigned_integer,
 		k_vec2,
 		k_vec3,
 		k_vec4,
@@ -121,6 +122,7 @@ public:
 	inline unsigned int GetGLProgram() const { return m_glProgram; }
 
 	static Error LoadShader(Shader*& outShader, const Path& vertexPath, const Path& fragmentPath);
+	static Error LoadComputeShader(Shader*& outShader, const Path& path);
 
 private:
 	Error Compile();

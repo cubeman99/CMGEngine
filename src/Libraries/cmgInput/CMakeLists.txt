@@ -15,6 +15,9 @@ set(CMG_INPUT_SOURCE_FILES
 	cmgJoystick.cpp
 	cmgDirectInputIncludes.h
 	cmgInputControl.h
+
+	ecs/cmgArcBallControlSystem.h
+	ecs/cmgArcBallControlSystem.cpp
 )
 
 cmg_install_library(cmgInput "${CMG_INPUT_SOURCE_FILES}")

@@ -171,14 +171,26 @@ Error Shader::SetSampler(const String& samplerName,
 // Static methods
 //-----------------------------------------------------------------------------
 
-Error Shader::LoadShader(Shader*& outShader, const Path& vertexPath, const Path& fragmentPath)
+Error Shader::LoadShader(Shader*& outShader,
+	const Path& vertexPath, const Path& fragmentPath)
 {
 	outShader = new Shader();
 	String vertexCode, fragmentCode;
 	File::OpenAndGetContents(vertexPath, vertexCode);
 	File::OpenAndGetContents(fragmentPath, fragmentCode);
-	outShader->AddStage(ShaderType::k_vertex_shader, vertexCode, "vertex shader");
-	outShader->AddStage(ShaderType::k_fragment_shader, fragmentCode, "fragment shader");
+	outShader->AddStage(ShaderType::k_vertex_shader,
+		vertexCode, vertexPath.GetPath());
+	outShader->AddStage(ShaderType::k_fragment_shader,
+		fragmentCode, fragmentPath.GetPath());
+	return outShader->CompileAndLink();
+}
+
+Error Shader::LoadComputeShader(Shader*& outShader, const Path& path)
+{
+	outShader = new Shader();
+	String code;
+	File::OpenAndGetContents(path, code);
+	outShader->AddStage(ShaderType::k_compute_shader, code, path.GetPath());
 	return outShader->CompileAndLink();
 }
 
@@ -339,6 +351,9 @@ void Shader::GenerateUniforms()
 		case GL_INT:
 			uniform.m_type = UniformType::k_integer;
 			break;
+		case GL_UNSIGNED_INT:
+			uniform.m_type = UniformType::k_unsigned_integer;
+			break;
 		case GL_FLOAT:
 			uniform.m_type = UniformType::k_float;
 			break;
@@ -361,8 +376,9 @@ void Shader::GenerateUniforms()
 			uniform.m_samplerSlot = samplerSlot++;
 			break;
 		default:
-			//fprintf(stderr, "Warning: unsupported GLSL uniform type for '%s'\n", uniformName);
-			CMG_ASSERT_FALSE("Unsupported uniform type");
+			fprintf(stderr, "Warning: unsupported GLSL uniform type for '%s'\n", uniformName);
+			//CMG_ASSERT_FALSE("Unsupported uniform type");
+			uniform.m_type = UniformType::k_unknown;
 			break;
 		}
 	}

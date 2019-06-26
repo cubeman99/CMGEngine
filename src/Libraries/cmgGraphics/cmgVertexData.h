@@ -158,9 +158,16 @@ struct VertexPosTexNorm
 						VertexType::k_tex_coord |
 						VertexType::k_normal);
 
-	Vector3f	position;
-	Vector2f	texCoord;
-	Vector3f	normal;
+	Vector3f position;
+	Vector2f texCoord;
+	Vector3f normal;
+
+	VertexPosTexNorm()
+	{}
+
+	VertexPosTexNorm(const Vector3f& position, const Vector2f& texCoord, const Vector3f& normal) :
+		position(position), texCoord(texCoord), normal(normal)
+	{}
 };
 
 struct VertexPosTexCol
@@ -169,9 +176,9 @@ struct VertexPosTexCol
 						VertexType::k_tex_coord |
 						VertexType::k_color);
 
-	Vector3f	position;
-	Vector2f	texCoord;
-	Vector4f	color;
+	Vector3f position;
+	Vector2f texCoord;
+	Vector4f color;
 };
 
 struct VertexPosNormCol

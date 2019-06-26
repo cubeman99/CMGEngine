@@ -1,16 +1,11 @@
 #ifndef _CMG_PHYSICS_ECS_PHYSICS_COMPONENTS_H_
 #define _CMG_PHYSICS_ECS_PHYSICS_COMPONENTS_H_
 
-#include <cmgMath/types/cmgTransform3f.h>
-#include <cmgMath/types/cmgMatrix4f.h>
 #include <cmgCore/ecs/cmgECSSystem.h>
+#include <cmgMath/types/cmgMatrix4f.h>
+#include <cmgMath/ecs/cmgTransformComponent.h>
 #include <cmgPhysics/cmgMotionIntegrators.h>
 
-
-struct TransformComponent : public ECSComponent<TransformComponent>
-{
-	Transform3f transform;
-};
 
 struct LinearMotionComponent : public ECSComponent<LinearMotionComponent>
 {

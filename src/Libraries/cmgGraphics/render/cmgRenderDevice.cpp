@@ -46,7 +46,37 @@ Error OpenGLRenderDevice::CreateShaderProgram(Shader** outShader,
 	return shaderError;
 }
 
-Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, float value)
+Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, int32 value)
+{
+	int32 uniformLocation;
+	SetShader(shader);
+	if (shader->GetUniformLocation(name, uniformLocation))
+	{
+		glUniform1i(uniformLocation, value);
+		return CMG_ERROR_SUCCESS;
+	}
+	else
+	{
+		return CMG_ERROR_FAILURE;
+	}
+}
+
+Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, uint32 value)
+{
+	int32 uniformLocation;
+	SetShader(shader);
+	if (shader->GetUniformLocation(name, uniformLocation))
+	{
+		glUniform1ui(uniformLocation, value);
+		return CMG_ERROR_SUCCESS;
+	}
+	else
+	{
+		return CMG_ERROR_FAILURE;
+	}
+}
+
+Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, float32 value)
 {
 	int32 uniformLocation;
 	SetShader(shader);
@@ -121,6 +151,15 @@ Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, c
 	}
 }
 
+Error OpenGLRenderDevice::SetTextureSampler(Shader* shader,
+	const String& name, Texture* texture, uint32 slot)
+{
+	SetShader(shader);
+	glActiveTexture(GL_TEXTURE0 + slot);
+	glBindTexture(GL_TEXTURE_2D, texture->m_glTextureId);
+	return SetShaderUniform(shader, name, (int) slot);
+}
+
 Error OpenGLRenderDevice::SetShaderSampler(Shader* shader,
 	const String& samplerName, Texture* texture, Sampler* sampler, uint32 slot)
 {
@@ -128,7 +167,6 @@ Error OpenGLRenderDevice::SetShaderSampler(Shader* shader,
 	glActiveTexture(GL_TEXTURE0 + slot);
 	glBindTexture(GL_TEXTURE_2D, texture->m_glTextureId);
 	glBindSampler(slot, sampler->GetId());
-
 
 	int32 uniformLocation;
 	if (shader->GetUniformLocation(samplerName, uniformLocation))
@@ -183,17 +221,34 @@ void OpenGLRenderDevice::Draw(RenderTarget* target, Shader* shader, Mesh* mesh)
 	if (mesh->GetIndexData()->GetCount() == 0)
 	{
 		// Draw non-indexed polygons
-		glDrawArrays(GL_TRIANGLES, mesh->GetFirstIndex(),
-			mesh->GetNumIndices());
+		if (mesh->GetNumIndices() > 0)
+		{
+			glDrawArrays(GL_TRIANGLES, mesh->GetFirstIndex(),
+				mesh->GetNumIndices());
+		}
 	}
 	else
 	{
+		uint32 start, count;
+		if (mesh->GetNumIndices() == 0)
+		{
+			start = mesh->GetIndexData()->GetStart();
+			count = mesh->GetIndexData()->GetCount();
+		}
+		else
+		{
+			start = mesh->GetFirstIndex();
+			count = mesh->GetNumIndices();
+		}
 		// Draw indexed polygons
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,
-			mesh->GetIndexData()->GetIndexBuffer()->GetGLIndexBuffer());
-		glDrawElements(GL_TRIANGLES, mesh->GetNumIndices(),
-			GL_UNSIGNED_INT, ((unsigned int*) 0) + mesh->GetFirstIndex());
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		if (count > 0)
+		{
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,
+				mesh->GetIndexData()->GetIndexBuffer()->GetGLIndexBuffer());
+			glDrawElements(GL_TRIANGLES, count,
+				GL_UNSIGNED_INT, ((unsigned int*) 0) + start);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		}
 	}
 
 	glBindVertexArray(0);

@@ -23,11 +23,15 @@ public:
 		const TextureParams& params);
 
 	Error CreateShaderProgram(Shader** outShader, const String& vertexCode, const String& fragmentCode);
-	Error SetShaderUniform(Shader* shader, const String& name, float value);
+	Error SetShaderUniform(Shader* shader, const String& name, int32 value);
+	Error SetShaderUniform(Shader* shader, const String& name, uint32 value);
+	Error SetShaderUniform(Shader* shader, const String& name, float32 value);
 	Error SetShaderUniform(Shader* shader, const String& name, const Vector2f& value);
 	Error SetShaderUniform(Shader* shader, const String& name, const Vector3f& value);
 	Error SetShaderUniform(Shader* shader, const String& name, const Vector4f& value);
 	Error SetShaderUniform(Shader* shader, const String& name, const Matrix4f& value);
+	Error SetTextureSampler(Shader* shader, const String& name,
+		Texture* texture, uint32 slot);
 	Error SetShaderSampler(Shader* shader, const String& samplerName,
 		Texture* texture, Sampler* sampler, uint32 slot);
 
