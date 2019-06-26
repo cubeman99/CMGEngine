@@ -8,8 +8,6 @@ set(CMG_MATH_SOURCE_FILES
 	ecs/cmgTransformComponent.h
 	
 	noise/cmgNoise.h
-	noise/cmgNoise.cpp
-	noise/cmgNoiseData.h
 
 	types/cmgBBox2f.h
 	types/cmgBBox2f.cpp
