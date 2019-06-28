@@ -1,13 +1,13 @@
 #ifndef _CMG_RECT_2I_H_
 #define _CMG_RECT_2I_H_
 
-#include <cmgMath/types/cmgPoint2i.h>
+#include <cmgMath/types/cmgVector2.h>
 
 
 // Axis-aligned, 2D floating-point rectangle.
 struct Rect2i
 {
-	Point2i position, size;
+	Vector2i position, size;
 
 	
 	// Constants.
@@ -16,7 +16,7 @@ struct Rect2i
 	// Constructors.
 	Rect2i();
 	Rect2i(int x, int y, int width, int height);
-	Rect2i(const Point2i& position, const Point2i& size);
+	Rect2i(const Vector2i& position, const Vector2i& size);
 
 	// Accessors.
 	inline int		GetX()				const { return position.x; }
@@ -29,12 +29,12 @@ struct Rect2i
 	inline int		GetBottom()			const { return position.y + size.y; }
 	inline int		GetArea()			const { return size.x * size.y; }
 	inline int		GetParimeter()		const { return 2 * (size.x + size.y); }
-	inline Point2i	GetTopLeft()		const { return position; }
-	inline Point2i	GetTopRight()		const { return Point2i(position.x + size.x, position.y); }
-	inline Point2i	GetBottomLeft()		const { return Point2i(position.x, position.y + size.y); }
-	inline Point2i	GetBottomRight()	const { return position + size; }
-	inline Point2i	GetCenter()			const { return position + (size / 2); }
-	bool Contains(const Point2i& v)		const;
+	inline Vector2i	GetTopLeft()		const { return position; }
+	inline Vector2i	GetTopRight()		const { return Vector2i(position.x + size.x, position.y); }
+	inline Vector2i	GetBottomLeft()		const { return Vector2i(position.x, position.y + size.y); }
+	inline Vector2i	GetBottomRight()	const { return position + size; }
+	inline Vector2i	GetCenter()			const { return position + (size / 2); }
+	bool Contains(const Vector2i& v)		const;
 	bool Contains(const Rect2i& r)		const;
 	bool Intersects(const Rect2i& r)	const;
 
@@ -44,12 +44,12 @@ struct Rect2i
 	inline void SetWidth(int width)		{ size.x = width; }
 	inline void SetHeight(int height)	{ size.y = height; }
 	Rect2i& Set(int x, int y, int width, int height);
-	Rect2i& Set(const Point2i& position, const Point2i& size);
+	Rect2i& Set(const Vector2i& position, const Vector2i& size);
 	Rect2i& Inset(int left, int top, int right, int bottom);
 	Rect2i& Inset(int horizontal, int vertical);
 	Rect2i& Inflate(int left, int top, int right, int bottom);
 	Rect2i& Inflate(int horizontal, int vertical);
-	Rect2i& Translate(const Point2i& amount);
+	Rect2i& Translate(const Vector2i& amount);
 	Rect2i& Translate(int x, int y);
 
 	// Static Methods.

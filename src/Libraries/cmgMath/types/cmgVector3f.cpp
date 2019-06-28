@@ -2,7 +2,6 @@
 #include <cmgMath/types/cmgVector2f.h>
 #include <cmgMath/types/cmgMatrix3f.h>
 #include <cmgMath/types/cmgMatrix4f.h>
-#include <cmgMath/types/cmgPoint3i.h>
 #include <cmgMath/types/cmgQuaternion.h>
 #include <cmgMath/cmgMathLib.h>
 
@@ -47,12 +46,6 @@ Vector3f::Vector3f(float x, float y, float z)
 // Contruct a 3d vector from a 2d vector with a specified z-component.
 Vector3f::Vector3f(const Vector2f& vec2, float z)
 	: x(vec2.x), y(vec2.y), z(z)
-{
-}
-
-// Cast an integer vector to a float vector.
-Vector3f::Vector3f(const Point3i& p)
-	: x((float) p.x), y((float) p.y), z((float) p.z)
 {
 }
 

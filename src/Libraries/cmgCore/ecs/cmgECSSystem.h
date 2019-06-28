@@ -36,6 +36,14 @@ public:
 	{
 	}
 
+	virtual void PreUpdate(float timeDelta)
+	{
+	}
+
+	virtual void PostUpdate(float timeDelta)
+	{
+	}
+
 protected:
 	void AddComponentType(uint32 componentType, uint32 componentFlag = FLAG_NONE)
 	{

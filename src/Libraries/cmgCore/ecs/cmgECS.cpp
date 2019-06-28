@@ -37,7 +37,19 @@ void ECS::UpdateSystems(ECSSystemList& systems, float deltaTime)
 	Array<ECSComponentPool*> componentPools;
 	for (uint32 i = 0; i < systems.Size(); i++)
 	{
+		systems[i]->PreUpdate(deltaTime);
+	}
+	for (uint32 i = 0; i < systems.Size(); i++)
+	{
 		const Array<uint32>& componentTypes = systems[i]->GetComponentTypes();
+
+		// Verify each component type for this system has a pool created
+		for (uint32 j = 0; j < componentTypes.size(); j++)
+		{
+			if (m_components.find(componentTypes[j]) == m_components.end())
+				m_components[componentTypes[j]] = new ECSComponentPool(componentTypes[j]);
+		}
+
 		if (componentTypes.size() == 1)
 		{
 			ECSComponentPool* pool = m_components[componentTypes[0]];
@@ -52,6 +64,10 @@ void ECS::UpdateSystems(ECSSystemList& systems, float deltaTime)
 			UpdateSystemWithMultipleComponents(i, systems, deltaTime,
 				componentTypes, componentParam, componentPools);
 		}
+	}
+	for (uint32 i = 0; i < systems.Size(); i++)
+	{
+		systems[i]->PostUpdate(deltaTime);
 	}
 }
 

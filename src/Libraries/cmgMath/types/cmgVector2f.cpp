@@ -1,6 +1,6 @@
 #include "cmgVector2f.h"
 #include <cmgMath/types/cmgMatrix3f.h>
-#include <cmgMath/types/cmgPoint2i.h>
+#include <cmgMath/types/cmgVector2.h>
 #include <cmgMath/cmgMathLib.h>
 
 
@@ -21,12 +21,6 @@ const Vector2f Vector2f::UNITY = Vector2f(0.0f, 1.0f);
 
 // Construct a vector with uninitialized components.
 Vector2f::Vector2f()
-{
-}
-
-Vector2f::Vector2f(const Point2i& v) :
-	x((float) v.x),
-	y((float) v.y)
 {
 }
 

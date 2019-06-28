@@ -15,6 +15,7 @@ set(CMG_GRAPHICS_SOURCE_FILES
 	cmgTextureParams.cpp
 	cmgShader.h
 	cmgShader.cpp
+	cmgVertexTypes.h
 	cmgVertexData.h
 	cmgVertexData.cpp
 	cmgMesh.h
@@ -27,6 +28,9 @@ set(CMG_GRAPHICS_SOURCE_FILES
 	cmgPrimitiveMeshes.cpp
 	cmgDebugDraw.h
 	cmgDebugDraw.cpp
+
+	cmgBufferObject.h
+	cmgBufferObject.cpp
 		
 	ecs/cmgArcBall.h
 

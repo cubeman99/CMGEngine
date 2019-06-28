@@ -25,10 +25,6 @@ set(CMG_MATH_SOURCE_FILES
 	types/cmgMatrix4f.cpp
 	types/cmgPlane.h
 	types/cmgPlane.cpp
-	types/cmgPoint2i.h
-	types/cmgPoint2i.cpp
-	types/cmgPoint3i.h
-	types/cmgPoint3i.cpp
 	types/cmgQuaternion.h
 	types/cmgQuaternion.cpp
 	types/cmgRay.h
@@ -39,6 +35,8 @@ set(CMG_MATH_SOURCE_FILES
 	types/cmgRect2i.cpp
 	types/cmgTransform3f.h
 	types/cmgTransform3f.cpp
+	types/cmgVector2.h
+	types/cmgVector3.h
 	types/cmgVector2f.h
 	types/cmgVector2f.cpp
 	types/cmgVector3f.h

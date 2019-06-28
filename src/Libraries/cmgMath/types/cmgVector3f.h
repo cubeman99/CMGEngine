@@ -7,7 +7,8 @@
 struct Matrix3f;
 struct Matrix4f;
 struct Quaternion;
-struct Point3i;
+template <typename T>
+struct Vector3;
 
 
 // 3D floating-point vector.
@@ -76,7 +77,11 @@ struct Vector3f
 	Vector3f(const Vector2f& vec2, float z);
 
 	// Cast an integer vector to a float vector.
-	Vector3f(const Point3i& p);
+	template <typename T>
+	Vector3f(const Vector3<T>& p)
+		: x((float) p.x), y((float) p.y), z((float) p.z)
+	{
+	}
 
 	// Construct a vector with all components set to a single value.
 	explicit Vector3f(float value);

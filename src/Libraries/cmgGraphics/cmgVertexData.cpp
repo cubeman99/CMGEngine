@@ -17,7 +17,7 @@ VertexAttributeInfo::VertexAttributeInfo() :
 {
 }
 
-VertexAttributeInfo::VertexAttributeInfo(VertexAttrib name, AttributeType type, const void* data, unsigned int stride) :
+VertexAttributeInfo::VertexAttributeInfo(VertexAttrib name, AttributeType type, const void* data, uint32 stride) :
 	name(name),
 	type(type),
 	data(data),
@@ -56,17 +56,15 @@ VertexAttributeInfo::VertexAttributeInfo(VertexAttrib name, AttributeType type, 
 //-----------------------------------------------------------------------------
 
 VertexBuffer::VertexBuffer() :
-	m_numVertices(0),
-	m_bufferSize(-1)
+	BufferObject(GL_ARRAY_BUFFER),
+	m_numVertices(0)
 {
 	glGenVertexArrays(1, &m_glVertexArray);
-	glGenBuffers(1, &m_glVertexBuffer);
 }
 
 VertexBuffer::~VertexBuffer()
 {
-	glDeleteVertexArrays(1, &m_glVertexBuffer);
-	glDeleteBuffers(1, &m_glVertexBuffer);
+	glDeleteVertexArrays(1, &m_glVertexArray);
 }
 
 int VertexBuffer::GetVertexCount() const
@@ -79,32 +77,27 @@ void VertexBuffer::SetVertices(int numVertices, const Vector3f* vertices)
 	SetVerticesRaw(VertexType::k_position, sizeof(Vector3f), numVertices, vertices);
 }
 
-void VertexBuffer::SetVerticesRaw(unsigned int vertexType,
+void VertexBuffer::SetVerticesRaw(uint32 vertexType,
 	int sizeOfVertex, int numVertices, const void* vertices)
 {
-	glBindBuffer(GL_ARRAY_BUFFER, m_glVertexBuffer);
-
 	// Buffer the vertex data
-	int newBufferSize = numVertices * sizeOfVertex;
-	if (m_bufferSize != newBufferSize)
+	if (numVertices * sizeOfVertex > (int) GetSize())
 	{
 		// Buffer new vertices
-		glBufferData(GL_ARRAY_BUFFER, newBufferSize, vertices, GL_STATIC_DRAW);
-		m_bufferSize = newBufferSize;
+		BufferData(numVertices * sizeOfVertex, vertices);
 	}
 	else
 	{
 		// Buffer over existing vertices
-		CMG_ASSERT_MSG(newBufferSize <= m_bufferSize,
-			"You cannot increase the buffer size"); // We mustn't increase the buffer size.
-		glBufferSubData(GL_ARRAY_BUFFER, 0, newBufferSize, vertices);
+		BufferSubData(0, numVertices * sizeOfVertex, vertices);
 	}
 
 	// Set the attribute locations
+	glBindBuffer(GL_ARRAY_BUFFER, GetGLBuffer());
 	glBindVertexArray(m_glVertexArray);
 
-	unsigned int offset = 0;
-	unsigned int index = 0;
+	uint32 offset = 0;
+	uint32 index = 0;
 
 	m_vertexType = vertexType;
 
@@ -144,36 +137,35 @@ void VertexBuffer::SetVerticesRaw(unsigned int vertexType,
 }
 
 void VertexBuffer::BufferVertices(
-	unsigned int numVertices,
+	uint32 numVertices,
 	const VertexAttributeInfo* attribs,
-	unsigned int numAttribs)
+	uint32 numAttribs)
 {
-	glBindBuffer(GL_ARRAY_BUFFER, m_glVertexBuffer);
-
-	// Increase buffer size if it is too small.
-	unsigned int newBufferSize = 0;
-	for (unsigned int i = 0; i < numAttribs; ++i)
+	// Increase buffer size if it is too small
+	uint32 newBufferSize = 0;
+	for (uint32 i = 0; i < numAttribs; ++i)
 	{
 		newBufferSize += numVertices *
 			attribs[i].numComponents * attribs[i].componentSize;
 	}
 	if ((int) newBufferSize > m_bufferSize)
 	{
-		glBufferData(GL_ARRAY_BUFFER, newBufferSize, nullptr, GL_STATIC_DRAW);
+		BufferData(newBufferSize, nullptr);
 		m_bufferSize = (int) newBufferSize;
 	}
 	
-	// Setup attribute info.
+	// Setup attribute info
+	glBindBuffer(GL_ARRAY_BUFFER, GetGLBuffer());
 	glBindVertexArray(m_glVertexArray);
-	unsigned int offset = 0;
-	for (unsigned int i = 0; i < numAttribs; ++i)
+	uint32 offset = 0;
+	for (uint32 i = 0; i < numAttribs; ++i)
 	{
 		const VertexAttributeInfo* attrib = attribs + i;
-		unsigned int attribIndex = (unsigned int) attrib->name;
-		unsigned int attribDataSize = numVertices *
+		uint32 attribIndex = (uint32) attrib->name;
+		uint32 attribDataSize = numVertices *
 			attrib->numComponents * attrib->componentSize;
 		
-		glBufferSubData(GL_ARRAY_BUFFER, offset, attribDataSize, attrib->data);
+		BufferSubData(offset, attribDataSize, attrib->data);
 		
 		glEnableVertexAttribArray(attribIndex);
 		glVertexAttribPointer(attribIndex, attrib->numComponents,
@@ -182,7 +174,6 @@ void VertexBuffer::BufferVertices(
 		offset += attribDataSize;
 	}
 	glBindVertexArray(0);
-
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	m_numVertices = numVertices;
 }
@@ -193,26 +184,19 @@ void VertexBuffer::BufferVertices(
 //-----------------------------------------------------------------------------
 
 IndexBuffer::IndexBuffer() :
+	BufferObject(GL_ELEMENT_ARRAY_BUFFER),
 	m_numIndices(0)
 {
-	glGenBuffers(1, &m_glIndexBuffer);
 }
 
-IndexBuffer::~IndexBuffer()
+
+void IndexBuffer::SetIndices(uint32 count, const uint32* indices)
 {
-	glDeleteBuffers(1, &m_glIndexBuffer);
+	m_numIndices = count;
+	BufferData(count, indices);
 }
 
-
-void IndexBuffer::SetIndices(unsigned int numIndices, const unsigned int* pIndices)
-{
-	m_numIndices = numIndices;
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_glIndexBuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices * sizeof(unsigned int),
-		pIndices, GL_STATIC_DRAW);
-}
-
-unsigned int IndexBuffer::GetIndexCount() const
+uint32 IndexBuffer::GetIndexCount() const
 {
 	return m_numIndices;
 }
@@ -228,7 +212,7 @@ VertexData::VertexData() :
 {
 }
 
-VertexData::VertexData(unsigned int start, unsigned int count) :
+VertexData::VertexData(uint32 start, uint32 count) :
 	m_vertexStart(start),
 	m_vertexCount(count)
 {
@@ -249,7 +233,7 @@ IndexData::IndexData() :
 {
 }
 
-IndexData::IndexData(unsigned int start, unsigned int count) :
+IndexData::IndexData(uint32 start, uint32 count) :
 	m_indexStart(start),
 	m_indexCount(count)
 {
@@ -259,19 +243,19 @@ IndexData::~IndexData()
 {
 }
 
-void IndexData::BufferIndices(const Array<unsigned int>& indices)
+void IndexData::BufferIndices(const Array<uint32>& indices)
 {
 	BufferIndices(indices.size(), indices.data());
 }
 
-void IndexData::BufferIndices(unsigned int numIndices, const unsigned int* indices)
+void IndexData::BufferIndices(uint32 numIndices, const uint32* indices)
 {
 	m_indexStart = 0;
 	m_indexCount = numIndices;
 	m_indexBuffer.SetIndices(numIndices, indices);
 }
 
-void IndexData::SetIndexRange(unsigned int start, unsigned int count)
+void IndexData::SetIndexRange(uint32 start, uint32 count)
 {
 	m_indexStart = start;
 	m_indexCount = count;

@@ -27,7 +27,7 @@ Rect2i::Rect2i(int x, int y, int width, int height) :
 }
 
 // Construct a rectangle from the given dimensions.
-Rect2i::Rect2i(const Point2i& position, const Point2i& size) :
+Rect2i::Rect2i(const Vector2i& position, const Vector2i& size) :
 	position(position),
 	size(size)
 {
@@ -40,7 +40,7 @@ Rect2i::Rect2i(const Point2i& position, const Point2i& size) :
 //-----------------------------------------------------------------------------
 
 // Return true if the given vector is contained in this rectangle.
-bool Rect2i::Contains(const Point2i& v) const
+bool Rect2i::Contains(const Vector2i& v) const
 {
 	return (v.x >= position.x && v.y >= position.y &&
 		v.x < position.x + size.x && v.y < position.y + size.y);
@@ -75,7 +75,7 @@ Rect2i& Rect2i::Set(int x, int y, int width, int height)
 }
 
 // Set the dimensions of this rectangle.
-Rect2i& Rect2i::Set(const Point2i& position, const Point2i& size)
+Rect2i& Rect2i::Set(const Vector2i& position, const Vector2i& size)
 {
 	this->position = position;
 	this->size = size;
@@ -131,7 +131,7 @@ Rect2i& Rect2i::Translate(int x, int y)
 }
 
 // Translate the rectangle's position.
-Rect2i& Rect2i::Translate(const Point2i& amount)
+Rect2i& Rect2i::Translate(const Vector2i& amount)
 {
 	position += amount;
 	return *this;

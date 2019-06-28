@@ -4,7 +4,8 @@
 #include <iostream>
 
 struct Matrix3f;
-struct Point2i;
+template <typename T>
+struct Vector2;
 
 
 // 2D floating-point vector.
@@ -17,15 +18,20 @@ struct Vector2f
 	};
 
 
-	// Constants.
+	// Constants
 	static const Vector2f ZERO;
 	static const Vector2f ONE;
 	static const Vector2f UNITX;
 	static const Vector2f UNITY;
 
-	// Constructors.
+	// Constructors
 	Vector2f();
-	Vector2f(const Point2i& v);
+	template <typename T>
+	explicit Vector2f(const Vector2<T>& v) :
+		x((float) v.x),
+		y((float) v.y)
+	{
+	}
 	Vector2f(float x, float y);
 	explicit Vector2f(float value);
 

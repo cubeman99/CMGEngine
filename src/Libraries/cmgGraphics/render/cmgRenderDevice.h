@@ -9,6 +9,7 @@
 #include <cmgGraphics/cmgShader.h>
 #include <cmgGraphics/cmgMesh.h>
 #include <cmgGraphics/cmgImageFormat.h>
+#include <cmgMath/types/cmgVector3.h>
 
 class Window;
 
@@ -27,7 +28,11 @@ public:
 	Error SetShaderUniform(Shader* shader, const String& name, uint32 value);
 	Error SetShaderUniform(Shader* shader, const String& name, float32 value);
 	Error SetShaderUniform(Shader* shader, const String& name, const Vector2f& value);
+	Error SetShaderUniform(Shader* shader, const String& name, const Vector2i& value);
+	Error SetShaderUniform(Shader* shader, const String& name, const Vector2ui& value);
 	Error SetShaderUniform(Shader* shader, const String& name, const Vector3f& value);
+	Error SetShaderUniform(Shader* shader, const String& name, const Vector3i& value);
+	Error SetShaderUniform(Shader* shader, const String& name, const Vector3ui& value);
 	Error SetShaderUniform(Shader* shader, const String& name, const Vector4f& value);
 	Error SetShaderUniform(Shader* shader, const String& name, const Matrix4f& value);
 	Error SetTextureSampler(Shader* shader, const String& name,
@@ -35,11 +40,16 @@ public:
 	Error SetShaderSampler(Shader* shader, const String& samplerName,
 		Texture* texture, Sampler* sampler, uint32 slot);
 
+	void BindBuffer(const BufferObject& buffer, uint32 slot);
+
 	Error CreateRenderTarget(RenderTarget** outRenderTarget);
 
 
 	void Clear(RenderTarget* target, const Color& color, bool clearDepth);
 	void Draw(RenderTarget* target, Shader* shader, Mesh* mesh);
+	void DispatchCompute(Shader* shader, Vector2ui numGroupsXY);
+	void DispatchCompute(Shader* shader, Vector3ui numGroupsXYZ);
+	void DispatchCompute(Shader* shader, uint32 numGroupsX, uint32 numGroupsY = 1, uint32 numGroupsZ = 1);
 
 private:
 	void SetRenderTarget(RenderTarget* renderTarget);

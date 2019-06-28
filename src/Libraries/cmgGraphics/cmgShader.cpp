@@ -351,8 +351,26 @@ void Shader::GenerateUniforms()
 		case GL_INT:
 			uniform.m_type = UniformType::k_integer;
 			break;
+		case GL_INT_VEC2:
+			uniform.m_type = UniformType::k_ivec2;
+			break;
+		case GL_INT_VEC3:
+			uniform.m_type = UniformType::k_ivec3;
+			break;
+		case GL_INT_VEC4:
+			uniform.m_type = UniformType::k_ivec4;
+			break;
 		case GL_UNSIGNED_INT:
-			uniform.m_type = UniformType::k_unsigned_integer;
+			uniform.m_type = UniformType::k_unsigned_int;
+			break;
+		case GL_UNSIGNED_INT_VEC2:
+			uniform.m_type = UniformType::k_uvec2;
+			break;
+		case GL_UNSIGNED_INT_VEC3:
+			uniform.m_type = UniformType::k_uvec3;
+			break;
+		case GL_UNSIGNED_INT_VEC4:
+			uniform.m_type = UniformType::k_uvec4;
 			break;
 		case GL_FLOAT:
 			uniform.m_type = UniformType::k_float;

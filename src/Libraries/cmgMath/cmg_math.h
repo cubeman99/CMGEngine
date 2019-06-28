@@ -13,14 +13,14 @@
 #include <cmgMath/types/cmgMatrix3f.h>
 #include <cmgMath/types/cmgMatrix4f.h>
 #include <cmgMath/types/cmgPlane.h>
-#include <cmgMath/types/cmgPoint2i.h>
-#include <cmgMath/types/cmgPoint3i.h>
 #include <cmgMath/types/cmgQuaternion.h>
 #include <cmgMath/types/cmgRay.h>
 #include <cmgMath/types/cmgRect2f.h>
 #include <cmgMath/types/cmgRect2i.h>
 #include <cmgMath/types/cmgTransform3f.h>
+#include <cmgMath/types/cmgVector2.h>
 #include <cmgMath/types/cmgVector2f.h>
+#include <cmgMath/types/cmgVector3.h>
 #include <cmgMath/types/cmgVector3f.h>
 #include <cmgMath/types/cmgVector4f.h>
 

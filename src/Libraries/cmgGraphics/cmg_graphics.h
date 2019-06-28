@@ -12,6 +12,7 @@
 #include <cmgGraphics/cmgTextureParams.h>
 #include <cmgGraphics/cmgImageFormat.h>
 #include <cmgGraphics/cmgShader.h>
+#include <cmgGraphics/cmgBufferObject.h>
 #include <cmgGraphics/cmgVertexData.h>
 #include <cmgGraphics/cmgMesh.h>
 #include <cmgGraphics/cmgPrimitiveMeshes.h>

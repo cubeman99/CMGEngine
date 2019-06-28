@@ -106,6 +106,36 @@ Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, c
 	}
 }
 
+Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, const Vector2ui& value)
+{
+	int32 uniformLocation;
+	SetShader(shader);
+	if (shader->GetUniformLocation(name, uniformLocation))
+	{
+		glUniform2uiv(uniformLocation, 1, value.v);
+		return CMG_ERROR_SUCCESS;
+	}
+	else
+	{
+		return CMG_ERROR_FAILURE;
+	}
+}
+
+Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, const Vector2i& value)
+{
+	int32 uniformLocation;
+	SetShader(shader);
+	if (shader->GetUniformLocation(name, uniformLocation))
+	{
+		glUniform2iv(uniformLocation, 1, value.v);
+		return CMG_ERROR_SUCCESS;
+	}
+	else
+	{
+		return CMG_ERROR_FAILURE;
+	}
+}
+
 Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, const Vector3f& value)
 {
 	int32 uniformLocation;
@@ -113,6 +143,36 @@ Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, c
 	if (shader->GetUniformLocation(name, uniformLocation))
 	{
 		glUniform3fv(uniformLocation, 1, value.v);
+		return CMG_ERROR_SUCCESS;
+	}
+	else
+	{
+		return CMG_ERROR_FAILURE;
+	}
+}
+
+Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, const Vector3i& value)
+{
+	int32 uniformLocation;
+	SetShader(shader);
+	if (shader->GetUniformLocation(name, uniformLocation))
+	{
+		glUniform3iv(uniformLocation, 1, value.v);
+		return CMG_ERROR_SUCCESS;
+	}
+	else
+	{
+		return CMG_ERROR_FAILURE;
+	}
+}
+
+Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, const Vector3ui& value)
+{
+	int32 uniformLocation;
+	SetShader(shader);
+	if (shader->GetUniformLocation(name, uniformLocation))
+	{
+		glUniform3uiv(uniformLocation, 1, value.v);
 		return CMG_ERROR_SUCCESS;
 	}
 	else
@@ -180,6 +240,11 @@ Error OpenGLRenderDevice::SetShaderSampler(Shader* shader,
 	}
 }
 
+void OpenGLRenderDevice::BindBuffer(const BufferObject & buffer, uint32 slot)
+{
+	glBindBufferBase(buffer.GetGLTarget(), slot, buffer.GetGLBuffer());
+}
+
 
 Error OpenGLRenderDevice::CreateRenderTarget(RenderTarget** outRenderTarget)
 {
@@ -215,6 +280,8 @@ void OpenGLRenderDevice::Draw(RenderTarget* target, Shader* shader, Mesh* mesh)
 	SetRenderTarget(target);
 	SetViewport(target);
 	SetShader(shader);
+	glBindBuffer(GL_ARRAY_BUFFER, mesh->GetVertexData()->
+		GetVertexBuffer()->GetGLVertexBuffer());
 	glBindVertexArray(mesh->GetVertexData()->
 		GetVertexBuffer()->GetGLVertexArray());
 
@@ -244,7 +311,7 @@ void OpenGLRenderDevice::Draw(RenderTarget* target, Shader* shader, Mesh* mesh)
 		if (count > 0)
 		{
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,
-				mesh->GetIndexData()->GetIndexBuffer()->GetGLIndexBuffer());
+				mesh->GetIndexData()->GetIndexBuffer()->GetGLBuffer());
 			glDrawElements(GL_TRIANGLES, count,
 				GL_UNSIGNED_INT, ((unsigned int*) 0) + start);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -252,6 +319,23 @@ void OpenGLRenderDevice::Draw(RenderTarget* target, Shader* shader, Mesh* mesh)
 	}
 
 	glBindVertexArray(0);
+}
+
+void OpenGLRenderDevice::DispatchCompute(Shader* shader, Vector2ui numGroupsXY)
+{
+	DispatchCompute(shader, numGroupsXY.x, numGroupsXY.y, 1);
+}
+
+void OpenGLRenderDevice::DispatchCompute(Shader* shader, Vector3ui numGroupsXYZ)
+{
+	DispatchCompute(shader, numGroupsXYZ.x, numGroupsXYZ.y, numGroupsXYZ.z);
+}
+
+void OpenGLRenderDevice::DispatchCompute(Shader* shader, uint32 numGroupsX, uint32 numGroupsY, uint32 numGroupsZ)
+{
+	SetShader(shader);
+	glDispatchCompute(numGroupsX, numGroupsY, numGroupsZ);
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
 
 void OpenGLRenderDevice::SetRenderTarget(RenderTarget* renderTarget)
