@@ -42,24 +42,29 @@ public:
 	
 	// Error checking
 	bool Succeeded() const;
+	bool Passed() const;
 	bool Failed() const;
-	void Ignore() const;
-	void Check() const;
-	void Uncheck() const;
+	const Error& Ignore() const;
+	const Error& Check() const;
+	const Error& Uncheck() const;
 
 	// Accessors
-	const String&	GetText() const;	
-	int				GetLineNumber() const;
-	const char*		GetFileName() const;
-	error_code_type	GetErrorCode() const;
+	const String& GetText() const;	
+	int GetLineNumber() const;
+	const char* GetFileName() const;
+	error_code_type GetErrorCode() const;
 
 private:
-	error_code_type	m_error;	// Error code
-	const char*		m_file;		// File name
-	int				m_line;		// Line number
-	String			m_message;	// Message text
-	mutable bool	m_errorCheckedByUser;
-	//char			padding[3];
+	// Error code
+	error_code_type m_error;
+	// File name
+	const char* m_file;
+	// Line number
+	int m_line;
+	// Message text
+	String m_message;
+	mutable bool m_errorCheckedByUser;
+	//char padding[3];
 };
 
 #define CMG_ERROR_MSG(_errorCode_, _message)\

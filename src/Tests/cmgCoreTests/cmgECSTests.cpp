@@ -6,14 +6,14 @@
 
 struct ECSTestComponentA : public ECSComponent<ECSTestComponentA>
 {
-	uint16 x;
-	uint16 y;
+	int16 x;
+	int16 y;
 };
 
 struct ECSTestComponentB : public ECSComponent<ECSTestComponentB>
 {
-	uint32 x;
-	uint32 y;
+	int32 x;
+	int32 y;
 };
 
 class ECSTestSystemA : public BaseECSSystem
@@ -131,6 +131,64 @@ TEST(ECS, CreateEntity)
 	ASSERT_TRUE(bb != nullptr);
 	EXPECT_EQ(3, bb->x);
 	EXPECT_EQ(4, bb->y);
+}
+
+TEST(ECS, RemoveEntity)
+{
+	ECS ecs;
+	ECSTestComponentA a;
+	a.x = 1;
+	a.y = 2;
+	ECSTestComponentB b;
+	b.x = 3;
+	b.y = 4;
+
+	ECSTestSystemAB system;
+	ECSSystemList systems;
+	systems.AddSystem(system);
+
+
+	// Create with no components
+	a.x = 1;
+	b.x = -1;
+	EntityHandle entity1 = ecs.CreateEntity(a, b);
+	a.x = 3;
+	b.x = -3;
+	EntityHandle entity2 = ecs.CreateEntity(a, b);
+	a.x = 5;
+	b.x = -5;
+	EntityHandle entity3 = ecs.CreateEntity(a, b);
+	EXPECT_TRUE(entity1 != NULL_ENTITY_HANDLE);
+	EXPECT_TRUE(entity2 != NULL_ENTITY_HANDLE);
+	EXPECT_TRUE(entity3 != NULL_ENTITY_HANDLE);
+	EXPECT_TRUE(ecs.GetComponent<ECSTestComponentA>(entity1) != nullptr);
+	EXPECT_TRUE(ecs.GetComponent<ECSTestComponentB>(entity1) != nullptr);
+	EXPECT_EQ(ecs.GetComponent<ECSTestComponentA>(entity1)->x, 1);
+	EXPECT_EQ(ecs.GetComponent<ECSTestComponentB>(entity1)->x, -1);
+	EXPECT_TRUE(ecs.GetComponent<ECSTestComponentA>(entity2) != nullptr);
+	EXPECT_TRUE(ecs.GetComponent<ECSTestComponentB>(entity2) != nullptr);
+	EXPECT_EQ(ecs.GetComponent<ECSTestComponentA>(entity2)->x, 3);
+	EXPECT_EQ(ecs.GetComponent<ECSTestComponentB>(entity2)->x, -3);
+	EXPECT_TRUE(ecs.GetComponent<ECSTestComponentA>(entity3) != nullptr);
+	EXPECT_TRUE(ecs.GetComponent<ECSTestComponentB>(entity3) != nullptr);
+	EXPECT_EQ(ecs.GetComponent<ECSTestComponentA>(entity3)->x, 5);
+	EXPECT_EQ(ecs.GetComponent<ECSTestComponentB>(entity3)->x, -5);
+	ecs.UpdateSystems(systems, 1.0f);
+	ecs.RemoveEntity(entity3);
+	EXPECT_TRUE(ecs.GetComponent<ECSTestComponentA>(entity1) != nullptr);
+	EXPECT_TRUE(ecs.GetComponent<ECSTestComponentB>(entity1) != nullptr);
+	EXPECT_EQ(ecs.GetComponent<ECSTestComponentA>(entity1)->x, 6);
+	EXPECT_EQ(ecs.GetComponent<ECSTestComponentB>(entity1)->x, -2);
+	EXPECT_TRUE(ecs.GetComponent<ECSTestComponentA>(entity2) != nullptr);
+	EXPECT_TRUE(ecs.GetComponent<ECSTestComponentB>(entity2) != nullptr);
+	EXPECT_EQ(ecs.GetComponent<ECSTestComponentA>(entity2)->x, 8);
+	EXPECT_EQ(ecs.GetComponent<ECSTestComponentB>(entity2)->x, -6);
+	ecs.UpdateSystems(systems, 1.0f);
+	ecs.RemoveEntity(entity1);
+	ecs.UpdateSystems(systems, 1.0f);
+	//EXPECT_TRUE(ecs.GetComponent<ECSTestComponentA>(entity2) != nullptr);
+	ecs.RemoveEntity(entity2);
+	ecs.UpdateSystems(systems, 1.0f);
 }
 
 TEST(ECS, AddGetHasComponent)

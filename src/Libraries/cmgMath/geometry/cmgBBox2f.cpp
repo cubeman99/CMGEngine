@@ -1,5 +1,5 @@
 #include "cmgBBox2f.h"
-#include <cmgMath/types/cmgRect2f.h>
+#include <cmgMath/geometry/cmgRect2f.h>
 #include <cmgMath/cmgMathLib.h>
 
 

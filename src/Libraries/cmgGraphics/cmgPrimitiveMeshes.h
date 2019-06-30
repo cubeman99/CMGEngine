@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <cmgMath/types/cmgVector3f.h>
-#include <cmgMath/types/cmgRay.h>
+#include <cmgMath/geometry/cmgRay.h>
 #include <cmgGraphics/cmg_graphics.h>
 
 

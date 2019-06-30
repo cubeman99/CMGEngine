@@ -1,6 +1,6 @@
 #include "cmgFrustum.h"
 #include <cmgMath/types/cmgQuaternion.h>
-#include <cmgMath/types/cmgBounds.h>
+#include <cmgMath/geometry/cmgBounds.h>
 
 
 //-----------------------------------------------------------------------------

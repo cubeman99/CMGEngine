@@ -8,6 +8,7 @@ class ECSComponentPool
 {
 public:
 	using ComponentHandle = uint32;
+	friend class ECS;
 
 public:
 	ECSComponentPool(uint32 componentId);

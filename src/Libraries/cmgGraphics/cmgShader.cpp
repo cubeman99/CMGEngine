@@ -4,20 +4,58 @@
 #include <cmgGraphics/cmgTexture.h>
 #include <cmgGraphics/render/cmgRenderDevice.h>
 #include <assert.h>
+#include <regex>
+
+
+ShaderStage::ShaderStage():
+	m_isEnabled(false),
+	m_isCompiled(false),
+	m_glShaderName(0)
+{
+}
+
+Error ShaderStage::Create(ShaderType type, const String& code, const Path& path)
+{
+	m_isEnabled = true;
+	m_type = type;
+	m_path = path;
+	m_code = code;
+
+	// Create the correct shader object.
+	if (type == ShaderType::k_vertex_shader)
+		m_glShaderName = glCreateShader(GL_VERTEX_SHADER);
+	else if (type == ShaderType::k_fragment_shader)
+		m_glShaderName = glCreateShader(GL_FRAGMENT_SHADER);
+	else if (type == ShaderType::k_geometry_shader)
+		m_glShaderName = glCreateShader(GL_GEOMETRY_SHADER);
+	else if (type == ShaderType::k_compute_shader)
+		m_glShaderName = glCreateShader(GL_COMPUTE_SHADER);
+	else
+	{
+		CMG_ASSERT_FALSE("Invalid shader stage type.");
+		return CMG_ERROR_FAILURE;
+	}
+
+	return CMG_ERROR_SUCCESS;
+}
+
+ShaderStage::~ShaderStage()
+{
+	if (m_isEnabled != 0)
+		glDeleteShader(m_glShaderName);
+}
 
 
 //-----------------------------------------------------------------------------
 // Constructor & destructor
 //-----------------------------------------------------------------------------
 
-Shader::Shader(OpenGLRenderDevice* device)
-	: m_isLinked(false)
-	, m_device(device)
+Shader::Shader(OpenGLRenderDevice* device):
+	m_isLinked(false),
+	m_device(device)
 {
 	// Create the shader program
 	m_glProgram = glCreateProgram();
-	for (int i = 0; i < (int) ShaderType::k_count; ++i)
-		m_glShaderStages[i] = 0;
 }
 
 Shader::~Shader()
@@ -28,8 +66,6 @@ Shader::~Shader()
 	// Delete the shader stages.
 	for (int i = 0; i < (int) ShaderType::k_count; ++i)
 	{
-		if (m_glShaderStages != 0)
-			glDeleteShader(m_glShaderStages[i]);
 	}
 }
 
@@ -44,19 +80,19 @@ bool Shader::IsLinked() const
 	return m_isLinked;
 }
 
-unsigned int Shader::GetNumUniforms() const
+uint32 Shader::GetNumUniforms() const
 {
 	return m_uniforms.size();
 }
 
-const Uniform& Shader::GetUniform(unsigned int index) const
+const Uniform& Shader::GetUniform(uint32 index) const
 {
 	return m_uniforms[index];
 }
 
 const Uniform* Shader::GetUniform(const String& name) const
 {
-	for (unsigned int i = 0; i < m_uniforms.size(); ++i)
+	for (uint32 i = 0; i < m_uniforms.size(); ++i)
 	{
 		if (m_uniforms[i].m_name == name)
 			return &m_uniforms[i];
@@ -66,7 +102,7 @@ const Uniform* Shader::GetUniform(const String& name) const
 
 int Shader::GetUniformLocation(const String& name) const
 {
-	for (unsigned int i = 0; i < m_uniforms.size(); ++i)
+	for (uint32 i = 0; i < m_uniforms.size(); ++i)
 	{
 		if (m_uniforms[i].m_name == name)
 			return m_uniforms[i].GetLocation();
@@ -76,7 +112,7 @@ int Shader::GetUniformLocation(const String& name) const
 
 bool Shader::GetUniformLocation(const String& name, int& outUniformLocation) const
 {
-	for (unsigned int i = 0; i < m_uniforms.size(); ++i)
+	for (uint32 i = 0; i < m_uniforms.size(); ++i)
 	{
 		if (m_uniforms[i].m_name == name)
 		{
@@ -92,51 +128,40 @@ bool Shader::GetUniformLocation(const String& name, int& outUniformLocation) con
 // Compiling and Linking
 //-----------------------------------------------------------------------------
 
-Error Shader::AddStage(ShaderType type, const String& code, const String& fileName)
+Error Shader::AddStage(ShaderType type, const String& code, const Path& path)
 {
-	GLuint shaderGL = 0;
-
-	// Create the correct shader object.
-	if (type == ShaderType::k_vertex_shader)
-		shaderGL = glCreateShader(GL_VERTEX_SHADER);
-	else if (type == ShaderType::k_fragment_shader)
-		shaderGL = glCreateShader(GL_FRAGMENT_SHADER);
-	else if (type == ShaderType::k_geometry_shader)
-		shaderGL = glCreateShader(GL_GEOMETRY_SHADER);
-	else if (type == ShaderType::k_compute_shader)
-		shaderGL = glCreateShader(GL_COMPUTE_SHADER);
-	else
-	{
-		CMG_ASSERT_FALSE("Invalid shader stage type.");
-		return CMG_ERROR_FAILURE;
-	}
-
-	// Set the shader's source code.
-	const GLchar* str[1] = { code.c_str() };
-	GLint lengths[1] = { (GLint) code.length() };
-	glShaderSource(shaderGL, 1, str, lengths);
-
-	// Attach the shader stage to the shader program.
-	glAttachShader(m_glProgram, shaderGL);
-	m_glShaderStages[(int) type] = shaderGL;
-	m_shaderStageFileNames[(int) type] = fileName;
+	// Create the stage
+	ShaderStage& stage = m_stages[(int) type];
+	Error error = stage.Create(type, code, path);
+	if (error.Failed())
+		return error.Uncheck();
+	
+	// Attach the shader stage to the shader program
+	glAttachShader(m_glProgram, stage.m_glShaderName);
 	m_isLinked = false;
+
 	return CMG_ERROR_SUCCESS;
 }
 
 Error Shader::CompileAndLink()
 {
+	Array<Path> paths;
+	return CompileAndLink(paths);
+}
+
+Error Shader::CompileAndLink(const Array<Path>& paths)
+{
 	Error error;
 
-	// 1. Compile the stages.
-	error = Compile();
+	// 1. Compile each stage
+	error = Compile(paths);
 	if (error.Failed())
 	{
 		error.Uncheck();
 		return error;
 	}
 
-	// 2. Link the program.
+	// 2. Link the program
 	error = Link();
 	if (error.Failed())
 	{
@@ -144,7 +169,7 @@ Error Shader::CompileAndLink()
 		return error;
 	}
 
-	// 3. Validate the program.
+	// 3. Validate the program
 	error = Validate();
 	if (error.Failed())
 	{
@@ -152,7 +177,7 @@ Error Shader::CompileAndLink()
 		return error;
 	}
 
-	// 4. Generate uniforms.
+	// 4. Generate uniforms
 	GenerateUniforms();
 
 	m_isLinked = true;
@@ -174,23 +199,51 @@ Error Shader::SetSampler(const String& samplerName,
 Error Shader::LoadShader(Shader*& outShader,
 	const Path& vertexPath, const Path& fragmentPath)
 {
-	outShader = new Shader();
+	// Load the code
 	String vertexCode, fragmentCode;
-	File::OpenAndGetContents(vertexPath, vertexCode);
-	File::OpenAndGetContents(fragmentPath, fragmentCode);
-	outShader->AddStage(ShaderType::k_vertex_shader,
+	Error error = File::OpenAndGetContents(vertexPath, vertexCode);
+	if (error.Failed())
+		return error.Uncheck();
+	error = File::OpenAndGetContents(fragmentPath, fragmentCode);
+	if (error.Failed())
+		return error.Uncheck();
+
+	// Add the stages
+	outShader = new Shader();
+	error = outShader->AddStage(ShaderType::k_vertex_shader,
 		vertexCode, vertexPath.GetPath());
-	outShader->AddStage(ShaderType::k_fragment_shader,
+	if (error.Failed())
+		return error.Uncheck();
+	error = outShader->AddStage(ShaderType::k_fragment_shader,
 		fragmentCode, fragmentPath.GetPath());
+	if (error.Failed())
+		return error.Uncheck();
+
+	// Compile
 	return outShader->CompileAndLink();
 }
 
 Error Shader::LoadComputeShader(Shader*& outShader, const Path& path)
 {
-	outShader = new Shader();
+	Array<Path> paths;
+	return LoadComputeShader(outShader, path, paths);
+}
+
+Error Shader::LoadComputeShader(Shader*& outShader, const Path& path, const Array<Path>& paths)
+{
+	// Load the code
 	String code;
-	File::OpenAndGetContents(path, code);
-	outShader->AddStage(ShaderType::k_compute_shader, code, path.GetPath());
+	Error error = File::OpenAndGetContents(path, code);
+	if (error.Failed())
+		return error.Uncheck();
+
+	// Add the stages
+	outShader = new Shader();
+	error = outShader->AddStage(ShaderType::k_compute_shader, code, path.GetPath());
+	if (error.Failed())
+		return error.Uncheck();
+
+	// Compile
 	return outShader->CompileAndLink();
 }
 
@@ -199,28 +252,31 @@ Error Shader::LoadComputeShader(Shader*& outShader, const Path& path)
 // Private methods
 //-----------------------------------------------------------------------------
 
-Error Shader::Compile()
+Error Shader::Compile(const Array<Path>& paths)
 {
 	Array<String> compileErrors;
 	Error compileError;
 
-	// Compile all shader stages.
-	for (unsigned int i = 0; i < (int) ShaderType::k_count; ++i)
+	// Pre-process and compile all shader stages
+	for (uint32 i = 0; i < (int) ShaderType::k_count; ++i)
 	{
-		if (m_glShaderStages[i] != 0)
+		ShaderStage& stage = m_stages[i];
+		if (stage.m_isEnabled)
 		{
-			compileError = CompileStage((ShaderType) i);
+			compileError = PreprocessStage(stage, paths);
+			if (compileError.Passed())
+				compileError = CompileStage(stage);
 			if (compileError.Failed())
 				compileErrors.push_back(compileError.GetText());
 		}
 	}
 
-	// Check if there were compile errors.
+	// Check if there were errors
 	if (compileErrors.size() > 0)
 	{
-		// Combine all errors into one message.
+		// Combine all errors into one message
 		String errorMessage = "There were shader compile errors:\n\n";
-		for (unsigned int i = 0; i < compileErrors.size(); ++i)
+		for (uint32 i = 0; i < compileErrors.size(); ++i)
 		{
 			if (i > 0)
 				errorMessage += "\n";
@@ -232,41 +288,91 @@ Error Shader::Compile()
 	return CMG_ERROR_SUCCESS;
 }
 
-Error Shader::CompileStage(ShaderType stage)
+Error Shader::PreprocessStage(ShaderStage& stage, const Array<Path>& paths)
 {
-	GLuint shaderGL = m_glShaderStages[(int) stage];
-	CMG_ASSERT(shaderGL != 0);
+	CMG_ASSERT(stage.m_isEnabled);
 
-	// Compile the shader.
-	glCompileShader(shaderGL);
+	std::regex regexInclude("\\s*#\\s*include\\s+[<\"](.*)[>\"]");
 
-	// Check for errors.
+	String oldCode = stage.m_code;
+	std::sregex_iterator matchesBegin = std::sregex_iterator(
+		oldCode.begin(), oldCode.end(), regexInclude);
+	std::sregex_iterator matchesEnd = std::sregex_iterator();
+	Path stageFileDir = stage.m_path.GetDirectory();
+	Error error;
+	uint32 offset = 0;
+
+	for (std::sregex_iterator it = matchesBegin; it != matchesEnd; ++it)
+	{
+		const std::smatch& match = *it;
+		std::string match_str = match.str();
+		if (match.size() > 1)
+		{
+			Path includePath = Path(match[1].str());
+			Path resolvedPath = stageFileDir + includePath;
+			if (!resolvedPath.Exists())
+				resolvedPath = Path::ResolvePath(includePath, paths);
+			if (resolvedPath.FileExists())
+			{
+				String includeCode;
+				error = File::OpenAndGetContents(resolvedPath, includeCode);
+				if (error.Failed())
+					return error.Uncheck();
+				stage.m_code = stage.m_code.replace(
+					match.position() + offset, match.length(), includeCode);
+				offset += includeCode.length() - match.length();
+			}
+			else
+			{
+				return CMG_ERROR_FAILURE;
+			}
+		}
+	} 
+
+	// Send the shader's source code to OpenGL
+	const GLchar* str[1] = { stage.m_code.c_str() };
+	GLint lengths[1] = { (GLint) stage.m_code.length() };
+	glShaderSource(stage.m_glShaderName, 1, str, lengths);
+
+	return CMG_ERROR_SUCCESS;
+}
+
+Error Shader::CompileStage(ShaderStage& stage)
+{
+	CMG_ASSERT(stage.m_isEnabled);
+
+	// Compile the shader
+	glCompileShader(stage.m_glShaderName);
+
+	// Check for errors
 	GLint isStatusOK;
-	glGetShaderiv(shaderGL, GL_COMPILE_STATUS, &isStatusOK);
+	glGetShaderiv(stage.m_glShaderName, GL_COMPILE_STATUS, &isStatusOK);
 	if (isStatusOK == GL_FALSE)
 	{
-		// Get the shader compile error message.
+		// Get the shader compile error message
 		GLchar errorMsg[1024] = { 0 };
-		glGetShaderInfoLog(shaderGL, sizeof(errorMsg), NULL, errorMsg);
+		glGetShaderInfoLog(stage.m_glShaderName,
+			sizeof(errorMsg), NULL, errorMsg);
 
-		// Format the error message.
+		// Format the error message
 		String errorMessage = errorMsg;
 		errorMessage = "\n" + errorMessage;
-		String toReplace = "\n" + m_shaderStageFileNames[(int) stage] + "(";
+		String toReplace = "\n" + stage.m_path.GetPath() + "(";
 
-		// Insert the shader file name before each error.
+		// Insert the shader file name before each error
 		size_t index = 0;
 		while (true)
 		{
-			// Locate the substring to replace.
+			// Locate the substring to replace
 			index = errorMessage.find("\n0(", index);
 			if (index == String::npos)
 				break;
 
-			// Make the replacement.
+			// Make the replacement
 			errorMessage.replace(index, 3, toReplace);
 
-			// Advance index forward so the next iteration doesn't pick it up as well.
+			// Advance index forward so the next iteration doesn't pick it up
+			// as well
 			index += toReplace.length();
 		}
 		errorMessage.erase(errorMessage.begin());
@@ -279,15 +385,15 @@ Error Shader::CompileStage(ShaderType stage)
 
 Error Shader::Link()
 {
-	// Link the program.
+	// Link the program
 	glLinkProgram(m_glProgram);
 
-	// Check for errors.
+	// Check for errors
 	GLint isStatusOK;
 	glGetProgramiv(m_glProgram, GL_LINK_STATUS, &isStatusOK);
 	if (isStatusOK == GL_FALSE)
 	{
-		// Get the error message.
+		// Get the error message
 		GLchar errorMsg[1024] = { 0 };
 		glGetProgramInfoLog(m_glProgram, sizeof(errorMsg), NULL, errorMsg);
 		String errorMessage = "Error linking shader:\n\n" + String(errorMsg) + "\n";
@@ -299,15 +405,15 @@ Error Shader::Link()
 
 Error Shader::Validate()
 {
-	// Validate the program.
+	// Validate the program
 	glValidateProgram(m_glProgram);
 
-	// Check for errors.
+	// Check for errors
 	GLint isStatusOK;
 	glGetProgramiv(m_glProgram, GL_VALIDATE_STATUS, &isStatusOK);
 	if (isStatusOK == GL_FALSE)
 	{
-		// Get the error message.
+		// Get the error message
 		GLchar errorMsg[1024] = { 0 };
 		glGetProgramInfoLog(m_glProgram, sizeof(errorMsg), NULL, errorMsg);
 		String errorMessage = "Error validation failed:\n\n" + String(errorMsg) + "\n";

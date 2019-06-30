@@ -2,6 +2,7 @@
 #include <cmgCore/io/cmgFile.h>
 #include <cmgCore/cmgAssert.h>
 #include <algorithm>
+#include <filesystem>
 
 namespace
 {
@@ -63,7 +64,7 @@ String Path::GetExtension() const
 	return "";
 }
 
-String Path::GetPathWithoutFileName() const
+String Path::GetDirectory() const
 {
 	unsigned int pos = m_path.find_last_of(g_pathSlash);
 	return m_path.substr(0, pos);
@@ -74,10 +75,15 @@ String Path::GetPathWithoutFileName() const
 // Path Checks
 //-----------------------------------------------------------------------------
 
-bool Path::FileExists()
+bool Path::Exists() const
+{
+	return std::experimental::filesystem::exists(m_path);
+}
+
+bool Path::FileExists() const
 {
 	File file(*this);
-	return file.Open(FileAccess::READ, FileType::BINARY).Succeeded();
+	return file.Open(FileAccess::READ, FileType::BINARY).Passed();
 }
 
 bool Path::DirectoryExists() const
@@ -126,4 +132,33 @@ bool Path::operator ==(const Path& other) const
 bool Path::operator !=(const Path& other) const
 {
 	return (m_path != other.m_path);
+}
+
+std::ostream& operator <<(std::ostream &out, const Path& path)
+{
+	out << path.GetPath();
+	return out;
+}
+
+
+//-----------------------------------------------------------------------------
+// Static methods
+//-----------------------------------------------------------------------------
+
+Path Path::operator +(const Path& right) const
+{
+	return Path(m_path + "/" + right.m_path);
+}
+
+Path Path::ResolvePath(const Path& path, const Array<Path>& paths)
+{
+	for (uint32 i = 0; i < paths.size(); i++)
+	{
+		Path relativePath = paths[i] + path;
+		if (relativePath.Exists())
+			return relativePath;
+	}
+	if (path.Exists())
+		return path;
+	return path;
 }

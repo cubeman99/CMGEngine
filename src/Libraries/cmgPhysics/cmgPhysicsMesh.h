@@ -5,7 +5,7 @@
 #include <cmgMath/types/cmgMatrix3f.h>
 #include <cmgMath/types/cmgMatrix4f.h>
 #include <cmgMath/types/cmgQuaternion.h>
-#include <cmgMath/types/cmgPlane.h>
+#include <cmgMath/geometry/cmgPlane.h>
 #include <cmgCore/containers/cmgArray.h>
 #include <cmgPhysics/cmgPhysicsPrimitives.h>
 

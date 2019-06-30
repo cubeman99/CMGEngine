@@ -166,8 +166,11 @@ void ECS::RemoveEntity(EntityHandle handle)
 	uint32 destIndex = entity->index;
 	uint32 srcIndex = m_entities.size() - 1;
 	delete m_entities[destIndex];
-	m_entities[destIndex] = m_entities[srcIndex];
-	m_entities[destIndex]->index = destIndex;
+	if (destIndex != srcIndex)
+	{
+		m_entities[destIndex] = m_entities[srcIndex];
+		m_entities[destIndex]->index = destIndex;
+	}
 	m_entities.pop_back();
 }
 
@@ -186,7 +189,7 @@ ECSComponentPool::ComponentHandle ECS::DoCreateComponent(
 void ECS::DoRemoveComponent(uint32 componentId, component_handle handle)
 {
 	ECSComponentPool* pool = m_components[componentId];
-	
+
 	// Update the reference to the shifted component's offset
 	BaseECSComponent* shiftedComponent = pool->back();
 	component_handle oldHandle = (component_handle) (pool->size() - 1);
@@ -197,7 +200,7 @@ void ECS::DoRemoveComponent(uint32 componentId, component_handle handle)
 			entity->components[i].handle == oldHandle)
 		{
 			entity->components[i].handle = handle;
-			return;
+			break;
 		}
 	}
 
@@ -222,3 +225,37 @@ uint32 ECS::FindLeastCommonComponent(const Array<uint32>& componentTypes, const 
 	}
 	return minIndex;
 }
+
+#include <iostream>
+void ECS::PrintDebug()
+{
+	using namespace std;
+	cout << "Entities:" << endl;
+	for (uint32 i = 0; i < m_entities.size(); i++)
+	{
+		auto entity = m_entities[i];
+		cout << "  " << entity->index << ". 0x" << hex << (uint64) entity << endl;
+		for (uint32 j = 0; j < entity->components.size(); j++)
+		{
+			auto comp = entity->components[j];
+			printf("    index=%u, id=%u, handle=%u\n", j, comp.id, comp.handle);
+		}
+	}
+
+	cout << endl << "Components:" << endl;
+	for (auto it = m_components.begin(); it != m_components.end(); it++)
+	{
+		printf("  id=%u, count=%u, capacity=%u\n",
+			it->first,
+			it->second->m_capacity,
+			it->second->m_count);
+			
+		for (uint32 j = 0; j < it->second->m_count; j++)
+		{
+			auto comp = it->second->GetComponent(j);
+			printf("    handle=%u, entity=0x%x\n", j, (uint64) comp->entity);
+		}
+	}
+}
+
+

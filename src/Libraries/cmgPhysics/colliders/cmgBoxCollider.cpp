@@ -1,5 +1,5 @@
 #include "cmgBoxCollider.h"
-#include <cmgMath/types/cmgPlane.h>
+#include <cmgMath/geometry/cmgPlane.h>
 
 
 //-----------------------------------------------------------------------------

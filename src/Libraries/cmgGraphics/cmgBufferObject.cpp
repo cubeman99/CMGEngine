@@ -56,10 +56,20 @@ void BufferObject::BufferSubData(uint32 offset, uint32 size, const void * data)
 	glBufferSubData(m_glTarget, offset, size, data);
 }
 
+void * BufferObject::MapBufferDataWrite()
+{
+	return MapBufferDataWrite(0, m_size);
+}
+
 void * BufferObject::MapBufferDataWrite(uint32 offset, uint32 size)
 {
 	glBindBuffer(m_glTarget, m_glBuffer);
 	return glMapBufferRange(m_glTarget, offset, size, GL_MAP_WRITE_BIT);
+}
+
+const void * BufferObject::MapBufferDataRead()
+{
+	return MapBufferDataRead(0, m_size);
 }
 
 const void * BufferObject::MapBufferDataRead(uint32 offset, uint32 size)

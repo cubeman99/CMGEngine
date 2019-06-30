@@ -45,16 +45,11 @@ struct UniformType
 //-----------------------------------------------------------------------------
 enum class ShaderType
 {
-	//typedef int value_type;
-
-	//enum
-	//{
-		k_vertex_shader = 0,
-		k_fragment_shader,
-		k_geometry_shader,
-		k_compute_shader,
-		k_count,
-	//};
+	k_vertex_shader = 0,
+	k_fragment_shader,
+	k_geometry_shader,
+	k_compute_shader,
+	k_count,
 };
 
 
@@ -83,10 +78,40 @@ public:
 	inline int				GetSamplerSlot()	const { return m_samplerSlot; }
 
 private:
-	String			m_name;
-	uniform_type	m_type;
-	int				m_location;
-	int				m_samplerSlot;
+	String m_name;
+	uniform_type m_type;
+	int m_location;
+	int m_samplerSlot;
+};
+
+
+//-----------------------------------------------------------------------------
+// ShaderStage
+//-----------------------------------------------------------------------------
+class ShaderStage
+{
+public:
+	friend class Shader;
+
+public:
+	inline const String& GetCode() const { return m_code; }
+	inline const Path& GetPath() const { return m_path; }
+	inline ShaderType GetType() const { return m_type; }
+	inline bool IsCompile() const { return m_isCompiled; }
+	inline bool IsEnabled() const { return m_isEnabled; }
+	inline uint32 GetGLShader() const { return m_glShaderName; }
+
+private:
+	ShaderStage();
+	~ShaderStage();
+	Error Create(ShaderType type, const String& code, const Path& path);
+
+	Path m_path;
+	String m_code;
+	uint32 m_glShaderName;
+	bool m_isEnabled;
+	bool m_isCompiled;
+	ShaderType m_type;
 };
 
 
@@ -97,54 +122,54 @@ class Shader
 {
 public:
 	friend class OpenGLRenderDevice;
-	//typedef ShaderType::value_type shader_type;
 
 public:
 	Shader(OpenGLRenderDevice* device = nullptr);
 	~Shader();
 	
-	// Accessors.
-	//const char*		GetName() const;
-	bool				IsLinked() const;
-	unsigned int		GetNumUniforms() const;
-	const Uniform&		GetUniform(unsigned int index) const;
-	const Uniform*		GetUniform(const String& name) const;
-	int					GetUniformLocation(const String& name) const;
-	bool				GetUniformLocation(const String& name, int& outUniformLocation) const;
-			
-	Error AddStage(ShaderType type, const String& code, const String& fileName = "");
+	// Accessors
+	//const char* GetName() const;
+	bool IsLinked() const;
+	uint32 GetNumUniforms() const;
+	const Uniform& GetUniform(uint32 index) const;
+	const Uniform* GetUniform(const String& name) const;
+	int GetUniformLocation(const String& name) const;
+	bool GetUniformLocation(const String& name, int& outUniformLocation) const;
+	
+	Error AddStage(ShaderType type, const String& code, const Path& path = "");
 	Error CompileAndLink();
+	Error CompileAndLink(const Array<Path>& paths);
 	
 	template<typename T>
 	Error SetUniform(const String& name, T value)
 	{
 		return m_device->SetShaderUniform(this, name, value);
 	}
-
 	Error SetSampler(const String& samplerName,
 		Texture* texture, Sampler* sampler, uint32 slot);
 	//Error SetUniformBuffer(const String& name, UniformBuffer* buffer);
 
-	inline unsigned int GetGLProgram() const { return m_glProgram; }
+	inline uint32 GetGLProgram() const { return m_glProgram; }
 
 	static Error LoadShader(Shader*& outShader, const Path& vertexPath, const Path& fragmentPath);
 	static Error LoadComputeShader(Shader*& outShader, const Path& path);
+	static Error LoadComputeShader(Shader*& outShader, const Path& path, const Array<Path>& paths);
 
 private:
-	Error Compile();
-	Error CompileStage(ShaderType stage);
+	Error Compile(const Array<Path>& paths);
+	Error PreprocessStage(ShaderStage& stage, const Array<Path>& paths);
+	Error CompileStage(ShaderStage& stage);
 	Error Link();
 	Error Validate();
 	void GenerateUniforms();
 	
 public:
-	OpenGLRenderDevice* m_device;
-	String			m_shaderStageFileNames[(int) ShaderType::k_count];
-	bool			m_isLinked;
-	Array<Uniform>	m_uniforms;
-	unsigned int	m_glProgram;
-	unsigned int	m_glShaderStages[(int) ShaderType::k_count];
-};
 
+	OpenGLRenderDevice* m_device;
+	bool m_isLinked;
+	uint32 m_glProgram;
+	ShaderStage m_stages[(int) ShaderType::k_count];
+	Array<Uniform> m_uniforms;
+};
 
 #endif // _CMG_SHADER_H_

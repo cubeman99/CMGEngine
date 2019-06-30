@@ -101,25 +101,34 @@ bool Error::Succeeded() const
 	return (m_error == CommonErrorTypes::k_success);
 }
 
+bool Error::Passed() const
+{
+	m_errorCheckedByUser = true;
+	return (m_error == CommonErrorTypes::k_success);
+}
+
 bool Error::Failed() const
 {
 	m_errorCheckedByUser = true;
 	return (m_error != CommonErrorTypes::k_success);
 }
 
-void Error::Ignore() const
+const Error& Error::Ignore() const
 {
 	m_errorCheckedByUser = true;
+	return *this;
 }
 
-void Error::Check() const
+const Error& Error::Check() const
 {
 	m_errorCheckedByUser = true;
+	return *this;
 }
 
-void Error::Uncheck() const
+const Error& Error::Uncheck() const
 {
 	m_errorCheckedByUser = false;
+	return *this;
 }
 
 

@@ -9,30 +9,31 @@ set(CMG_MATH_SOURCE_FILES
 	
 	noise/cmgNoise.h
 
-	types/cmgBBox2f.h
-	types/cmgBBox2f.cpp
-	types/cmgBounds.h
-	types/cmgBounds.cpp
-	types/cmgCircle2f.h
-	types/cmgCircle2f.cpp
-	types/cmgFrustum.h
-	types/cmgFrustum.cpp
-	types/cmgLine2f.h
-	types/cmgLine2f.cpp
+	geometry/cmgBBox2f.h
+	geometry/cmgBBox2f.cpp
+	geometry/cmgBounds.h
+	geometry/cmgBounds.cpp
+	geometry/cmgCircle2f.h
+	geometry/cmgCircle2f.cpp
+	geometry/cmgFrustum.h
+	geometry/cmgFrustum.cpp
+	geometry/cmgLine2f.h
+	geometry/cmgLine2f.cpp
+	geometry/cmgPlane.h
+	geometry/cmgPlane.cpp
+	geometry/cmgRay.h
+	geometry/cmgRay.cpp
+	geometry/cmgRect2f.h
+	geometry/cmgRect2f.cpp
+	geometry/cmgRect2i.h
+	geometry/cmgRect2i.cpp
+
 	types/cmgMatrix3f.h
 	types/cmgMatrix3f.cpp
 	types/cmgMatrix4f.h
 	types/cmgMatrix4f.cpp
-	types/cmgPlane.h
-	types/cmgPlane.cpp
 	types/cmgQuaternion.h
 	types/cmgQuaternion.cpp
-	types/cmgRay.h
-	types/cmgRay.cpp
-	types/cmgRect2f.h
-	types/cmgRect2f.cpp
-	types/cmgRect2i.h
-	types/cmgRect2i.cpp
 	types/cmgTransform3f.h
 	types/cmgTransform3f.cpp
 	types/cmgVector2.h

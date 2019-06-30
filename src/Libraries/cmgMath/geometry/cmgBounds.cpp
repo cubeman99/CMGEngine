@@ -1,5 +1,5 @@
 #include "cmgBounds.h"
-#include <cmgMath/types/cmgRay.h>
+#include <cmgMath/geometry/cmgRay.h>
 #include <cmgMath/cmgMathLib.h>
 
 
@@ -60,10 +60,24 @@ bool Bounds::CastRay(const Ray& ray, Vector3f& intersection) const
 }
 
 
-// The smallest squared distance between the point and this bounding box.
-float	Bounds::GetSqrDistance(const Vector3f& point) const
+// The smallest distance between the point and this bounding box.
+float Bounds::DistToPoint(const Vector3f& point) const
 {
-	return 0.0f; // TODO: Bounds::getSqrDistance()
+	return ClampPoint(point).DistTo(point);
+}
+
+// The smallest squared distance between the point and this bounding box.
+float Bounds::DistSqrToPoint(const Vector3f& point) const
+{
+	return ClampPoint(point).DistToSqr(point);
+}
+
+Vector3f Bounds::ClampPoint(const Vector3f& point) const
+{
+	return Vector3f(
+		Math::Clamp(point.x, mins.x, maxs.x),
+		Math::Clamp(point.y, mins.y, maxs.y),
+		Math::Clamp(point.z, mins.z, maxs.z));
 }
 
 
@@ -148,6 +162,28 @@ Bounds& Bounds::Combine(const Bounds& bounds)
 	Encapsulate(bounds.mins);
 	Encapsulate(bounds.maxs);
 	return *this;
+}
+
+Bounds Bounds::Union(const Bounds & left, const Bounds & right)
+{
+	Bounds result = left;
+	return result.Combine(right);
+}
+
+bool Bounds::Intersect(Bounds& outIntersection, const Bounds & left, const Bounds & right)
+{
+	if (left.Intersects(right))
+	{
+		for (uint32 axis = 0; axis < 3; axis++)
+		{
+			outIntersection.mins[axis] = Math::Max(
+				left.mins[axis], right.mins[axis]);
+			outIntersection.maxs[axis] = Math::Min(
+				left.maxs[axis], right.maxs[axis]);
+		}
+		return true;
+	}
+	return false;
 }
 
 

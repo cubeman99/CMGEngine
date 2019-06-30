@@ -56,6 +56,8 @@ public:
 	void UpdateSystems(ECSSystemList& systems, float deltaTime);
 	//void RemoveSystem(BaseECSSystem& system);
 
+	void PrintDebug();
+
 private:
 	typedef ECSComponentPool::ComponentHandle component_handle;
 

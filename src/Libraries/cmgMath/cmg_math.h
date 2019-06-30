@@ -3,20 +3,24 @@
 
 
 #include <cmgMath/cmgMathLib.h>
+
 #include <cmgMath/ecs/cmgTransformComponent.h>
+
+#include <cmgMath/geometry/cmgLine2f.h>
+#include <cmgMath/geometry/cmgBBox2f.h>
+#include <cmgMath/geometry/cmgCircle2f.h>
+#include <cmgMath/geometry/cmgRect2i.h>
+#include <cmgMath/geometry/cmgRect2f.h>
+#include <cmgMath/geometry/cmgBounds.h>
+#include <cmgMath/geometry/cmgFrustum.h>
+#include <cmgMath/geometry/cmgPlane.h>
+#include <cmgMath/geometry/cmgRay.h>
+
 #include <cmgMath/noise/cmgNoise.h>
-#include <cmgMath/types/cmgBBox2f.h>
-#include <cmgMath/types/cmgBounds.h>
-#include <cmgMath/types/cmgCircle2f.h>
-#include <cmgMath/types/cmgFrustum.h>
-#include <cmgMath/types/cmgLine2f.h>
+
 #include <cmgMath/types/cmgMatrix3f.h>
 #include <cmgMath/types/cmgMatrix4f.h>
-#include <cmgMath/types/cmgPlane.h>
 #include <cmgMath/types/cmgQuaternion.h>
-#include <cmgMath/types/cmgRay.h>
-#include <cmgMath/types/cmgRect2f.h>
-#include <cmgMath/types/cmgRect2i.h>
 #include <cmgMath/types/cmgTransform3f.h>
 #include <cmgMath/types/cmgVector2.h>
 #include <cmgMath/types/cmgVector2f.h>

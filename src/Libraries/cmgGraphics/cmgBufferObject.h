@@ -30,7 +30,14 @@ public:
 	const T* MapBufferDataRead();
 	template<typename T>
 	const T* MapBufferDataRead(uint32 offset, uint32 size);
+
+	void* MapBufferDataWrite();
 	void* MapBufferDataWrite(uint32 offset, uint32 size);
+	template<typename T>
+	T* MapBufferDataWrite();
+	template<typename T>
+	T* MapBufferDataWrite(uint32 offset, uint32 count);
+
 	void UnmapBufferData();
 
 protected:
@@ -64,6 +71,18 @@ template<typename T>
 const T * BufferObject::MapBufferDataRead(uint32 index, uint32 count)
 {
 	return (const T*) MapBufferDataRead(index * sizeof(T), count * sizeof(T));
+}
+
+template<typename T>
+T * BufferObject::MapBufferDataWrite()
+{
+	return (T*) MapBufferDataWrite(0, m_size);
+}
+
+template<typename T>
+T * BufferObject::MapBufferDataWrite(uint32 index, uint32 count)
+{
+	return (T*) MapBufferDataWrite(index * sizeof(T), count * sizeof(T));
 }
 
 

@@ -3,7 +3,7 @@
 
 #include <cmgMath/types/cmgMatrix3f.h>
 #include <cmgMath/types/cmgMatrix4f.h>
-#include <cmgMath/types/cmgRay.h>
+#include <cmgMath/geometry/cmgRay.h>
 #include <cmgMath/cmgMathLib.h>
 
 class RigidBody;

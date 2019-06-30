@@ -1,6 +1,6 @@
 #include "cmgPlane.h"
-#include <cmgMath/types/cmgBounds.h>
-#include <cmgMath/types/cmgRay.h>
+#include <cmgMath/geometry/cmgBounds.h>
+#include <cmgMath/geometry/cmgRay.h>
 #include <cmgMath/cmgMathLib.h>
 
 

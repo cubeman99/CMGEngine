@@ -1,7 +1,7 @@
 #include "cmgCollisionDetector.h"
 #include <cmgMath/cmgMathLib.h>
-#include <cmgMath/types/cmgPlane.h>
-#include <cmgMath/types/cmgRay.h>
+#include <cmgMath/geometry/cmgPlane.h>
+#include <cmgMath/geometry/cmgRay.h>
 #include <cmgPhysics/cmgGJK.h>
 
 CollisionDetector::CollisionDetector()

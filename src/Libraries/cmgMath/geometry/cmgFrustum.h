@@ -1,7 +1,7 @@
 #ifndef _CMG_FRUSTUM_H_
 #define _CMG_FRUSTUM_H_
 
-#include <cmgMath/types/cmgPlane.h>
+#include <cmgMath/geometry/cmgPlane.h>
 
 struct Bounds;
 struct Quaternion;

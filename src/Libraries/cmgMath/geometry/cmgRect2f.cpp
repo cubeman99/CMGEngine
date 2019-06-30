@@ -1,5 +1,5 @@
 #include "cmgRect2f.h"
-#include <cmgMath/types/cmgRect2i.h>
+#include <cmgMath/geometry/cmgRect2i.h>
 #include <cmgMath/cmgMathLib.h>
 
 
