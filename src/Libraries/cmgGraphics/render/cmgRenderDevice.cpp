@@ -310,9 +310,12 @@ void OpenGLRenderDevice::Draw(RenderTarget* target, Shader* shader, Mesh* mesh)
 		// Draw indexed polygons
 		if (count > 0)
 		{
+			uint32 glPrimitiveType = GL_TRIANGLES;
+			if (mesh->GetPrimitiveType() == VertexPrimitiveType::k_lines)
+				glPrimitiveType = GL_LINES;
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,
 				mesh->GetIndexData()->GetIndexBuffer()->GetGLBuffer());
-			glDrawElements(GL_TRIANGLES, count,
+			glDrawElements(glPrimitiveType, count,
 				GL_UNSIGNED_INT, ((unsigned int*) 0) + start);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 		}

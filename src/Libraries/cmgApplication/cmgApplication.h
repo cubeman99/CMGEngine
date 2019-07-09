@@ -28,6 +28,7 @@ public:
 
 	inline float GetFPS() { return m_perceivedFps; }
 	inline Window* GetWindow() { return &m_window; }
+	inline RenderDevice* GetRenderDevice() { return m_renderDevice; }
 	inline InputManager* GetInputManager() { return &m_inputManager; }
 	inline Mouse* GetMouse() { return m_mouse; }
 	inline Keyboard* GetKeyboard() { return m_keyboard; }
@@ -35,6 +36,7 @@ public:
 
 private:
 	Window m_window;
+	RenderDevice* m_renderDevice;
 	InputManager m_inputManager;
 	Keyboard* m_keyboard;
 	Mouse* m_mouse;

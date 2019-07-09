@@ -574,7 +574,7 @@ Mesh* Primitives::CreateCube()
 		VertexPosTexNorm(Vector3f( r, -r,  r), Vector2f(0.0f, 1.0f), Vector3f::UNITZ),
 	};
 
-	unsigned int indices[] = {
+	uint32 indices[] = {
 		0,1,2, 0,2,3,
 		4,5,6, 4,6,7,
 		8,9,10, 8,10,11,
@@ -586,6 +586,34 @@ Mesh* Primitives::CreateCube()
 	Mesh* mesh = new Mesh();
 	mesh->GetVertexData()->BufferVertices(24, vertices);
 	mesh->GetIndexData()->BufferIndices(36, indices);
+	return mesh;
+}
+
+Mesh* Primitives::CreateWireframeCube()
+{
+	float r = 1.0f;
+
+	Vector3f vertices[] = {
+		Vector3f(-r,  r, -r),
+		Vector3f( r,  r, -r),
+		Vector3f( r,  r,  r),
+		Vector3f(-r,  r,  r),
+		Vector3f(-r, -r, -r),
+		Vector3f( r, -r, -r),
+		Vector3f( r, -r, r),
+		Vector3f(-r, -r, r),
+	};
+
+	uint32 indices[] = {
+		0,1,1,2,2,3,3,0,
+		4,5,5,6,6,7,7,4,
+		0,4,1,5,2,6,3,7,
+	};
+
+	Mesh* mesh = new Mesh();
+	mesh->GetVertexData()->BufferVertices(8, vertices);
+	mesh->GetIndexData()->BufferIndices(24, indices);
+	mesh->SetPrimitiveType(VertexPrimitiveType::k_lines);
 	return mesh;
 }
 

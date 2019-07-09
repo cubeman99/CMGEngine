@@ -131,6 +131,7 @@ public:
 	//const char* GetName() const;
 	bool IsLinked() const;
 	uint32 GetNumUniforms() const;
+	bool HasUniform(const String& name) const;
 	const Uniform& GetUniform(uint32 index) const;
 	const Uniform* GetUniform(const String& name) const;
 	int GetUniformLocation(const String& name) const;

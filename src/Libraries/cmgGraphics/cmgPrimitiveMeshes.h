@@ -48,6 +48,7 @@ public:
 	static const unsigned int*	GetConeIndices();
 
 	static Mesh* CreateCube();
+	static Mesh* CreateWireframeCube();
 	static Mesh* CreateIcosahedron(float radoius, bool smooth = true);
 
 	static Mesh* CreateQuad();

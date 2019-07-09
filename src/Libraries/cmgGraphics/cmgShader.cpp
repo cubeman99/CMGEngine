@@ -85,6 +85,11 @@ uint32 Shader::GetNumUniforms() const
 	return m_uniforms.size();
 }
 
+bool Shader::HasUniform(const String & name) const
+{
+	return GetUniform(name) != nullptr;
+}
+
 const Uniform& Shader::GetUniform(uint32 index) const
 {
 	return m_uniforms[index];

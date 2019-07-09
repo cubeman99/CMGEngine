@@ -3,6 +3,17 @@
 
 #include <cmgGraphics/cmgVertexData.h>
 
+struct MeshLoadOptions
+{
+	enum
+	{
+		k_none = 0,
+		k_flip_triangles = 1,
+	};
+
+	typedef uint32 value_type;
+};
+
 
 class Mesh
 {
@@ -27,7 +38,7 @@ private:
 		inline void SetPrimitiveType(VertexPrimitiveType::value_type type) { m_primitiveType = type; }
 
 		// Static methods
-		static Error Load(const Path& path, Mesh*& mesh);
+		static Error Load(const Path& path, Mesh*& mesh, MeshLoadOptions::value_type options = MeshLoadOptions::k_none);
 
 	private:
 		// Prevent copying

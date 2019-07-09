@@ -34,7 +34,7 @@ struct ObjFace
 	{}
 };
 
-Error Mesh::Load(const Path& path, Mesh*& outMesh)
+Error Mesh::Load(const Path& path, Mesh*& outMesh, MeshLoadOptions::value_type options)
 {
 	String fileContents;
 	Error openError = File::OpenAndGetContents(path, fileContents);
@@ -43,6 +43,8 @@ Error Mesh::Load(const Path& path, Mesh*& outMesh)
 		openError.Uncheck();
 		return openError;
 	}
+
+	bool flipTriangles = (options & MeshLoadOptions::k_flip_triangles) != 0;
 
 	Array<Vector3f> positions;
 	Array<Vector3f> normals;
@@ -109,7 +111,10 @@ Error Mesh::Load(const Path& path, Mesh*& outMesh)
 
 				//cout << position << " / " << texCoord << " / " << normal << endl;
 
-				faces.push_back(face);
+				if (flipTriangles)
+					faces.insert(faces.begin(), face);
+				else
+					faces.push_back(face);
 				faceVertex++;
 			}
 		}

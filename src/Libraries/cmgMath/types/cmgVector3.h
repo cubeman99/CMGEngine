@@ -214,6 +214,21 @@ struct Vector3
 	{
 		return Vector3(x / denominator, y / denominator, z / denominator);
 	}
+
+	// implementation for use as a comparator
+	bool operator <(const Vector3& other) const
+	{
+		if (x < other.x)
+			return true;
+		else if (x == other.x)
+		{
+			if (y < other.y)
+				return true;
+			else if (y == other.y)
+				return (z < other.z);
+		}
+		return false;
+	}
 };
 
 

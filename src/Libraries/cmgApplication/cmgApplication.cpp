@@ -2,15 +2,18 @@
 #include <GL/GL.h>
 
 
-Application::Application()
-	: m_isInitialized(false)
-	, m_isQuitRequested(false)
-	, m_perceivedFps(0.0f)
+Application::Application():
+	m_isInitialized(false),
+	m_isQuitRequested(false),
+	m_perceivedFps(0.0f),
+	m_renderDevice(nullptr)
 {
 }
 
 Application::~Application()
 {
+	delete m_renderDevice;
+	m_renderDevice = nullptr;
 }
 
 bool Application::Initialize(const std::string& title, unsigned int width, unsigned int height)
@@ -32,6 +35,7 @@ bool Application::Initialize(const std::string& title, unsigned int width, unsig
 	if (!m_inputManager.Initialize(&m_window))
 		return false;
 
+	m_renderDevice = new OpenGLRenderDevice(&m_window);
 	m_mouse = m_inputManager.AddDevice<Mouse>();
 	m_keyboard = m_inputManager.AddDevice<Keyboard>();
 
