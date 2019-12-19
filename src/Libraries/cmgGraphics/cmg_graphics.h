@@ -14,6 +14,7 @@
 #include <cmgGraphics/cmgShader.h>
 #include <cmgGraphics/cmgBufferObject.h>
 #include <cmgGraphics/cmgVertexData.h>
+#include <cmgGraphics/cmgMaterial.h>
 #include <cmgGraphics/cmgMesh.h>
 #include <cmgGraphics/cmgPrimitiveMeshes.h>
 #include <cmgGraphics/cmgDebugDraw.h>

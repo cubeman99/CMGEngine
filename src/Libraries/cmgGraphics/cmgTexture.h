@@ -1,6 +1,7 @@
 #ifndef _TEXTURE_H_
 #define _TEXTURE_H_
 
+#include <cmgCore/smart_ptr/cmg_smart_ptr.h>
 #include <cmgGraphics/types/cmgColor.h>
 #include <cmgGraphics/cmgTextureParams.h>
 #include <cmgGraphics/cmgImageFormat.h>
@@ -23,6 +24,7 @@ class Texture
 
 public:
 	typedef CubeMapFace::index_type cubemap_face_index;
+	using sptr = cmg::shared_ptr<Texture>;
 
 public:
 	Texture();
@@ -78,7 +80,10 @@ public:
 	void InitRenderTarget();
 
 	static Texture* LoadTexture(const std::string& fileName, const TextureParams& params = TextureParams());
-	static Error LoadTexture(Texture*& outTexture, const std::string& fileName, const TextureParams& params = TextureParams());
+	static Error LoadTextureOld(Texture*& outTexture, const Array<uint8>& data, const TextureParams& params = TextureParams());
+	static Error LoadTextureOld(Texture*& outTexture, const Path& path, const TextureParams& params = TextureParams());
+	static Error LoadTexture(Texture*& outTexture, const Array<uint8>& data, const TextureParams& params = TextureParams());
+	static Error LoadTexture(Texture*& outTexture, const Path& path, const TextureParams& params = TextureParams());
 	static Error SaveTexture(Texture* texture, const Path& path);
 
 
@@ -88,6 +93,9 @@ private:
 	void DoBindTexture();
 	void DoUnbindTexture();
 	unsigned int GetGLTextureTarget() const;
+
+	// Create a texture with the given OpenGL ID
+	Texture(uint32 id);
 
 	// Prevent copying textures.
 	Texture(const Texture& other) {}

@@ -46,7 +46,7 @@ Error OpenGLRenderDevice::CreateShaderProgram(Shader** outShader,
 	return shaderError;
 }
 
-Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, int32 value)
+Error OpenGLRenderDevice::SetShaderUniform(Shader::sptr shader, const String& name, int32 value)
 {
 	int32 uniformLocation;
 	SetShader(shader);
@@ -61,7 +61,7 @@ Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, i
 	}
 }
 
-Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, uint32 value)
+Error OpenGLRenderDevice::SetShaderUniform(Shader::sptr shader, const String& name, uint32 value)
 {
 	int32 uniformLocation;
 	SetShader(shader);
@@ -76,7 +76,7 @@ Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, u
 	}
 }
 
-Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, float32 value)
+Error OpenGLRenderDevice::SetShaderUniform(Shader::sptr shader, const String& name, float32 value)
 {
 	int32 uniformLocation;
 	SetShader(shader);
@@ -91,7 +91,7 @@ Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, f
 	}
 }
 
-Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, const Vector2f& value)
+Error OpenGLRenderDevice::SetShaderUniform(Shader::sptr shader, const String& name, const Vector2f& value)
 {
 	int32 uniformLocation;
 	SetShader(shader);
@@ -106,7 +106,7 @@ Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, c
 	}
 }
 
-Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, const Vector2ui& value)
+Error OpenGLRenderDevice::SetShaderUniform(Shader::sptr shader, const String& name, const Vector2ui& value)
 {
 	int32 uniformLocation;
 	SetShader(shader);
@@ -121,7 +121,7 @@ Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, c
 	}
 }
 
-Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, const Vector2i& value)
+Error OpenGLRenderDevice::SetShaderUniform(Shader::sptr shader, const String& name, const Vector2i& value)
 {
 	int32 uniformLocation;
 	SetShader(shader);
@@ -136,7 +136,7 @@ Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, c
 	}
 }
 
-Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, const Vector3f& value)
+Error OpenGLRenderDevice::SetShaderUniform(Shader::sptr shader, const String& name, const Vector3f& value)
 {
 	int32 uniformLocation;
 	SetShader(shader);
@@ -151,7 +151,7 @@ Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, c
 	}
 }
 
-Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, const Vector3i& value)
+Error OpenGLRenderDevice::SetShaderUniform(Shader::sptr shader, const String& name, const Vector3i& value)
 {
 	int32 uniformLocation;
 	SetShader(shader);
@@ -166,7 +166,7 @@ Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, c
 	}
 }
 
-Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, const Vector3ui& value)
+Error OpenGLRenderDevice::SetShaderUniform(Shader::sptr shader, const String& name, const Vector3ui& value)
 {
 	int32 uniformLocation;
 	SetShader(shader);
@@ -181,7 +181,7 @@ Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, c
 	}
 }
 
-Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, const Vector4f& value)
+Error OpenGLRenderDevice::SetShaderUniform(Shader::sptr shader, const String& name, const Vector4f& value)
 {
 	int32 uniformLocation;
 	SetShader(shader);
@@ -196,7 +196,7 @@ Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, c
 	}
 }
 
-Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, const Matrix4f& value)
+Error OpenGLRenderDevice::SetShaderUniform(Shader::sptr shader, const String& name, const Matrix4f& value)
 {
 	int32 uniformLocation;
 	SetShader(shader);
@@ -211,8 +211,8 @@ Error OpenGLRenderDevice::SetShaderUniform(Shader* shader, const String& name, c
 	}
 }
 
-Error OpenGLRenderDevice::SetTextureSampler(Shader* shader,
-	const String& name, Texture* texture, uint32 slot)
+Error OpenGLRenderDevice::SetTextureSampler(Shader::sptr shader,
+	const String& name, Texture::sptr texture, uint32 slot)
 {
 	SetShader(shader);
 	glActiveTexture(GL_TEXTURE0 + slot);
@@ -220,8 +220,8 @@ Error OpenGLRenderDevice::SetTextureSampler(Shader* shader,
 	return SetShaderUniform(shader, name, (int) slot);
 }
 
-Error OpenGLRenderDevice::SetShaderSampler(Shader* shader,
-	const String& samplerName, Texture* texture, Sampler* sampler, uint32 slot)
+Error OpenGLRenderDevice::SetShaderSampler(Shader::sptr shader,
+	const String& samplerName, Texture::sptr texture, Sampler* sampler, uint32 slot)
 {
 	SetShader(shader);
 	glActiveTexture(GL_TEXTURE0 + slot);
@@ -275,7 +275,7 @@ void OpenGLRenderDevice::Clear(RenderTarget* target, const Color& color,
 	glClear(flags);
 }
 
-void OpenGLRenderDevice::Draw(RenderTarget* target, Shader* shader, Mesh* mesh)
+void OpenGLRenderDevice::Draw(RenderTarget* target, Shader::sptr shader, Mesh::sptr mesh)
 {
 	SetRenderTarget(target);
 	SetViewport(target);
@@ -324,17 +324,17 @@ void OpenGLRenderDevice::Draw(RenderTarget* target, Shader* shader, Mesh* mesh)
 	glBindVertexArray(0);
 }
 
-void OpenGLRenderDevice::DispatchCompute(Shader* shader, Vector2ui numGroupsXY)
+void OpenGLRenderDevice::DispatchCompute(Shader::sptr shader, Vector2ui numGroupsXY)
 {
 	DispatchCompute(shader, numGroupsXY.x, numGroupsXY.y, 1);
 }
 
-void OpenGLRenderDevice::DispatchCompute(Shader* shader, Vector3ui numGroupsXYZ)
+void OpenGLRenderDevice::DispatchCompute(Shader::sptr shader, Vector3ui numGroupsXYZ)
 {
 	DispatchCompute(shader, numGroupsXYZ.x, numGroupsXYZ.y, numGroupsXYZ.z);
 }
 
-void OpenGLRenderDevice::DispatchCompute(Shader* shader, uint32 numGroupsX, uint32 numGroupsY, uint32 numGroupsZ)
+void OpenGLRenderDevice::DispatchCompute(Shader::sptr shader, uint32 numGroupsX, uint32 numGroupsY, uint32 numGroupsZ)
 {
 	SetShader(shader);
 	glDispatchCompute(numGroupsX, numGroupsY, numGroupsZ);
@@ -357,7 +357,7 @@ void OpenGLRenderDevice::SetViewport(RenderTarget* renderTarget)
 		glViewport(0, 0, m_window->GetWidth(), m_window->GetHeight());
 }
 
-void OpenGLRenderDevice::SetShader(Shader* shader)
+void OpenGLRenderDevice::SetShader(Shader::sptr shader)
 {
 	if (shader != nullptr)
 		glUseProgram(shader->m_glProgram);

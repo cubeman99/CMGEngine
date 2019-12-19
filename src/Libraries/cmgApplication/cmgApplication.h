@@ -4,6 +4,7 @@
 #include <cmgCore/cmg_core.h>
 #include <cmgGraphics/cmg_graphics.h>
 #include <cmgInput/cmg_input.h>
+#include <cmgApplication/cmgResourceManager.h>
 
 
 class Application
@@ -30,12 +31,14 @@ public:
 	inline Window* GetWindow() { return &m_window; }
 	inline RenderDevice* GetRenderDevice() { return m_renderDevice; }
 	inline InputManager* GetInputManager() { return &m_inputManager; }
+	inline cmg::ResourceManager* GetResourceManager() { return &m_resourceManager; }
 	inline Mouse* GetMouse() { return m_mouse; }
 	inline Keyboard* GetKeyboard() { return m_keyboard; }
 
 
 private:
 	Window m_window;
+	cmg::ResourceManager m_resourceManager;
 	RenderDevice* m_renderDevice;
 	InputManager m_inputManager;
 	Keyboard* m_keyboard;

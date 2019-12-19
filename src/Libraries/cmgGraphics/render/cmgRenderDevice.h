@@ -24,21 +24,21 @@ public:
 		const TextureParams& params);
 
 	Error CreateShaderProgram(Shader** outShader, const String& vertexCode, const String& fragmentCode);
-	Error SetShaderUniform(Shader* shader, const String& name, int32 value);
-	Error SetShaderUniform(Shader* shader, const String& name, uint32 value);
-	Error SetShaderUniform(Shader* shader, const String& name, float32 value);
-	Error SetShaderUniform(Shader* shader, const String& name, const Vector2f& value);
-	Error SetShaderUniform(Shader* shader, const String& name, const Vector2i& value);
-	Error SetShaderUniform(Shader* shader, const String& name, const Vector2ui& value);
-	Error SetShaderUniform(Shader* shader, const String& name, const Vector3f& value);
-	Error SetShaderUniform(Shader* shader, const String& name, const Vector3i& value);
-	Error SetShaderUniform(Shader* shader, const String& name, const Vector3ui& value);
-	Error SetShaderUniform(Shader* shader, const String& name, const Vector4f& value);
-	Error SetShaderUniform(Shader* shader, const String& name, const Matrix4f& value);
-	Error SetTextureSampler(Shader* shader, const String& name,
-		Texture* texture, uint32 slot);
-	Error SetShaderSampler(Shader* shader, const String& samplerName,
-		Texture* texture, Sampler* sampler, uint32 slot);
+	Error SetShaderUniform(Shader::sptr shader, const String& name, int32 value);
+	Error SetShaderUniform(Shader::sptr shader, const String& name, uint32 value);
+	Error SetShaderUniform(Shader::sptr shader, const String& name, float32 value);
+	Error SetShaderUniform(Shader::sptr shader, const String& name, const Vector2f& value);
+	Error SetShaderUniform(Shader::sptr shader, const String& name, const Vector2i& value);
+	Error SetShaderUniform(Shader::sptr shader, const String& name, const Vector2ui& value);
+	Error SetShaderUniform(Shader::sptr shader, const String& name, const Vector3f& value);
+	Error SetShaderUniform(Shader::sptr shader, const String& name, const Vector3i& value);
+	Error SetShaderUniform(Shader::sptr shader, const String& name, const Vector3ui& value);
+	Error SetShaderUniform(Shader::sptr shader, const String& name, const Vector4f& value);
+	Error SetShaderUniform(Shader::sptr shader, const String& name, const Matrix4f& value);
+	Error SetTextureSampler(Shader::sptr shader, const String& name,
+		Texture::sptr texture, uint32 slot);
+	Error SetShaderSampler(Shader::sptr shader, const String& samplerName,
+		Texture::sptr texture, Sampler* sampler, uint32 slot);
 
 	void BindBuffer(const BufferObject& buffer, uint32 slot);
 
@@ -46,15 +46,15 @@ public:
 
 
 	void Clear(RenderTarget* target, const Color& color, bool clearDepth);
-	void Draw(RenderTarget* target, Shader* shader, Mesh* mesh);
-	void DispatchCompute(Shader* shader, Vector2ui numGroupsXY);
-	void DispatchCompute(Shader* shader, Vector3ui numGroupsXYZ);
-	void DispatchCompute(Shader* shader, uint32 numGroupsX, uint32 numGroupsY = 1, uint32 numGroupsZ = 1);
+	void Draw(RenderTarget* target, Shader::sptr shader, Mesh::sptr mesh);
+	void DispatchCompute(Shader::sptr shader, Vector2ui numGroupsXY);
+	void DispatchCompute(Shader::sptr shader, Vector3ui numGroupsXYZ);
+	void DispatchCompute(Shader::sptr shader, uint32 numGroupsX, uint32 numGroupsY = 1, uint32 numGroupsZ = 1);
 
 private:
 	void SetRenderTarget(RenderTarget* renderTarget);
 	void SetViewport(RenderTarget* renderTarget);
-	void SetShader(Shader* shader);
+	void SetShader(Shader::sptr shader);
 
 	Array<RenderTarget*> m_renderTargets;
 	Array<Texture*> m_textures;

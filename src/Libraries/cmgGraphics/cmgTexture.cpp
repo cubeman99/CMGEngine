@@ -3,9 +3,9 @@
 #include <cmgGraphics/third_party/lodepng/lodepng.h>
 #include <cmgGraphics/cmgOpenGLIncludes.h>
 #include <cmgMath/cmgMathLib.h>
+#include <SOIL/SOIL.h>
 #include <vector>
 #include <fstream>
-
 
 //-----------------------------------------------------------------------------
 // OpenGL Enum Conversions
@@ -190,21 +190,14 @@ namespace
 // Constructor & destructor.
 //-----------------------------------------------------------------------------
 
-Texture::Texture()
-	: m_width(0)
-	, m_height(0)
-	, m_depth(0)
-	, m_numMipMaps(0)
-	, m_anisotropyAmount(0.0f)
-	, m_glTextureId(0)
-	, m_glDepthBufferId(0)
-	, m_glFrameBufferId(0)
+Texture::Texture() :
+	Texture(0)
 {
 	glGenTextures(1, &m_glTextureId);
 }
 
-Texture::Texture(const TextureParams& params)
-	: Texture()
+Texture::Texture(const TextureParams& params) :
+	Texture()
 {
 	SetParams(params);
 }
@@ -219,6 +212,22 @@ Texture::~Texture()
 		glDeleteTextures(1, &m_glTextureId);
 }
 
+Texture::Texture(uint32 id) :
+	m_glTextureId(id),
+	m_width(0),
+	m_height(0),
+	m_depth(0),
+	m_numMipMaps(0),
+	m_anisotropyAmount(0.0f),
+	m_glDepthBufferId(0),
+	m_glFrameBufferId(0)
+{
+	if (id != 0)
+	{
+		glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &m_width);
+		glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &m_height);
+	}
+}
 
 
 //-----------------------------------------------------------------------------
@@ -600,27 +609,68 @@ Texture* Texture::LoadTexture(const std::string& fileName, const TextureParams& 
 	return texture;
 }
 
-Error Texture::LoadTexture(Texture*& outTexture, const std::string& fileName, const TextureParams& params)
+Error Texture::LoadTexture(Texture*& outTexture, const Path& path, const TextureParams& params)
+{
+	/* load an image file directly as a new OpenGL texture */
+	GLuint glId = SOIL_load_OGL_texture(
+		path.c_str(), SOIL_LOAD_AUTO,
+		SOIL_CREATE_NEW_ID, SOIL_FLAG_COMPRESS_TO_DXT);
+	if (glId == 0)
+		return CMG_ERROR(CommonErrorTypes::k_file_corrupt);
+
+	// Create the texture
+	TextureParams texParams = params;
+	texParams.SetTarget(TextureTarget::TEXTURE_2D);
+	outTexture = new Texture(glId);
+	outTexture->SetParams(texParams);
+	outTexture->GenerateMipMaps();
+
+	return CMG_ERROR_SUCCESS;
+}
+
+Error Texture::LoadTexture(Texture*& outTexture, const Array<uint8>& data, const TextureParams& params)
+{
+	GLuint glId = SOIL_load_OGL_texture_from_memory(
+		data.data(), data.size(), SOIL_LOAD_AUTO,
+		SOIL_CREATE_NEW_ID, SOIL_FLAG_COMPRESS_TO_DXT);
+	if (glId == 0)
+		return CMG_ERROR(CommonErrorTypes::k_corrupt_data);
+
+	// Create the texture
+	TextureParams texParams = params;
+	texParams.SetTarget(TextureTarget::TEXTURE_2D);
+	outTexture = new Texture(glId);
+	outTexture->SetParams(texParams);
+	outTexture->GenerateMipMaps();
+
+	return CMG_ERROR_SUCCESS;
+}
+
+Error Texture::LoadTextureOld(Texture*& outTexture, const Path& path, const TextureParams& params)
 {
 	// Read the PNG file's contents into an array
-	Array<unsigned char> fileData;
-	Error error = File::OpenAndGetContents(fileName, fileData);
+	Array<uint8> fileData;
+	Error error = File::OpenAndGetContents(path, fileData);
 	if (error.Failed())
 	{
 		error.Uncheck();
 		return error;
 	}
+	return LoadTextureOld(outTexture, fileData, params);
+}
 
+Error Texture::LoadTextureOld(Texture*& outTexture, const Array<uint8>& data, const TextureParams& params)
+{
 	// Decode the PNG file data into pixels
 	unsigned int width;
 	unsigned int height;
-	std::vector<unsigned char> imageData;
+	std::vector<uint8> imageData;
 	lodepng::State lodePngState;
 	lodepng::decode(imageData, width, height, lodePngState,
-		fileData.data(), fileData.size());
+		data.data(), data.size());
 	if (lodePngState.error != 0)
 	{
-		std::cerr << "lodepng_decode32 failed: "
+		std::cerr << "lodepng_decode32 failed BAD BAD: "
 			<< lodepng_error_text(lodePngState.error) << std::endl;
 		return CMG_ERROR(CommonErrorTypes::k_file_corrupt);
 	}

@@ -39,6 +39,9 @@ set(CMG_CORE_SOURCE_FILES
 
 	time/cmgTimer.h
 	time/cmgTimer.cpp
+
+	smart_ptr/cmg_smart_ptr.h
+	smart_ptr/cmgSharedPtr.h
 )
 
 cmg_install_library(cmgCore "${CMG_CORE_SOURCE_FILES}")

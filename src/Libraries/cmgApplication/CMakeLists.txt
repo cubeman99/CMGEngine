@@ -5,6 +5,8 @@ set(CMG_APPLICATION_SOURCE_FILES
 
 	cmgApplication.h
 	cmgApplication.cpp
+	cmgResourceManager.h
+	cmgResourceManager.cpp
 
 )
 

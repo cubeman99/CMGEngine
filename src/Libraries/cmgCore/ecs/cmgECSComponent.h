@@ -5,18 +5,19 @@
 #include <tuple>
 
 struct BaseECSComponent;
+class ECSEntity;
 
-typedef void* EntityHandle;
+typedef ECSEntity* EntityHandle;
 typedef BaseECSComponent* (*ECSComponentCreateFunction)(
 	void* location, const BaseECSComponent* component);
 typedef void(*ECSComponentFreeFunction)(BaseECSComponent* component);
-#define NULL_ENTITY_HANDLE nullptr
+constexpr ECSEntity* NULL_ENTITY_HANDLE = nullptr;
 
 
 struct BaseECSComponent
 {
 public:
-	EntityHandle entity = NULL_ENTITY_HANDLE;
+	ECSEntity* entity = nullptr;
 
 	virtual ~BaseECSComponent()
 	{

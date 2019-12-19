@@ -7,6 +7,7 @@ set(SOLUTION_DEPENDENCY_PROJECTS
 	googletest
 	WinSDK
 	Catch
+	SOIL
 )
 
 set(SOLUTION_LIBRARY_PROJECTS
@@ -106,6 +107,7 @@ function(cmg_install_library target_name target_source_files)
 	
 	# Set the include directory.
 	include_directories(
+		"../../${SOLUTION_DEPENDENCY_PROJECTS_FOLDER}"
 		"../"
 		"./"
 		 ${OPENGL_INCLUDE_DIRS}
@@ -153,6 +155,7 @@ function(cmg_install_test target_name target_source_files)
 	# Set the include directory.
 	include_directories(
 		"../../${SOLUTION_LIBRARY_PROJECTS_FOLDER}"
+		"../../${SOLUTION_DEPENDENCY_PROJECTS_FOLDER}"
 		"./"
 		 ${OPENGL_INCLUDE_DIRS}
 		 "${CMG_DEP_INSTALL_PATH}/include"

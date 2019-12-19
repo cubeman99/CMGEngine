@@ -122,6 +122,7 @@ class Shader
 {
 public:
 	friend class OpenGLRenderDevice;
+	using sptr = cmg::shared_ptr<Shader>;
 
 public:
 	Shader(OpenGLRenderDevice* device = nullptr);
@@ -146,9 +147,6 @@ public:
 	{
 		return m_device->SetShaderUniform(this, name, value);
 	}
-	Error SetSampler(const String& samplerName,
-		Texture* texture, Sampler* sampler, uint32 slot);
-	//Error SetUniformBuffer(const String& name, UniformBuffer* buffer);
 
 	inline uint32 GetGLProgram() const { return m_glProgram; }
 

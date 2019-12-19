@@ -5,6 +5,54 @@
 #include <cmgCore/ecs/cmgECSComponentPool.h>
 
 
+class ECSEntity
+{
+	friend class ECS;
+
+public:
+	ECSEntity(ECS& ecs);
+
+	ECS& GetECS();
+	const ECS& GetECS() const;
+
+	template <class T_Component>
+	T_Component* GetComponent()
+	{
+		return m_ecs.GetComponent<T_Component>(this);
+	}
+
+	template <class T_Component>
+	bool HasComponent()
+	{
+		return m_ecs.HasComponent<T_Component>(this);
+	}
+
+	template <class T_Component>
+	void AddComponent(const T_Component& component)
+	{
+		return m_ecs.AddComponent(this, component);
+	}
+
+	template <class T_Component>
+	void RemoveComponent()
+	{
+		return m_ecs.RemoveComponent<T_Component>(this);
+	}
+
+
+private:
+	struct EntityComponent
+	{
+		uint32 id;
+		ECSComponentPool::ComponentHandle handle;
+	};
+
+	uint32 index;
+	Array<EntityComponent> components;
+	ECS& m_ecs;
+};
+
+
 class ECS
 {
 public:
@@ -12,29 +60,29 @@ public:
 	~ECS();
 
 	// Entity methods
-	EntityHandle CreateEntity(const BaseECSComponent* components,
+	ECSEntity* CreateEntity(const BaseECSComponent* components,
 		const uint32* componentIds, size_t numComponents);
-	EntityHandle CreateEntity();
+	ECSEntity* CreateEntity();
 	template <class T1>
-	EntityHandle CreateEntity(const T1& c1);
+	ECSEntity* CreateEntity(const T1& c1);
 	template <class T1, class T2>
-	EntityHandle CreateEntity(const T1& c1, const T2& c2);
+	ECSEntity* CreateEntity(const T1& c1, const T2& c2);
 	template <class T1, class T2, class T3>
-	EntityHandle CreateEntity(const T1& c1, const T2& c2, const T3& c3);
+	ECSEntity* CreateEntity(const T1& c1, const T2& c2, const T3& c3);
 	template <class T1, class T2, class T3, class T4>
-	EntityHandle CreateEntity(const T1& c1, const T2& c2, const T3& c3, const T4& c4);
+	ECSEntity* CreateEntity(const T1& c1, const T2& c2, const T3& c3, const T4& c4);
 	template <class T1, class T2, class T3, class T4, class T5>
-	EntityHandle CreateEntity(const T1& c1, const T2& c2, const T3& c3, const T4& c4, const T5& c5);
+	ECSEntity* CreateEntity(const T1& c1, const T2& c2, const T3& c3, const T4& c4, const T5& c5);
 	template <class T1, class T2, class T3, class T4, class T5, class T6>
-	EntityHandle CreateEntity(const T1& c1, const T2& c2, const T3& c3, const T4& c4, const T5& c5, const T6& c6);
+	ECSEntity* CreateEntity(const T1& c1, const T2& c2, const T3& c3, const T4& c4, const T5& c5, const T6& c6);
 	template <class T1, class T2, class T3, class T4, class T5, class T6, class T7>
-	EntityHandle CreateEntity(const T1& c1, const T2& c2, const T3& c3, const T4& c4, const T5& c5, const T6& c6, const T7& c7);
+	ECSEntity* CreateEntity(const T1& c1, const T2& c2, const T3& c3, const T4& c4, const T5& c5, const T6& c6, const T7& c7);
 	template <class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8>
-	EntityHandle CreateEntity(const T1& c1, const T2& c2, const T3& c3, const T4& c4, const T5& c5, const T6& c6, const T7& c7, const T8& c8);
+	ECSEntity* CreateEntity(const T1& c1, const T2& c2, const T3& c3, const T4& c4, const T5& c5, const T6& c6, const T7& c7, const T8& c8);
 	template <class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9>
-	EntityHandle CreateEntity(const T1& c1, const T2& c2, const T3& c3, const T4& c4, const T5& c5, const T6& c6, const T7& c7, const T8& c8, const T9& c9);
+	ECSEntity* CreateEntity(const T1& c1, const T2& c2, const T3& c3, const T4& c4, const T5& c5, const T6& c6, const T7& c7, const T8& c8, const T9& c9);
 	template <class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10>
-	EntityHandle CreateEntity(const T1& c1, const T2& c2, const T3& c3, const T4& c4, const T5& c5, const T6& c6, const T7& c7, const T8& c8, const T9& c9, const T10& c10);
+	ECSEntity* CreateEntity(const T1& c1, const T2& c2, const T3& c3, const T4& c4, const T5& c5, const T6& c6, const T7& c7, const T8& c8, const T9& c9, const T10& c10);
 
 	void ClearEntities();
 	void RemoveEntity(EntityHandle handle);
@@ -60,19 +108,7 @@ public:
 
 private:
 	typedef ECSComponentPool::ComponentHandle component_handle;
-
-	struct EntityComponent
-	{
-		uint32 id;
-		ECSComponentPool::ComponentHandle handle;
-	};
-
-	struct Entity
-	{
-		uint32 index;
-		Array<EntityComponent> components;
-	};
-
+	
 	ECSComponentPool::ComponentHandle DoCreateComponent(
 		EntityHandle entity, uint32 componentId,
 		const BaseECSComponent* component);
@@ -80,12 +116,12 @@ private:
 	void UpdateSystemWithMultipleComponents(uint32 index, ECSSystemList& systems, float delta,
 		const Array<uint32>& componentTypes, Array<BaseECSComponent*>& componentParam,
 		Array<ECSComponentPool*>& componentPools);
-	BaseECSComponent* GetComponentInternal(Entity& entity, ECSComponentPool* pool, uint32 componentID);
+	BaseECSComponent* GetComponentInternal(ECSEntity& entity, ECSComponentPool* pool, uint32 componentID);
 	uint32 FindLeastCommonComponent(const Array<uint32>& componentTypes, const Array<uint32>& componentFlags);
 
 	//Array<BaseECSSystem*> m_systems;
 	Map<uint32, ECSComponentPool*> m_components;
-	Array<Entity*> m_entities;
+	Array<ECSEntity*> m_entities;
 };
 
 
@@ -93,16 +129,16 @@ template <class T_Component>
 void ECS::AddComponent(EntityHandle entity, const T_Component& component)
 {
 	// Create the component then add it to the entity
-	EntityComponent pair;
+	ECSEntity::EntityComponent pair;
 	pair.id = T_Component::ID;
 	pair.handle = DoCreateComponent(entity, T_Component::ID, &component);
-	((Entity*) entity)->components.push_back(pair);
+	((ECSEntity*) entity)->components.push_back(pair);
 }
 
 template <class T_Component>
 void ECS::RemoveComponent(EntityHandle entity)
 {
-	Array<EntityComponent>& components = ((Entity*) entity)->components;
+	Array<ECSEntity::EntityComponent>& components = ((ECSEntity*) entity)->components;
 	for (uint32 i = 0; i < components.size(); i++)
 	{
 		if (components[i].id == T_Component::ID)
@@ -117,7 +153,7 @@ void ECS::RemoveComponent(EntityHandle entity)
 template <class T_Component>
 T_Component* ECS::GetComponent(EntityHandle entity)
 {
-	Array<EntityComponent>& components = ((Entity*) entity)->components;
+	Array<ECSEntity::EntityComponent>& components = ((ECSEntity*) entity)->components;
 	for (uint32 i = 0; i < components.size(); i++)
 	{
 		if (components[i].id == T_Component::ID)
@@ -132,7 +168,7 @@ T_Component* ECS::GetComponent(EntityHandle entity)
 template <class T_Component>
 bool ECS::HasComponent(EntityHandle entity)
 {
-	Array<EntityComponent>& components = ((Entity*) entity)->components;
+	Array<ECSEntity::EntityComponent>& components = ((ECSEntity*) entity)->components;
 	for (uint32 i = 0; i < components.size(); i++)
 	{
 		if (components[i].id == T_Component::ID)

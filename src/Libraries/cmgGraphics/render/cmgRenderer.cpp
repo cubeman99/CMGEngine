@@ -187,7 +187,9 @@ void Renderer::UpdateUniforms()
 
 void Renderer::ApplyRenderSettings(bool clear)
 {
-	// Depth.
+	glEnable(GL_TEXTURE_2D);
+
+	// Depth
 	EnableDisableGL(m_params.IsDepthTestEnabled(), GL_DEPTH_TEST);
 	EnableDisableGL(!m_params.IsNearFarPlaneClippingEnabled(), GL_DEPTH_CLAMP);
 	glDepthFunc(TranslateCompareFunc(m_params.GetDepthFunction()));

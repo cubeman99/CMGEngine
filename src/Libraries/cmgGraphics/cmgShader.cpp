@@ -189,13 +189,6 @@ Error Shader::CompileAndLink(const Array<Path>& paths)
 	return CMG_ERROR_SUCCESS;
 }
 
-Error Shader::SetSampler(const String& samplerName,
-	Texture* texture, Sampler* sampler, uint32 slot)
-{
-	return m_device->SetShaderSampler(this, samplerName, texture, sampler,
-		slot);
-}
-
 
 //-----------------------------------------------------------------------------
 // Static methods

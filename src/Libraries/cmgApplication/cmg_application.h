@@ -3,6 +3,7 @@
 
 
 #include <cmgApplication/cmgApplication.h>
+#include <cmgApplication/cmgResourceManager.h>
 
 
 #endif // _CMG_APPLICATION_INCLUDE_ALL_H_

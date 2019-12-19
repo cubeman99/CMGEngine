@@ -2,6 +2,20 @@
 #include "cmgAssert.h"
 #include <cmgMath/cmgMathLib.h>
 
+ECSEntity::ECSEntity(ECS& ecs):
+	m_ecs(ecs)
+{
+}
+
+ECS& ECSEntity::GetECS()
+{
+	return m_ecs;
+}
+
+const ECS& ECSEntity::GetECS() const
+{
+	return m_ecs;
+}
 
 ECS::ECS()
 {
@@ -20,7 +34,7 @@ ECS::~ECS()
 	m_entities.clear();
 }
 
-BaseECSComponent* ECS::GetComponentInternal(Entity& entity,
+BaseECSComponent* ECS::GetComponentInternal(ECSEntity& entity,
 	ECSComponentPool* pool, uint32 componentID)
 {
 	for (uint32 i = 0; i < entity.components.size(); i++)
@@ -87,7 +101,7 @@ void ECS::UpdateSystemWithMultipleComponents(uint32 index, ECSSystemList& system
 	for (uint32 i = 0; i < pool->size(); i++)
 	{
 		componentParam[minSizeIndex] = pool->GetComponent(i);
-		Entity* entity = (Entity*) componentParam[minSizeIndex]->entity;
+		ECSEntity* entity = (ECSEntity*) componentParam[minSizeIndex]->entity;
 
 		bool isValid = true;
 		for (uint32 j = 0; j < componentTypes.size(); j++)
@@ -116,7 +130,7 @@ void ECS::UpdateSystemWithMultipleComponents(uint32 index, ECSSystemList& system
 
 EntityHandle ECS::CreateEntity()
 {
-	Entity* entity = new Entity();
+	ECSEntity* entity = new ECSEntity(*this);
 	entity->index = m_entities.size();
 	m_entities.push_back(entity);
 	return (EntityHandle) entity;
@@ -125,7 +139,7 @@ EntityHandle ECS::CreateEntity()
 EntityHandle ECS::CreateEntity(const BaseECSComponent* components,
 	const uint32* componentIds, size_t numComponents)
 {
-	Entity* entity = (Entity*) CreateEntity();
+	ECSEntity* entity = (ECSEntity*) CreateEntity();
 
 	// Construct the components for the entity
 	for (uint32 i = 0; i < numComponents; i++)
@@ -133,7 +147,7 @@ EntityHandle ECS::CreateEntity(const BaseECSComponent* components,
 		CMG_ASSERT(BaseECSComponent::IsTypeValid(componentIds[i]));
 
 		// Create the component then add it to the entity
-		EntityComponent pair;
+		ECSEntity::EntityComponent pair;
 		pair.id = componentIds[i];
 		pair.handle = DoCreateComponent(entity,
 			componentIds[i], components + i);
@@ -153,7 +167,7 @@ void ECS::ClearEntities()
 
 void ECS::RemoveEntity(EntityHandle handle)
 {
-	Entity* entity = (Entity*) handle;
+	ECSEntity* entity = (ECSEntity*) handle;
 
 	// Delete all the entity's components from memory
 	for (uint32 i = 0; i < entity->components.size(); i++)
@@ -193,7 +207,7 @@ void ECS::DoRemoveComponent(uint32 componentId, component_handle handle)
 	// Update the reference to the shifted component's offset
 	BaseECSComponent* shiftedComponent = pool->back();
 	component_handle oldHandle = (component_handle) (pool->size() - 1);
-	Entity* entity = (Entity*) shiftedComponent->entity;
+	ECSEntity* entity = (ECSEntity*) shiftedComponent->entity;
 	for (uint32 i = 0; i < entity->components.size(); i++)
 	{
 		if (entity->components[i].id == componentId &&

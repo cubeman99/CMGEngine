@@ -280,3 +280,24 @@ TEST(ECS, UpdateSystemWithMultipleComponents)
 	EXPECT_EQ(bb->y, 4);
 }
 
+#include <cmgApplication/cmgResourceManager.h>
+
+TEST(ResourcePool, Test)
+{
+	int* a = new int(2);
+	int* b = new int(5);
+	cmg::shared_ptr<int> sha;
+	{
+		cmg::ResourcePool<int> pool;
+		sha = pool.Add("a.txt", 0, a);
+		std::cout << sha.use_count() << std::endl;
+		sha = pool.Get("a.txt");
+		pool.Unload("a.txt");
+		std::cout << sha.get() << std::endl;
+		std::cout << sha.use_count() << std::endl;
+		std::cout << sha.unique() << std::endl;
+		sha = pool.Set("a.txt", b);
+		std::cout << sha.get() << std::endl;
+	}
+	std::cout << sha.use_count() << std::endl;
+}

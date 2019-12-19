@@ -28,6 +28,8 @@ set(CMG_GRAPHICS_SOURCE_FILES
 	cmgPrimitiveMeshes.cpp
 	cmgDebugDraw.h
 	cmgDebugDraw.cpp
+	cmgMaterial.h
+	cmgMaterial.cpp
 
 	cmgBufferObject.h
 	cmgBufferObject.cpp
@@ -57,14 +59,13 @@ set(CMG_GRAPHICS_SOURCE_FILES
 	types/cmgColor.cpp
 )
 
-
-
 cmg_install_library(cmgGraphics "${CMG_GRAPHICS_SOURCE_FILES}")
 
 target_link_libraries(cmgGraphics
 	cmgCore
 	cmgMath
 	FreeType
+	SOIL
 	${OPENGL_LIBRARIES}
 )
 

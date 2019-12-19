@@ -97,6 +97,7 @@ function(cmg_install_library target_name target_source_files)
 	include_directories(
 		"../"
 		"./"
+		"../../${SOLUTION_DEPENDENCY_PROJECTS_FOLDER}"
 		 ${OPENGL_INCLUDE_DIRS}
 		 #"${CMG_DEP_INSTALL_PATH}/include"
 	)
@@ -141,6 +142,7 @@ function(cmg_install_test target_name target_source_files)
 	include_directories(
 		"../"
 		"./"
+		"../../${SOLUTION_DEPENDENCY_PROJECTS_FOLDER}"
 		 ${OPENGL_INCLUDE_DIRS}
 		 #"${CMG_DEP_INSTALL_PATH}/include"
 	)
