@@ -6,6 +6,7 @@
 
 #include <cmgGraphics/ecs/cmgArcBall.h>
 #include <cmgGraphics/types/cmgColor.h>
+#include <cmgGraphics/cmgFont.h>
 #include <cmgGraphics/cmgSpriteFont.h>
 #include <cmgGraphics/cmgBuiltInFonts.h>
 #include <cmgGraphics/cmgTexture.h>

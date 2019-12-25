@@ -3,6 +3,8 @@
 #include <cmgCore/cmgAssert.h>
 #include <algorithm>
 #include <filesystem>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 namespace
 {
@@ -36,21 +38,36 @@ Path::Path(const char* path)
 
 
 //-----------------------------------------------------------------------------
-// Accessors
+// Getters
 //-----------------------------------------------------------------------------
 
-String Path::GetFileName() const
+const char* Path::c_str() const
+{
+	return m_path.c_str();
+}
+
+const String& Path::ToString() const
+{
+	return m_path;
+}
+
+Path::operator String() const
+{
+	return m_path;
+}
+
+String Path::GetName() const
 {
 	unsigned int pos = m_path.find_last_of(g_pathSlash);
 	if (pos != String::npos)
 		return m_path.substr(pos + 1);
-	return "";
+	return m_path;
 }
 
-String Path::GetFileNameWithoutExtension() const
+String Path::GetNameWithoutExtension() const
 {
-	String result = GetFileName();
-	unsigned int pos = result.find_last_of(g_extension);
+	String result = GetName();
+	size_t pos = result.find_last_of(g_extension);
 	if (pos != String::npos)
 		return result.substr(0, pos);
 	return result;
@@ -58,22 +75,19 @@ String Path::GetFileNameWithoutExtension() const
 
 String Path::GetExtension() const
 {
-	unsigned int pos = m_path.find_last_of(g_extension);
+	size_t pos = m_path.find_last_of(g_extension);
 	if (pos != String::npos)
 		return m_path.substr(pos + 1);
 	return "";
 }
 
-String Path::GetDirectory() const
+Path Path::GetParent() const
 {
-	unsigned int pos = m_path.find_last_of(g_pathSlash);
-	return m_path.substr(0, pos);
+	size_t pos = m_path.find_last_of(g_pathSlash);
+	if (pos == String::npos)
+		return Path("");
+	return Path(m_path.substr(0, pos));
 }
-
-
-//-----------------------------------------------------------------------------
-// Path Checks
-//-----------------------------------------------------------------------------
 
 bool Path::Exists() const
 {
@@ -88,34 +102,26 @@ bool Path::FileExists() const
 
 bool Path::DirectoryExists() const
 {
-	//CMG_ASSERT_UNIMPLEMENTED_FUNCTION();
-	return true;
-}
-
-bool Path::HasFilename() const
-{
-	//CMG_ASSERT_UNIMPLEMENTED_FUNCTION();
-	return true;
+	struct stat info;
+	if (stat(m_path.c_str(), &info) != 0)
+		return false;
+	return (info.st_mode & S_IFDIR);
 }
 
 
 //-----------------------------------------------------------------------------
-// Path Getter & Setter
+// Settets
 //-----------------------------------------------------------------------------
 
-const char* Path::c_str() const
-{
-	return m_path.c_str();
-}
-
-const String& Path::GetPath() const
-{
-	return m_path;
-}
-
-void Path::SetPath(const String& path)
+void Path::Set(const String& path)
 {
 	m_path = path;
+}
+
+Path& Path::operator =(const String& path)
+{
+	m_path = path;
+	return *this;
 }
 
 
@@ -134,9 +140,34 @@ bool Path::operator !=(const Path& other) const
 	return (m_path != other.m_path);
 }
 
+bool Path::operator<(const Path & right) const
+{
+	return m_path < right.m_path;
+}
+
+bool Path::operator>(const Path & right) const
+{
+	return m_path > right.m_path;
+}
+
+bool Path::operator<=(const Path & right) const
+{
+	return m_path <= right.m_path;
+}
+
+bool Path::operator>=(const Path & right) const
+{
+	return m_path >= right.m_path;
+}
+
+Path Path::operator /(const Path& right) const
+{
+	return Path(m_path + "/" + right.m_path);
+}
+
 std::ostream& operator <<(std::ostream &out, const Path& path)
 {
-	out << path.GetPath();
+	out << path.ToString();
 	return out;
 }
 
@@ -144,11 +175,6 @@ std::ostream& operator <<(std::ostream &out, const Path& path)
 //-----------------------------------------------------------------------------
 // Static methods
 //-----------------------------------------------------------------------------
-
-Path Path::operator +(const Path& right) const
-{
-	return Path(m_path + "/" + right.m_path);
-}
 
 Path Path::ResolvePath(const Path& path, const Array<Path>& paths)
 {
@@ -161,4 +187,31 @@ Path Path::ResolvePath(const Path& path, const Array<Path>& paths)
 	if (path.Exists())
 		return path;
 	return path;
+}
+
+
+
+//-----------------------------------------------------------------------------
+// Deprecated
+//-----------------------------------------------------------------------------
+
+Path Path::operator +(const Path& right) const
+{
+	return Path(m_path + "/" + right.m_path);
+}
+
+String Path::GetFileName() const
+{
+	return GetName();
+}
+
+String Path::GetDirectory() const
+{
+	size_t pos = m_path.find_last_of(g_pathSlash);
+	return m_path.substr(0, pos);
+}
+
+const String& Path::GetPath() const
+{
+	return m_path;
 }

@@ -108,6 +108,7 @@ function(cmg_install_library target_name target_source_files)
 	# Set the include directory.
 	include_directories(
 		"../../${SOLUTION_DEPENDENCY_PROJECTS_FOLDER}"
+		"../../${SOLUTION_DEPENDENCY_PROJECTS_FOLDER}/FreeType/include"
 		"../"
 		"./"
 		 ${OPENGL_INCLUDE_DIRS}

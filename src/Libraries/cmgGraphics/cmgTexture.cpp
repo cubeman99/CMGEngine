@@ -202,6 +202,20 @@ Texture::Texture(const TextureParams& params) :
 	SetParams(params);
 }
 
+Texture::Texture(const DecodedImageData & data, const TextureParams& params) :
+	Texture(params)
+{
+	PixelTransferFormat format = PixelTransferFormat::RGBA;
+	if (data.channels == 3)
+		format = PixelTransferFormat::RGB;
+	else if (data.channels == 2)
+		format = PixelTransferFormat::RG;
+	else if (data.channels == 1)
+		format = PixelTransferFormat::RED;
+	WritePixels2D(data.width, data.height, format,
+		PixelType::TYPE_UNSIGNED_BYTE, data.data);
+}
+
 Texture::~Texture()
 {
 	if (m_glDepthBufferId != 0)
@@ -646,59 +660,48 @@ Error Texture::LoadTexture(Texture*& outTexture, const Array<uint8>& data, const
 	return CMG_ERROR_SUCCESS;
 }
 
-Error Texture::LoadTextureOld(Texture*& outTexture, const Path& path, const TextureParams& params)
+Error Texture::DecodeImage(DecodedImageData & outImage, const Path & path)
 {
-	// Read the PNG file's contents into an array
-	Array<uint8> fileData;
-	Error error = File::OpenAndGetContents(path, fileData);
-	if (error.Failed())
-	{
-		error.Uncheck();
-		return error;
-	}
-	return LoadTextureOld(outTexture, fileData, params);
-}
-
-Error Texture::LoadTextureOld(Texture*& outTexture, const Array<uint8>& data, const TextureParams& params)
-{
-	// Decode the PNG file data into pixels
-	unsigned int width;
-	unsigned int height;
-	std::vector<uint8> imageData;
-	lodepng::State lodePngState;
-	lodepng::decode(imageData, width, height, lodePngState,
-		data.data(), data.size());
-	if (lodePngState.error != 0)
-	{
-		std::cerr << "lodepng_decode32 failed BAD BAD: "
-			<< lodepng_error_text(lodePngState.error) << std::endl;
-		return CMG_ERROR(CommonErrorTypes::k_file_corrupt);
-	}
-
-	// Create the texture
-	TextureParams texParams = params;
-	texParams.SetTarget(TextureTarget::TEXTURE_2D);
-	outTexture = new Texture();
-	outTexture->SetParams(texParams);
-	outTexture->WritePixels2D(width, height,
-		PixelTransferFormat::RGBA,
-		PixelType::TYPE_UNSIGNED_BYTE,
-		imageData.data());
-
+	outImage.data = SOIL_load_image(
+		path.c_str(), &outImage.width, &outImage.height,
+		&outImage.channels, 4);
+	if (outImage.data == nullptr)
+		return CMG_ERROR(CommonErrorTypes::k_corrupt_data);
+	outImage.channels = 4;
 	return CMG_ERROR_SUCCESS;
 }
 
-Error Texture::SaveTexture(Texture* texture, const Path& path)
+Error Texture::DecodeImage(DecodedImageData& outImage, const Array<uint8>& data)
 {
+	// I have had issues with SOIL_LOAD_AUTO where channels = 3
+	outImage.data = SOIL_load_image_from_memory(
+		data.data(), data.size(), &outImage.width, &outImage.height,
+		&outImage.channels, 4);
+	if (outImage.data == nullptr)
+		return CMG_ERROR(CommonErrorTypes::k_corrupt_data);
+	outImage.channels = 4;
+	return CMG_ERROR_SUCCESS;
+}
+
+Error Texture::SaveTexture(Texture* texture, const Path& path, int mipmapLevel)
+{
+	// Get the dimensions for this mipmap level
+	int32 width, height;
+	glBindTexture(texture->GetGLTextureTarget(), texture->m_glTextureId);
+	glGetTexLevelParameteriv(GL_TEXTURE_2D, mipmapLevel, GL_TEXTURE_WIDTH, &width);
+	glGetTexLevelParameteriv(GL_TEXTURE_2D, mipmapLevel, GL_TEXTURE_HEIGHT, &height);
+	if (width <= 0 || height <= 0)
+		return CMG_ERROR_FAILURE;
+
 	// Retreive the pixel data
-	Array<uint8> image;
-	image.resize(texture->GetWidth() * texture->GetHeight() * 4);
-	texture->ReadPixels(PixelTransferFormat::RGBA,
-		PixelType::TYPE_UNSIGNED_BYTE, image.data());
+	Array<uint8> data;
+	data.resize(width * height * 4);
+	texture->ReadPixels(mipmapLevel, PixelTransferFormat::RGBA,
+		PixelType::TYPE_UNSIGNED_BYTE, data.data());
 
 	// Encode and save the image as PNG
-	uint32 error = lodepng::encode(path.GetPath(), image,
-		texture->GetWidth(), texture->GetHeight());
+	unsigned int error = lodepng::encode(
+		path, data, (unsigned int) width, (unsigned int) height);
 	if (error)
 		return CMG_ERROR_FAILURE;
 	else

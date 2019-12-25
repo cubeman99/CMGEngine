@@ -14,6 +14,7 @@
 #include <cmgCore/log/cmgLogging.h>
 #include <cmgCore/smart_ptr/cmg_smart_ptr.h>
 #include <cmgCore/string/cmgString.h>
+#include <cmgCore/cmgEventSystem.h>
 
 
 #endif // _CMG_CORE_INCLUDE_ALL_H_

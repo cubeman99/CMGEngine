@@ -97,6 +97,7 @@ function(cmg_install_library target_name target_source_files)
 	include_directories(
 		"../"
 		"./"
+		"../../${SOLUTION_DEPENDENCY_PROJECTS_FOLDER}/FreeType/include"
 		"../../${SOLUTION_DEPENDENCY_PROJECTS_FOLDER}"
 		 ${OPENGL_INCLUDE_DIRS}
 		 #"${CMG_DEP_INSTALL_PATH}/include"

@@ -14,8 +14,8 @@ namespace cmg {
 	Error ResourceManager::LoadTexture(resource_ptr<Texture>& outTexture,
 		const Path& path, const TextureParams& params)
 	{
-		Texture* texture = new Texture();
-		ResourceName name = path.GetPath();
+		Texture* texture = nullptr;
+		ResourceName name = path.ToString();
 		Error error = Texture::LoadTexture(texture, ResolvePath(path), params);
 		if (error.Passed())
 			outTexture = Add(name, texture);
@@ -25,8 +25,8 @@ namespace cmg {
 	Error ResourceManager::LoadMesh(resource_ptr<Mesh>& outMesh, const Path& path,
 		MeshLoadOptions::value_type options)
 	{
-		Mesh* mesh = new Mesh();
-		ResourceName name = path.GetPath();
+		Mesh* mesh = nullptr;
+		ResourceName name = path.ToString();
 		Error error = Mesh::Load(ResolvePath(path), mesh, options);
 		if (error.Passed())
 			outMesh = Add(name, mesh);
@@ -49,7 +49,7 @@ namespace cmg {
 		const Path& path)
 	{
 		Shader* shader = new Shader();
-		ResourceName name = path.GetPath();
+		ResourceName name = path.ToString();
 		Error error = Shader::LoadComputeShader(shader,
 			ResolvePath(path), m_shaderIncludePaths);
 		if (error.Passed())
@@ -64,6 +64,18 @@ namespace cmg {
 		return CMG_ERROR_SUCCESS;
 	}
 
+	Error ResourceManager::LoadFont(resource_ptr<Font>& outFont,
+		const Path& path, uint32 size, uint32 charRegionBegin, uint32 charRegionEnd)
+	{
+		Font* font = nullptr;
+		ResourceName name = path.ToString();
+		Error error = Font::LoadFont(font, ResolvePath(path),
+			size, charRegionBegin, charRegionEnd);
+		if (error.Passed())
+			outFont = Add(name, font);
+		return error.Uncheck();
+	}
+
 	void ResourceManager::AddShaderIncludePath(const Path& path)
 	{
 		m_shaderIncludePaths.push_back(path);
@@ -71,7 +83,8 @@ namespace cmg {
 
 	void ResourceManager::AddPath(const Path & path)
 	{
-		m_paths.push_back(path);
+		if (std::find(m_paths.begin(), m_paths.end(), path) == m_paths.end())
+			m_paths.push_back(path);
 	}
 
 	Path ResourceManager::ResolvePath(const Path & path)
@@ -95,6 +108,11 @@ namespace cmg {
 	}
 
 	template<> ResourcePool<SpriteFont>* ResourceManager::GetResourcePool<SpriteFont>()
+	{
+		return &m_poolSpriteFonts;
+	}
+
+	template<> ResourcePool<Font>* ResourceManager::GetResourcePool<Font>()
 	{
 		return &m_poolFonts;
 	}

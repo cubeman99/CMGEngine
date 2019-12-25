@@ -27,8 +27,9 @@ SpriteFont* SpriteFont::LoadSpriteFont(const Path& path, int charsPerRow,
 	int charWidth, int charHeight, int charSpacing)
 {
 	// Load the sprite font image
-	Texture* texture = Texture::LoadTexture(path.GetPath());
-	if (texture == nullptr)
+	Texture* texture = nullptr;
+	Error error = Texture::LoadTexture(texture, path);
+	if (error.Failed())
 		return nullptr;
 
 	// Construct the sprite font object

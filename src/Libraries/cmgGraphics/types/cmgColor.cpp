@@ -59,6 +59,7 @@ const Color Color::WHITE		= Color(255, 255, 255);
 const Color Color::BLACK		= Color(  0,   0,   0);
 const Color Color::LIGHT_GRAY	= Color(192, 192, 192);
 const Color Color::GRAY			= Color(128, 128, 128);
+const Color Color::DARK_GRAY	= Color( 64,  64,  64);
 const Color Color::RED			= Color(255,   0,   0);
 const Color Color::YELLOW		= Color(255, 255,   0);
 const Color Color::GREEN		= Color(  0, 255,   0);

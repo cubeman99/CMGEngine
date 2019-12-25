@@ -6,15 +6,15 @@
 // Constructors & Destructor
 //-----------------------------------------------------------------------------
 	
-File::File(const Path& path)
-	: m_path(path)
-	, m_file(nullptr)
+File::File(const Path& path) :
+	m_path(path),
+	m_file(nullptr)
 {
 }
 
-File::File(const File& other)
-	: m_path(other.m_path)
-	, m_file(nullptr)
+File::File(const File& other) :
+	m_path(other.m_path),
+	m_file(nullptr)
 {
 }
 	
@@ -32,8 +32,6 @@ Error File::Open(FileAccess access, FileType type)
 {
 	if (type != FileType::BINARY && type != FileType::TEXT)
 		CMG_ASSERT_FALSE("Invalid file type (must be binary or text)");
-	if (!m_path.HasFilename())
-		return CMG_ERROR(CommonErrorTypes::k_path_incorrect);
 				
 	// Determine the open mode string.
 	const char* mode;
@@ -87,21 +85,21 @@ Error File::Close()
 // Read & Write
 //-----------------------------------------------------------------------------
 	
-Error File::Read(void* destination, unsigned int size)
+Error File::Read(void* destination, uint32 size)
 {
 	CMG_ASSERT_MSG(IsOpen(), "Attempting to read a file that is not open");
 
-	if (fread((unsigned char*) destination, 1, size, m_file) != size)
+	if (fread((uint8*) destination, 1, size, m_file) != size)
 		return CMG_ERROR(CommonErrorTypes::k_file_read);
 
 	return CMG_ERROR_SUCCESS;
 }
 	
-Error File::Write(const void* data, unsigned int size)
+Error File::Write(const void* data, uint32 size)
 {
 	CMG_ASSERT_MSG(IsOpen(), "Attempting to write/append to a file that is not open");
 
-	if (fwrite((unsigned char*) data, 1, size, m_file) != size)
+	if (fwrite((uint8*) data, 1, size, m_file) != size)
 		return CMG_ERROR(CommonErrorTypes::k_file_write);
 
 	return CMG_ERROR_SUCCESS;
@@ -138,7 +136,7 @@ Error File::GetContents(String& out)
 	return CMG_ERROR_SUCCESS;
 }
 	
-Error File::GetContents(Array<unsigned char>& out)
+Error File::GetContents(Array<uint8>& out)
 {
 	CMG_ASSERT_MSG(m_file, "No file to read - did you forget to call Open()?");
 
@@ -172,20 +170,42 @@ Error File::OpenAndGetContents(const Path& path, String& out)
 	File file(path);
 	error = file.Open(FileAccess::READ, FileType::TEXT);
 	if (error.Failed())
-	{
-		error.Uncheck();
-		return error;
-	}
+		return error.Uncheck();
 	return file.GetContents(out);
 }
 	
-Error File::OpenAndGetContents(const Path& path, Array<unsigned char>& out)
+Error File::OpenAndGetContents(const Path& path, Array<uint8>& out)
 {
 	Error error;
 	File file(path);
 	error = file.Open(FileAccess::READ, FileType::BINARY);
 	if (error.Failed())
-		return error;
+		return error.Uncheck();
 	return file.GetContents(out);
+}
+
+Error File::OpenAndWriteContents(const Path & path, const String & text)
+{
+	Error error;
+	File file(path);
+	error = file.Open(FileAccess::WRITE, FileType::TEXT);
+	if (error.Failed())
+		return error.Uncheck();
+	return file.Write(text.data(), text.length());
+}
+
+Error File::OpenAndWriteContents(const Path & path, const Array<uint8>& data)
+{
+	return OpenAndWriteContents(path, data.data(), data.size());
+}
+
+Error File::OpenAndWriteContents(const Path & path, const uint8 * data, size_t count)
+{
+	Error error;
+	File file(path);
+	error = file.Open(FileAccess::WRITE, FileType::BINARY);
+	if (error.Failed())
+		return error.Uncheck();
+	return file.Write(data, count);
 }
 	

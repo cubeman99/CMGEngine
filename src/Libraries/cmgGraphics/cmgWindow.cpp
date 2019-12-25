@@ -116,18 +116,29 @@ HRESULT WindowDropTarget::Drop(IDataObject *pDataObject, DWORD grfKeyState, POIN
     if (pDataObject->GetData(&format, &medium) == S_OK)
 	{
 		WindowEvent winEvent(WindowEvent::k_drop_file);
-		char fileName[MAX_PATH];
 
-		DragQueryFile((HDROP) medium.hGlobal, 0, fileName, sizeof (fileName));
-		winEvent.drop.text = fileName;
+		// Get the number of files dropped
+		uint32 fileCount = DragQueryFile((HDROP) medium.hGlobal, 0xFFFFFFFF, nullptr, 0);
+		
+		// Get the path to each dropped file
+		char fileName[MAX_PATH];
+		for (uint32 index = 0; index < fileCount; index++)
+		{
+			DragQueryFile((HDROP) medium.hGlobal, index, fileName, sizeof(fileName));
+			winEvent.drop.paths.push_back(Path(fileName));
+		}
+		
+		// Release internal windows stuff
 		if (medium.pUnkForRelease != nullptr)
 			medium.pUnkForRelease->Release();
 		else
 			GlobalFree(medium.hGlobal);
-		
+
+		// Send the dropped file event
+		if (!winEvent.drop.paths.empty())
+			winEvent.drop.text = winEvent.drop.paths[0];
 		m_window->SendEvent(winEvent);
 	}
-
 
 	return S_OK;
 }
@@ -454,7 +465,6 @@ void Window::SetFullscreen(bool fullscreen)
 		int screenHeight = GetSystemMetrics(SM_CYSCREEN);
 		m_graphicsMode.SetWidth(screenWidth);
 		m_graphicsMode.SetHeight(screenHeight);
-		printf("New size: %d x %d\n", screenWidth, screenHeight);
 
 		// Resize the window so that it fits the entire screen.
 		SetWindowPos(m_handle, HWND_TOP, 0, 0, m_graphicsMode.GetWidth(),
@@ -487,7 +497,6 @@ void Window::SetFullscreen(bool fullscreen)
 		GetClientRect(m_handle, &clientRect);
 		m_graphicsMode.SetWidth(clientRect.right - clientRect.left);
 		m_graphicsMode.SetHeight(clientRect.bottom - clientRect.top);
-		printf("New size: %d x %d\n", m_graphicsMode.GetWidth(), m_graphicsMode.GetHeight());
 	}
 }
 

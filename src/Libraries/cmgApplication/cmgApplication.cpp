@@ -2,11 +2,7 @@
 #include <GL/GL.h>
 
 
-Application::Application():
-	m_isInitialized(false),
-	m_isQuitRequested(false),
-	m_perceivedFps(0.0f),
-	m_renderDevice(nullptr)
+Application::Application()
 {
 }
 
@@ -16,7 +12,7 @@ Application::~Application()
 	m_renderDevice = nullptr;
 }
 
-bool Application::Initialize(const std::string& title, unsigned int width, unsigned int height)
+bool Application::Initialize(const std::string& title, uint32 width, uint32 height)
 {
 	GraphicsMode gfxMode;
 	gfxMode.SetWidth((int) width);
@@ -62,25 +58,38 @@ void Application::Run()
 	{
 		//startTime = clock();
 
-		// Process window events.
+		// Process window events
 		while (m_window.GetEvent(winEvent))
 		{
 			if (winEvent.m_type == WindowEvent::k_resized)
 			{
+				Window::ResizedEvent resizedEvent;
+				resizedEvent.width = winEvent.GetWidth();
+				resizedEvent.height = winEvent.GetHeight();
+				m_eventManager.Publish(&resizedEvent);
 				OnResizeWindow(winEvent.GetWidth(), winEvent.GetHeight());
 				glViewport(0, 0, winEvent.GetWidth(), winEvent.GetHeight());
 			}
 			else if (winEvent.m_type == WindowEvent::k_close)
 			{
+				Window::CloseEvent closeEvent;
+				m_eventManager.Publish(&closeEvent);
 				Quit();
 				break;
 			}
 			else if (winEvent.m_type == WindowEvent::k_drop_file)
 			{
+				Window::DropFilesEvent dropEvent;
+				dropEvent.paths = winEvent.drop.paths;
+				m_eventManager.Publish(&dropEvent);
 				OnDropFile(winEvent.drop.text);
+				OnDropFiles(winEvent.drop.paths);
 			}
 			else if (winEvent.m_type == WindowEvent::k_drop_text)
 			{
+				Window::DropTextEvent dropEvent;
+				dropEvent.text = winEvent.drop.text;
+				m_eventManager.Publish(&dropEvent);
 				OnDropText(winEvent.drop.text);
 			}
 		}

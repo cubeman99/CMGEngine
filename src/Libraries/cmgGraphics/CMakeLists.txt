@@ -22,6 +22,8 @@ set(CMG_GRAPHICS_SOURCE_FILES
 	cmgMesh.cpp
 	cmgSpriteFont.h
 	cmgSpriteFont.cpp
+	cmgFont.h
+	cmgFont.cpp
 	cmgBuiltInFonts.h
 	cmgBuiltInFonts.cpp
 	cmgPrimitiveMeshes.h
@@ -57,6 +59,9 @@ set(CMG_GRAPHICS_SOURCE_FILES
 
 	types/cmgColor.h
 	types/cmgColor.cpp
+	
+	utilities/cmgShelfBinPacker.h
+	utilities/cmgShelfBinPacker.cpp
 )
 
 cmg_install_library(cmgGraphics "${CMG_GRAPHICS_SOURCE_FILES}")

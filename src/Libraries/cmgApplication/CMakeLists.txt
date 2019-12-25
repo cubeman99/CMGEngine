@@ -17,4 +17,5 @@ target_link_libraries(cmgApplication
 	cmgMath
 	cmgInput
 	cmgGraphics
+	FreeType
 )

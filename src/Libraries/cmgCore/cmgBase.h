@@ -55,6 +55,7 @@ typedef double float64;
 // There we'll have to use this macro
 #define CMG_COMMA ,
 
+#define CMG_DEPRECATED
 
 //-----------------------------------------------------------------------------
 // Unused Macros

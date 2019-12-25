@@ -35,19 +35,23 @@ public:
 	File(const File& other);
 	~File();
 
-	// Open & close.
+	// Open & close
 	Error Open(FileAccess access, FileType type);
 	bool IsOpen() const;
 	Error Close();
 
-	// Read & write.
-	Error Read(void* destination, unsigned int size);
-	Error Write(const void* data, unsigned int size);
+	// Read & write
+	Error Read(void* destination, uint32 size);
+	Error Write(const void* data, uint32 size);
 	Error GetContents(String& out);
-	Error GetContents(Array<unsigned char>& out);
+	Error GetContents(Array<uint8>& out);
 
+	// Static methods
 	static Error OpenAndGetContents(const Path& path, String& out);
-	static Error OpenAndGetContents(const Path& path, Array<unsigned char>& out);
+	static Error OpenAndGetContents(const Path& path, Array<uint8>& out);
+	static Error OpenAndWriteContents(const Path& path, const String& text);
+	static Error OpenAndWriteContents(const Path& path, const Array<uint8>& data);
+	static Error OpenAndWriteContents(const Path& path, const uint8* data, size_t count);
 
 private:
 	Path m_path;

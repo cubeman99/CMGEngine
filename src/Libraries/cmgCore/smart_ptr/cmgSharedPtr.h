@@ -19,7 +19,7 @@ namespace cmg
 	template <class T, class... Args>
 	shared_ptr<T> make_shared(Args&&... args)
 	{
-		return std::make_shared<T>(args);
+		return std::make_shared<T>(args...);
 	}
 
 };

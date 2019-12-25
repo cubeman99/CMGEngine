@@ -18,6 +18,7 @@ struct Color
 	static const Color BLACK;
 	static const Color LIGHT_GRAY;
 	static const Color GRAY;
+	static const Color DARK_GRAY;
 	static const Color RED;
 	static const Color YELLOW;
 	static const Color GREEN;

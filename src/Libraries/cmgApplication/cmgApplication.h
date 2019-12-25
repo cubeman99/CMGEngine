@@ -13,7 +13,7 @@ public:
 	Application();
 	virtual ~Application();
 
-	bool Initialize(const std::string& title, unsigned int width, unsigned int height);
+	bool Initialize(const std::string& title, uint32 width, uint32 height);
 	void Run();
 	void Quit();
 
@@ -21,12 +21,11 @@ public:
 	virtual void OnUpdate(float timeDelta) {}
 	virtual void OnRender() {}
 	virtual void OnQuit() {}
-
 	virtual void OnResizeWindow(int width, int height) {}
-	virtual void OnDropFile(const String& fileName) {}
+	virtual void OnDropFiles(const Array<Path>& paths) {}
+	CMG_DEPRECATED virtual void OnDropFile(const String& fileName) {}
 	virtual void OnDropText(const String& text) {}
-
-
+	
 	inline float GetFPS() { return m_perceivedFps; }
 	inline Window* GetWindow() { return &m_window; }
 	inline RenderDevice* GetRenderDevice() { return m_renderDevice; }
@@ -34,19 +33,21 @@ public:
 	inline cmg::ResourceManager* GetResourceManager() { return &m_resourceManager; }
 	inline Mouse* GetMouse() { return m_mouse; }
 	inline Keyboard* GetKeyboard() { return m_keyboard; }
+	inline cmg::EventManager* GetEventManager() { return &m_eventManager; }
 
 
 private:
 	Window m_window;
 	cmg::ResourceManager m_resourceManager;
-	RenderDevice* m_renderDevice;
+	cmg::EventManager m_eventManager;
+	RenderDevice* m_renderDevice = nullptr;
 	InputManager m_inputManager;
-	Keyboard* m_keyboard;
-	Mouse* m_mouse;
-	float m_perceivedFps;
+	Keyboard* m_keyboard = nullptr;
+	Mouse* m_mouse = nullptr;
 
-	bool m_isQuitRequested;
-	bool m_isInitialized;
+	float m_perceivedFps = 0.0f;
+	bool m_isQuitRequested = false;
+	bool m_isInitialized = false;
 };
 
 

@@ -209,11 +209,11 @@ Error Shader::LoadShader(Shader*& outShader,
 	// Add the stages
 	outShader = new Shader();
 	error = outShader->AddStage(ShaderType::k_vertex_shader,
-		vertexCode, vertexPath.GetPath());
+		vertexCode, vertexPath);
 	if (error.Failed())
 		return error.Uncheck();
 	error = outShader->AddStage(ShaderType::k_fragment_shader,
-		fragmentCode, fragmentPath.GetPath());
+		fragmentCode, fragmentPath);
 	if (error.Failed())
 		return error.Uncheck();
 
@@ -237,7 +237,7 @@ Error Shader::LoadComputeShader(Shader*& outShader, const Path& path, const Arra
 
 	// Add the stages
 	outShader = new Shader();
-	error = outShader->AddStage(ShaderType::k_compute_shader, code, path.GetPath());
+	error = outShader->AddStage(ShaderType::k_compute_shader, code, path);
 	if (error.Failed())
 		return error.Uncheck();
 
@@ -296,7 +296,7 @@ Error Shader::PreprocessStage(ShaderStage& stage, const Array<Path>& paths)
 	std::sregex_iterator matchesBegin = std::sregex_iterator(
 		oldCode.begin(), oldCode.end(), regexInclude);
 	std::sregex_iterator matchesEnd = std::sregex_iterator();
-	Path stageFileDir = stage.m_path.GetDirectory();
+	Path stageFileDir = stage.m_path.GetParent();
 	Error error;
 	uint32 offset = 0;
 
@@ -307,7 +307,7 @@ Error Shader::PreprocessStage(ShaderStage& stage, const Array<Path>& paths)
 		if (match.size() > 1)
 		{
 			Path includePath = Path(match[1].str());
-			Path resolvedPath = stageFileDir + includePath;
+			Path resolvedPath = stageFileDir / includePath;
 			if (!resolvedPath.Exists())
 				resolvedPath = Path::ResolvePath(includePath, paths);
 			if (resolvedPath.FileExists())
@@ -355,7 +355,7 @@ Error Shader::CompileStage(ShaderStage& stage)
 		// Format the error message
 		String errorMessage = errorMsg;
 		errorMessage = "\n" + errorMessage;
-		String toReplace = "\n" + stage.m_path.GetPath() + "(";
+		String toReplace = "\n" + stage.m_path.ToString() + "(";
 
 		// Insert the shader file name before each error
 		size_t index = 0;

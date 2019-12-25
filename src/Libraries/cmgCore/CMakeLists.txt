@@ -10,6 +10,8 @@ set(CMG_CORE_SOURCE_FILES
 	cmgConsole.cpp
 	cmgRandom.h
 	cmgRandom.cpp
+	cmgEventSystem.h
+	cmgEventSystem.cpp
 
 	containers/cmgArray.h
 	containers/cmgArray.cpp

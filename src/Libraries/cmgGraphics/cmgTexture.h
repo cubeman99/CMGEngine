@@ -10,6 +10,13 @@
 
 class RenderBuffer;
 
+struct DecodedImageData
+{
+	uint8* data = nullptr;
+	int32 width = 0;
+	int32 height = 0;
+	int32 channels = 0;
+};
 
 //-----------------------------------------------------------------------------
 // OpenGL Texture
@@ -29,6 +36,7 @@ public:
 public:
 	Texture();
 	Texture(const TextureParams& params);
+	Texture(const DecodedImageData& data, const TextureParams& params = TextureParams());
 	~Texture();
 
 	// Texture Parameters
@@ -80,11 +88,15 @@ public:
 	void InitRenderTarget();
 
 	static Texture* LoadTexture(const std::string& fileName, const TextureParams& params = TextureParams());
-	static Error LoadTextureOld(Texture*& outTexture, const Array<uint8>& data, const TextureParams& params = TextureParams());
-	static Error LoadTextureOld(Texture*& outTexture, const Path& path, const TextureParams& params = TextureParams());
 	static Error LoadTexture(Texture*& outTexture, const Array<uint8>& data, const TextureParams& params = TextureParams());
 	static Error LoadTexture(Texture*& outTexture, const Path& path, const TextureParams& params = TextureParams());
-	static Error SaveTexture(Texture* texture, const Path& path);
+
+	// Decode an image from memory into raw pixel data
+	static Error DecodeImage(DecodedImageData& outImage, const Path& path);
+	static Error DecodeImage(DecodedImageData& outImage, const Array<uint8>& data);
+
+	// Save a texture to file
+	static Error SaveTexture(Texture* texture, const Path& path, int mipmapLevel = 0);
 
 
 	inline unsigned int GetGLTextureID() const { return m_glTextureId; }
@@ -97,7 +109,7 @@ private:
 	// Create a texture with the given OpenGL ID
 	Texture(uint32 id);
 
-	// Prevent copying textures.
+	// Prevent copying textures
 	Texture(const Texture& other) {}
 	void operator=(const Texture& other) {}
 

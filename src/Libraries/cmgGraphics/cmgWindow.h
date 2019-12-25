@@ -155,7 +155,8 @@ struct WindowEvent
 
 	struct
 	{
-		String text; // Text or filename.
+		String text; // Text
+		Array<Path> paths; // Dropped file paths
 	} drop;
 };
 
@@ -193,6 +194,26 @@ class Window
 public:
 	typedef WindowHandle::type      window_handle;
 	typedef std::queue<WindowEvent>	event_queue;
+
+	struct ResizedEvent : public cmg::Event
+	{
+		int32 width;
+		int32 height;
+	};
+
+	struct DropTextEvent : public cmg::Event
+	{
+		String text;
+	};
+
+	struct DropFilesEvent : public cmg::Event
+	{
+		Array<Path> paths;
+	};
+
+	struct CloseEvent : public cmg::Event
+	{
+	};
 
 public:
 	Window();
