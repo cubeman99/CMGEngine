@@ -3,7 +3,7 @@
 
 #include <cmgGraphics/cmgOpenGLIncludes.h>
 #include <cmgCore/cmg_core.h>
-#include <cmgGraphics/cmgVertexTypes.h>
+#include <cmgGraphics/types/cmgVertexTypes.h>
 #include <cmgGraphics/cmgBufferObject.h>
 
 

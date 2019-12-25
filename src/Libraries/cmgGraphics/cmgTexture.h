@@ -1,10 +1,10 @@
-#ifndef _TEXTURE_H_
-#define _TEXTURE_H_
+#ifndef _CMG_GRAPHICS_TEXTURE_H_
+#define _CMG_GRAPHICS_TEXTURE_H_
 
 #include <cmgCore/smart_ptr/cmg_smart_ptr.h>
 #include <cmgGraphics/types/cmgColor.h>
 #include <cmgGraphics/cmgTextureParams.h>
-#include <cmgGraphics/cmgImageFormat.h>
+#include <cmgGraphics/types/cmgImageFormat.h>
 #include <cmgCore/error/cmgError.h>
 #include <cmgCore/io/cmgPath.h>
 
@@ -22,6 +22,17 @@ struct DecodedImageData
 // OpenGL Texture
 //-----------------------------------------------------------------------------
 
+//
+// Supported image load formats:
+//   - PNG (non-interlaced)
+//   - JPEG
+//
+// Supported image save formats:
+//   - PNG
+//   - BMP
+//   - TGA
+//   - DDS
+//
 class Texture
 {
 	friend class Font;
@@ -36,7 +47,8 @@ public:
 public:
 	Texture();
 	Texture(const TextureParams& params);
-	Texture(const DecodedImageData& data, const TextureParams& params = TextureParams());
+	Texture(const DecodedImageData& data,
+		const TextureParams& params = TextureParams());
 	~Texture();
 
 	// Texture Parameters
@@ -57,46 +69,69 @@ public:
 		
 	// Pixel read
 	void ReadPixels(Color* pixels) const;
-	void ReadPixels(PixelTransferFormat format, PixelType type, void* pixels) const;
+	void ReadPixels(PixelTransferFormat format, PixelType type,
+		void* pixels) const;
 	void ReadPixels(int mipmapLevel, Color* pixels) const;
-	void ReadPixels(int mipmapLevel, PixelTransferFormat format, PixelType type, void* pixels) const;
+	void ReadPixels(int mipmapLevel, PixelTransferFormat format,
+		PixelType type, void* pixels) const;
 
 	// Cubemap face write
-	void WriteFacePixels(cubemap_face_index face, int width, int height, const Color* pixels);
-	void WriteFacePixels(cubemap_face_index face, int width, int height, PixelTransferFormat format, PixelType type, const void* pixelData);
-	void WriteFacePixelsAtLevel(cubemap_face_index face, int mipmapLevel, int width, int height, const Color* pixels);
-	void WriteFacePixelsAtLevel(cubemap_face_index face, int mipmapLevel, int width, int height, PixelTransferFormat format, PixelType type, const void* pixelData);
+	void WriteFacePixels(cubemap_face_index face, int width, int height,
+		const Color* pixels);
+	void WriteFacePixels(cubemap_face_index face, int width, int height,
+		PixelTransferFormat format, PixelType type, const void* pixelData);
+	void WriteFacePixelsAtLevel(cubemap_face_index face, int mipmapLevel,
+		int width, int height, const Color* pixels);
+	void WriteFacePixelsAtLevel(cubemap_face_index face, int mipmapLevel,
+		int width, int height, PixelTransferFormat format, PixelType type,
+		const void* pixelData);
 		
 	// 1D texture write
 	void WritePixels1D(int width, const Color* pixels);
-	void WritePixels1D(int width, PixelTransferFormat format, PixelType type, const void* pixelData);
+	void WritePixels1D(int width, PixelTransferFormat format, PixelType type,
+		const void* pixelData);
 	void WritePixelsAtLevel1D(int mipmapLevel, int width, const Color* pixels);
-	void WritePixelsAtLevel1D(int mipmapLevel, int width, PixelTransferFormat format, PixelType type, const void* pixelData);
+	void WritePixelsAtLevel1D(int mipmapLevel, int width,
+		PixelTransferFormat format, PixelType type, const void* pixelData);
 		
 	// 2D texture write
 	void WritePixels2D(int width, int height, const Color* pixels);
-	void WritePixels2D(int width, int height, PixelTransferFormat format, PixelType type, const void* pixelData);
-	void WritePixelsAtLevel2D(int mipmapLevel, int width, int height, const Color* pixels);
-	void WritePixelsAtLevel2D(int mipmapLevel, int width, int height, PixelTransferFormat format, PixelType type, const void* pixelData);
+	void WritePixels2D(int width, int height, PixelTransferFormat format,
+		PixelType type, const void* pixelData);
+	void WritePixelsAtLevel2D(int mipmapLevel, int width, int height,
+		const Color* pixels);
+	void WritePixelsAtLevel2D(int mipmapLevel, int width, int height,
+		PixelTransferFormat format, PixelType type, const void* pixelData);
 		
 	// 3D texture write
 	void WritePixels3D(int width, int height, int depth, const Color* pixels);
-	void WritePixels3D(int width, int height, int depth, PixelTransferFormat format, PixelType type, const void* pixelData);
-	void WritePixelsAtLevel3D(int mipmapLevel, int width, int height, int depth, const Color* pixels);
-	void WritePixelsAtLevel3D(int mipmapLevel, int width, int height, int depth, PixelTransferFormat format, PixelType type, const void* pixelData);
+	void WritePixels3D(int width, int height, int depth,
+		PixelTransferFormat format, PixelType type, const void* pixelData);
+	void WritePixelsAtLevel3D(int mipmapLevel, int width, int height,
+		int depth, const Color* pixels);
+	void WritePixelsAtLevel3D(int mipmapLevel, int width, int height,
+		int depth, PixelTransferFormat format, PixelType type,
+		const void* pixelData);
 
 	void InitRenderTarget();
 
-	static Texture* LoadTexture(const std::string& fileName, const TextureParams& params = TextureParams());
-	static Error LoadTexture(Texture*& outTexture, const Array<uint8>& data, const TextureParams& params = TextureParams());
-	static Error LoadTexture(Texture*& outTexture, const Path& path, const TextureParams& params = TextureParams());
+	static Texture* LoadTexture(const std::string& fileName,
+		const TextureParams& params = TextureParams());
+	static Error LoadTexture(Texture*& outTexture, const Array<uint8>& data,
+		const TextureParams& params = TextureParams());
+	static Error LoadTexture(Texture*& outTexture, const Path& path,
+		const TextureParams& params = TextureParams());
 
 	// Decode an image from memory into raw pixel data
 	static Error DecodeImage(DecodedImageData& outImage, const Path& path);
-	static Error DecodeImage(DecodedImageData& outImage, const Array<uint8>& data);
+	static Error DecodeImage(DecodedImageData& outImage,
+		const Array<uint8>& data);
 
 	// Save a texture to file
-	static Error SaveTexture(Texture* texture, const Path& path, int mipmapLevel = 0);
+	static Error SaveTexture(const Texture* texture, const Path& path,
+		int mipmapLevel = 0);
+	static Error SaveTexture(const Texture* texture, const Path& path,
+		ImageEncodingFormat format, int mipmapLevel = 0);
 
 
 	inline unsigned int GetGLTextureID() const { return m_glTextureId; }
@@ -126,4 +161,4 @@ private:
 };
 
 
-#endif // _TEXTURE_H_
+#endif // _CMG_GRAPHICS_TEXTURE_H_

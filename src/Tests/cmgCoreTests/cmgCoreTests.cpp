@@ -77,6 +77,13 @@ TEST(String, Trim)
 	EXPECT_EQ(string::TrimRight(" hello"), " hello");
 	EXPECT_EQ(string::TrimRight("   hello     "), "   hello");
 	EXPECT_EQ(string::TrimRight("    hello "), "    hello");
+
+	EXPECT_EQ(string::ToLower("Hello"), "hello");
+	EXPECT_EQ(string::ToLower("HELLO"), "hello");
+	EXPECT_EQ(string::ToLower("hello"), "hello");
+	EXPECT_EQ(string::ToUpper("Hello"), "HELLO");
+	EXPECT_EQ(string::ToUpper("HELLO"), "HELLO");
+	EXPECT_EQ(string::ToUpper("hello"), "HELLO");
 }
 
 

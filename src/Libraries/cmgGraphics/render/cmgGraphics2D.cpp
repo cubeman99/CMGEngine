@@ -210,170 +210,88 @@ void Graphics2D::DrawTexture(Texture* texture, const Rect2f& source, const Rect2
 
 Rect2f Graphics2D::MeasureString(const Font* font, const String& string)
 {
-	const Glyph* pGlyph;
+	const Glyph* glyph;
 	Vector2i mins(0, 0);
 	Vector2i maxs(0, 0);
 	Vector2i penPosition(0, 0);
 
-	for (unsigned int i = 0; i < string.length(); i++)
+	for (uint32 i = 0; i < string.length(); i++)
 	{
-		pGlyph = font->GetGlyph(string[i]);
-		if (pGlyph->HasImage())
+		glyph = font->GetGlyph(string[i]);
+		if (glyph->HasImage())
 		{
-			if (penPosition.x + pGlyph->GetMinX() < mins.x)
-				mins.x = penPosition.x + pGlyph->GetMinX();
-			if (penPosition.y + pGlyph->GetMinY() < mins.y)
-				mins.y = penPosition.y + pGlyph->GetMinY();
-			if (penPosition.x + pGlyph->GetMaxX() > maxs.x)
-				maxs.x = penPosition.x + pGlyph->GetMaxX();
-			if (penPosition.y + pGlyph->GetMaxY() > maxs.y)
-				maxs.y = penPosition.y + pGlyph->GetMaxY();
+			if (penPosition.x + glyph->GetMinX() < mins.x)
+				mins.x = penPosition.x + glyph->GetMinX();
+			if (penPosition.y + glyph->GetMinY() < mins.y)
+				mins.y = penPosition.y + glyph->GetMinY();
+			if (penPosition.x + glyph->GetMaxX() > maxs.x)
+				maxs.x = penPosition.x + glyph->GetMaxX();
+			if (penPosition.y + glyph->GetMaxY() > maxs.y)
+				maxs.y = penPosition.y + glyph->GetMaxY();
 		}
-		penPosition.x += pGlyph->GetAdvance();
+		penPosition.x += glyph->GetAdvance();
 	}
 	return Rect2f((float) mins.x, (float) mins.y,
 		(float) (maxs.x - mins.x), (float) (maxs.y - mins.y));
-}
-
-Vector2f Graphics2D::MeasureString(const SpriteFont* font, const String& string)
-{
-	Vector2f cursor(0, 0);
-	Vector2f size(0, 0);
-
-	for (const char* charPtr = string.c_str(); *charPtr != '\0'; charPtr++)
-	{
-		unsigned char c = (unsigned char) *charPtr;
-
-		if (c == '\n')
-		{
-			cursor.x = 0.0f;
-			cursor.y += font->m_charHeight;
-		}
-		else
-		{
-			cursor.x += font->m_charWidth;
-		}
-
-		size.x = Math::Max(size.x, cursor.x);
-		size.y = Math::Max(size.y, cursor.y + font->m_charHeight);
-	}
-
-	return size;
-}
-
-void Graphics2D::DrawString(SpriteFont* font, const String& string,
-	const Vector2f& position, const Color& color, TextAlign align)
-{
-	float scale = 1.0f;
-
-	Texture* texture = font->GetTexture();
-	Vector2f texSize((float) texture->GetWidth(),
-		(float) texture->GetHeight());
-	Vector2f charSize = Vector2f(
-		(float) font->m_charWidth, (float) font->m_charHeight) / texSize;
-	Vector2f cursor = position;
-	Vector2f screenCharSize = Vector2f(
-		font->m_charWidth * scale, font->m_charHeight * scale);
-	Vector2f texCoord;
-	int row, col, x, y;
-
-	// Change cursor position based on alignment
-	Vector2f stringSize = MeasureString(font, string);
-	if ((int) align & (int) TextAlign::RIGHT)
-		cursor.x -= stringSize.x;
-	if (!((int) align & (int) TextAlign::LEFT))
-		cursor.x -= (int) (stringSize.x * 0.5f);
-	if ((int) align & (int) TextAlign::BOTTOM)
-		cursor.y -= stringSize.y;
-	else if (!((int) align & (int) TextAlign::TOP))
-		cursor.y -= (int) (stringSize.y * 0.5f);
-
-	ActivateRenderTarget();
-	gl_Transform(m_transformation);
-	glBindTexture(GL_TEXTURE_2D, font->GetTexture()->GetGLTextureID());
-	glBegin(GL_QUADS);
-	glColor4ubv(color.data());
-
-	for (const char* charPtr = string.c_str(); *charPtr != '\0'; charPtr++)
-	{
-		unsigned char c = (unsigned char) *charPtr;
-
-		if (c == '\n')
-		{
-			cursor.x = position.x;
-			cursor.y += font->m_charHeight * scale;
-		}
-		else
-		{
-			col = c % font->m_charsPerRow;
-			row = c / font->m_charsPerRow;
-			x = col * (font->m_charWidth + font->m_charSpacing);
-			y = row * (font->m_charHeight + font->m_charSpacing);
-			texCoord.x = x / (float) font->GetTexture()->GetWidth();
-			texCoord.y = y / (float) font->GetTexture()->GetHeight();
-
-			glTexCoord2f(texCoord.x, texCoord.y);
-			glVertex2f(cursor.x, cursor.y);
-			glTexCoord2f(texCoord.x + charSize.x, texCoord.y);
-			glVertex2f(cursor.x + screenCharSize.x, cursor.y);
-			glTexCoord2f(texCoord.x + charSize.x, texCoord.y + charSize.y);
-			glVertex2f(cursor.x + screenCharSize.x, cursor.y + screenCharSize.y);
-			glTexCoord2f(texCoord.x, texCoord.y + charSize.y);
-			glVertex2f(cursor.x, cursor.y + screenCharSize.y);
-
-			cursor.x += font->m_charWidth * scale;
-		}
-	}
-
-	glEnd();
-	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Graphics2D::DrawString(Font* font, const String& string,
 	const Vector2f& position, const Color& color, TextAlign align)
 {
 	Texture* texture = font->GetGlyphTexture();
-	const Glyph* pGlyph;
+	const Glyph* glyph;
 	float dx1, dy1, dx2, dy2;
 	float sx1, sy1, sx2, sy2;
 
 	Vector2f penPosition = position;
+	float lineSpacing = font->GetSize() * 2.0f;
 
 	if (align != TextAlign::BOTTOM_LEFT)
 	{
 		Rect2f bounds = MeasureString(font, string);
 		if ((int) align & (int) TextAlign::RIGHT)
 			penPosition.x -= bounds.GetRight();
-		else if ((int) align & (int) TextAlign::LEFT)
+		else if (!((int) align & (int) TextAlign::LEFT))
 			penPosition.x -= bounds.GetRight() -
 			(float) ((int) bounds.GetWidth() / 2);
 		if ((int) align & (int) TextAlign::TOP)
 			penPosition.y -= bounds.GetTop();
-		else if ((int) align & (int) TextAlign::BOTTOM)
+		else if (!((int) align & (int) TextAlign::BOTTOM))
 			penPosition.y -= bounds.GetTop() +
 			(float) ((int) bounds.GetHeight() / 2);
 	}
 
+	Vector2f penPositionStart = penPosition;
+
+	ActivateRenderTarget();
+	gl_Transform(m_transformation);
 	glBindTexture(GL_TEXTURE_2D, texture->GetGLTextureID());
 	glBegin(GL_QUADS);
-	glColor4ub(color.r, color.g, color.b, color.a);
+	glColor4ubv(color.data());
 
 	// Draw each glyph in the string of characters
-	for (unsigned int i = 0; i < string.length(); i++)
+	for (uint32 i = 0; i < string.length(); i++)
 	{
-		pGlyph = font->GetGlyph(string[i]);
+		glyph = font->GetGlyph(string[i]);
 
-		if (pGlyph->HasImage())
+		char c = string[i];
+
+		if (c == '\n')
+		{
+			penPosition.x = penPositionStart.x;
+			penPosition.y += lineSpacing;
+		}
+		else if (glyph->HasImage())
 		{
 			// Determine texture coordinates and draw destination rect
-			sx1 = pGlyph->GetSourceX() / (float) texture->GetWidth();
-			sy1 = pGlyph->GetSourceY() / (float) texture->GetHeight();
-			sx2 = (pGlyph->GetSourceX() + pGlyph->GetWidth()) / (float) texture->GetWidth();
-			sy2 = (pGlyph->GetSourceY() + pGlyph->GetHeight()) / (float) texture->GetHeight();
-			dx1 = penPosition.x + pGlyph->GetMinX();
-			dy1 = penPosition.y + pGlyph->GetMinY();
-			dx2 = penPosition.x + pGlyph->GetMaxX();
-			dy2 = penPosition.y + pGlyph->GetMaxY();
+			sx1 = glyph->GetSourceX() / (float) texture->GetWidth();
+			sy1 = glyph->GetSourceY() / (float) texture->GetHeight();
+			sx2 = (glyph->GetSourceX() + glyph->GetWidth()) / (float) texture->GetWidth();
+			sy2 = (glyph->GetSourceY() + glyph->GetHeight()) / (float) texture->GetHeight();
+			dx1 = penPosition.x + glyph->GetMinX();
+			dy1 = penPosition.y + glyph->GetMinY();
+			dx2 = penPosition.x + glyph->GetMaxX();
+			dy2 = penPosition.y + glyph->GetMaxY();
 
 			// Draw the glyph image
 			glTexCoord2f(sx1, sy1); // Top left corner
@@ -387,7 +305,7 @@ void Graphics2D::DrawString(Font* font, const String& string,
 		}
 
 		// Advance the pen position
-		penPosition.x += pGlyph->GetAdvance();
+		penPosition.x += glyph->GetAdvance();
 	}
 
 	glEnd();

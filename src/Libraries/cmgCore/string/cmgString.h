@@ -34,6 +34,12 @@ namespace string
 
 	// trim from both ends (copying)
 	String Trim(String str);
+
+	// Convert to lowercase/uppercase
+	void ToLowerIP(String& str);
+	String ToLower(String str);
+	void ToUpperIP(String& str);
+	String ToUpper(String str);
 };
 
 /*class String : public std::string

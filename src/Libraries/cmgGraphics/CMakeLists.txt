@@ -7,29 +7,22 @@ set(CMG_GRAPHICS_SOURCE_FILES
 	cmgWindow.cpp
 
 	cmgOpenGLIncludes.h
-	cmgImageFormat.h
-	cmgImageFormat.cpp
 	cmgTexture.h
 	cmgTexture.cpp
 	cmgTextureParams.h
 	cmgTextureParams.cpp
 	cmgShader.h
 	cmgShader.cpp
-	cmgVertexTypes.h
 	cmgVertexData.h
 	cmgVertexData.cpp
 	cmgMesh.h
 	cmgMesh.cpp
-	cmgSpriteFont.h
-	cmgSpriteFont.cpp
 	cmgFont.h
 	cmgFont.cpp
 	cmgBuiltInFonts.h
 	cmgBuiltInFonts.cpp
 	cmgPrimitiveMeshes.h
 	cmgPrimitiveMeshes.cpp
-	cmgDebugDraw.h
-	cmgDebugDraw.cpp
 	cmgMaterial.h
 	cmgMaterial.cpp
 
@@ -38,14 +31,16 @@ set(CMG_GRAPHICS_SOURCE_FILES
 		
 	ecs/cmgArcBall.h
 
+	render/cmgDebugDraw.h
+	render/cmgDebugDraw.cpp
+	render/cmgGraphics2D.h
+	render/cmgGraphics2D.cpp
 	render/cmgRenderDevice.h
 	render/cmgRenderDevice.cpp
 	render/cmgRenderParams.h
 	render/cmgRenderParams.cpp
 	render/cmgRenderer.h
 	render/cmgRenderer.cpp
-	render/cmgGraphics2D.h
-	render/cmgGraphics2D.cpp
 	render/cmgRenderTarget.h
 	render/cmgRenderTarget.cpp
 	render/cmgSampler.h
@@ -59,6 +54,8 @@ set(CMG_GRAPHICS_SOURCE_FILES
 
 	types/cmgColor.h
 	types/cmgColor.cpp
+	types/cmgImageFormat.h
+	types/cmgVertexTypes.h
 	
 	utilities/cmgShelfBinPacker.h
 	utilities/cmgShelfBinPacker.cpp

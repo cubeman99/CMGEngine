@@ -4,11 +4,10 @@
 #include <cmgCore/cmg_core.h>
 #include <cmgGraphics/render/cmgRenderTarget.h>
 #include <cmgGraphics/render/cmgSampler.h>
-#include <cmgGraphics/cmgSpriteFont.h>
 #include <cmgGraphics/cmgTexture.h>
 #include <cmgGraphics/cmgShader.h>
 #include <cmgGraphics/cmgMesh.h>
-#include <cmgGraphics/cmgImageFormat.h>
+#include <cmgGraphics/types/cmgImageFormat.h>
 #include <cmgMath/types/cmgVector3.h>
 
 class Window;

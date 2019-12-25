@@ -2,7 +2,7 @@
 #define _TEXTURE_PARAMS_H_
 
 #include <cmgGraphics/types/cmgColor.h>
-#include <cmgGraphics/cmgImageFormat.h>
+#include <cmgGraphics/types/cmgImageFormat.h>
 	
 	
 //-----------------------------------------------------------------------------
@@ -139,7 +139,7 @@ public:
 	TextureParams();
 
 	//-----------------------------------------------------------------------------
-	// Getters.
+	// Getters
 
 	texture_target_type GetTarget() const { return m_target; }
 	texture_filter_options_type GetMinFilter() const { return m_minFilter; }
@@ -153,7 +153,7 @@ public:
 	bool UseAnisotropy() const { return m_anisotropy; }
 
 	//-----------------------------------------------------------------------------
-	// Setters.
+	// Setters
 
 	void SetTarget(texture_target_type target)							{ m_target = target; }
 	void SetMinFilter(texture_filter_options_type minFilter)			{ m_minFilter = minFilter; }

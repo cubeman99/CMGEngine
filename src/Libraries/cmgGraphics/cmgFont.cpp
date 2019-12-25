@@ -12,7 +12,7 @@
 // Initialize the glyph metrics.
 void Glyph::Init(void* ftGlyphPtr)
 {
-	FT_GlyphSlot ftGlyph = (FT_GlyphSlot) ftGlyphPtr;
+	FT_GlyphSlot ftGlyph = static_cast<FT_GlyphSlot>(ftGlyphPtr);
 	m_sourceX = 0;
 	m_sourceY = 0;
 	m_minX = ftGlyph->bitmap_left;
@@ -55,7 +55,8 @@ void Font::QuitFreeTypeLibrary()
 }
 
 // Load a font from file, using the given size and character region.
-Error Font::LoadFont(Font*& outFont, const Path& path, int size, int charRegionBegin, int charRegionEnd)
+Error Font::LoadFont(Font*& outFont, const Path& path, int32 size,
+	uint32 charRegionBegin, uint32 charRegionEnd)
 {
 	InitFreeTypeLibrary();
 	CMG_ASSERT(g_freeTypeLibrary != nullptr && charRegionEnd > charRegionBegin);
@@ -89,18 +90,113 @@ Error Font::LoadFont(Font*& outFont, const Path& path, int size, int charRegionB
 	return CMG_ERROR_SUCCESS;
 }
 
+Error Font::LoadSpriteFont(Font *& outFont, const Path & path,
+	uint32 charsPerRow, uint32 charWidth, uint32 charHeight, uint32 charSpacing)
+{
+	// Load the sprite font image
+	Texture* texture = nullptr;
+	Error error = Texture::LoadTexture(texture, path);
+	if (error.Failed())
+		return error.Uncheck();
+
+	// Create the font instance
+	outFont = new Font(texture);
+
+	// Create the mapping of glyphs using a grid pattern
+	outFont->m_charRegion.begin = 0;
+	outFont->m_charRegion.length = 256;
+	outFont->m_glyphs = new Glyph[outFont->m_charRegion.length];
+	outFont->m_size = charWidth;
+	for (uint32 i = 0; i < outFont->m_charRegion.length; i++)
+	{
+		uint32 x = i % charsPerRow;
+		uint32 y = i / charsPerRow;
+		Glyph& glyph = outFont->m_glyphs[i];
+		glyph.m_sourceX = x * (charWidth + charSpacing);
+		glyph.m_sourceY = y * (charHeight + charSpacing);
+		glyph.m_width = charWidth;
+		glyph.m_height = charHeight;
+		glyph.m_advance = charWidth;
+		glyph.m_minX = 0;
+		glyph.m_minY = -((int32) charHeight);
+	}
+
+	return CMG_ERROR_SUCCESS;
+}
+
+Error Font::LoadBuiltInFont(Font *& outFont, BuiltInFonts builtInFont)
+{
+	if (builtInFont == BuiltInFonts::FONT_CONSOLE)
+	{
+		// Convert the bitmap data into RGBA pixels
+		const uint32 width = FontConsoleBitmap::WIDTH;
+		const uint32 height = FontConsoleBitmap::HEIGHT;
+		const uint32 size = width * height;
+		Color pixels[size];
+		uint32 alpha;
+		for (uint32 i = 0; i < size; i++)
+		{
+			alpha = (FontConsoleBitmap::BITMAP_DATA[i] > 0 ? 255 : 0);
+			pixels[i] = Color(255, 255, 255, alpha);
+		}
+
+		// Load the pixels into a texture
+		TextureParams params;
+		params.SetFiltering(TextureFilter::NEAREST);
+		params.SetWrap(TextureWrap::CLAMP_TO_BORDER);
+		Texture* texture = new Texture(params);
+		texture->WritePixels2D(width, height, pixels);
+
+		// Construct the sprite font object
+		outFont = new Font(texture);
+
+		// Create the mapping of glyphs using a grid pattern
+		outFont->m_charRegion.begin = 0;
+		outFont->m_charRegion.length = 256;
+		outFont->m_glyphs = new Glyph[outFont->m_charRegion.length];
+		outFont->m_size = FontConsoleBitmap::CHAR_WIDTH;
+		for (uint32 i = 0; i < outFont->m_charRegion.length; i++)
+		{
+			uint32 x = i % FontConsoleBitmap::CHARS_PER_ROW;
+			uint32 y = i / FontConsoleBitmap::CHARS_PER_ROW;
+			Glyph& glyph = outFont->m_glyphs[i];
+			glyph.m_sourceX = x * (FontConsoleBitmap::CHAR_WIDTH +
+				FontConsoleBitmap::CHAR_SPACING);
+			glyph.m_sourceY = y * (FontConsoleBitmap::CHAR_HEIGHT +
+				FontConsoleBitmap::CHAR_SPACING);
+			glyph.m_width = FontConsoleBitmap::CHAR_WIDTH;
+			glyph.m_height = FontConsoleBitmap::CHAR_HEIGHT;
+			glyph.m_advance = FontConsoleBitmap::CHAR_WIDTH;
+			glyph.m_minX = 0;
+			glyph.m_minY = -((int32) FontConsoleBitmap::CHAR_HEIGHT);
+		}
+	}
+	else
+	{
+		return CMG_ERROR_FAILURE;
+	}
+
+	return CMG_ERROR_SUCCESS;
+}
+
 
 
 //-----------------------------------------------------------------------------
 // Font constructor & destructor
 //-----------------------------------------------------------------------------
 
-Font::Font(void* ftFace, int size, int charRegionBegin, int charRegionEnd) :
+Font::Font(Texture* texture) :
+	m_glyphAtlasTexture(texture)
+{
+}
+
+Font::Font(void* ftFace, int32 size, uint32 charRegionBegin,
+	uint32 charRegionEnd) :
 	m_familyName(((FT_Face) ftFace)->family_name),
 	m_styleName(((FT_Face) ftFace)->style_name),
 	m_size(size)
 {
-	FT_Face pFace = (FT_Face) ftFace;
+	FT_Face pFace = static_cast<FT_Face>(ftFace);
 
 	m_charRegion.begin = charRegionBegin;
 	m_charRegion.length = charRegionEnd - charRegionBegin;
@@ -111,12 +207,12 @@ Font::Font(void* ftFace, int size, int charRegionBegin, int charRegionEnd) :
 	FT_Error ftError;
 	FT_ULong charCode;
 
-	FT_Get_Char_Index(pFace, (FT_ULong) 12);
+	FT_Get_Char_Index(pFace, static_cast<FT_ULong>(12));
 
 	// Create the glyphs
-	for (int i = 0; i < m_charRegion.length; i++)
+	for (uint32 i = 0; i < m_charRegion.length; i++)
 	{
-		charCode = (FT_ULong) (m_charRegion.begin + i);
+		charCode = static_cast<FT_ULong>(m_charRegion.begin + i);
 		ftError  = FT_Load_Char(pFace, charCode, FT_LOAD_RENDER);
 
 		glyphImageData[i] = nullptr;
@@ -167,7 +263,7 @@ Font::Font(void* ftFace, int size, int charRegionBegin, int charRegionEnd) :
 		PixelTransferFormat::RGBA, PixelType::TYPE_UNSIGNED_BYTE, nullptr);
 
 	// Blit glyph images into the texture sheet
-	for (int i = 0; i < m_charRegion.length; i++)
+	for (uint32 i = 0; i < m_charRegion.length; i++)
 	{
 		if (glyphImageData[i] != nullptr)
 		{
@@ -207,11 +303,11 @@ Font::~Font()
 // Return the glyph that represents the given character.
 const Glyph* Font::GetGlyph(char c) const
 {
-	return GetGlyph((int) c);
+	return GetGlyph(static_cast<uint32>(c));
 }
 
 // Return the glyph that represents the given character code.
-const Glyph* Font::GetGlyph(int charCode) const
+const Glyph* Font::GetGlyph(uint32 charCode) const
 {
 	if (IsCharDefined(charCode))
 		return &m_glyphs[charCode - m_charRegion.begin];
@@ -219,8 +315,9 @@ const Glyph* Font::GetGlyph(int charCode) const
 }
 
 // Is the given character code defined in the font's character regions?
-bool Font::IsCharDefined(int charCode) const
+bool Font::IsCharDefined(uint32 charCode) const
 {
-	return (charCode >= m_charRegion.begin && charCode < m_charRegion.begin + m_charRegion.length);
+	return (charCode >= m_charRegion.begin &&
+		charCode < m_charRegion.begin + m_charRegion.length);
 }
 

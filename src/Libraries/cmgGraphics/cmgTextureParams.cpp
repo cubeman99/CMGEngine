@@ -26,6 +26,15 @@ TextureParams::TextureParams()
 // Mutators
 //-----------------------------------------------------------------------------
 
+void TextureParams::SetFiltering(texture_filter_options_type minFilter,
+	texture_filter_options_type magFilter,
+	texture_filter_options_type mipMapFilter)
+{
+	m_minFilter = minFilter;
+	m_magFilter = magFilter;
+	m_mipFilter = mipMapFilter;
+}
+
 void TextureParams::SetFiltering(TextureFilter::value_type filtering)
 {
 	if (filtering == TextureFilter::NEAREST)

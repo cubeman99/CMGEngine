@@ -51,28 +51,27 @@ class Glyph
 
 public:
 	inline bool HasImage() const { return (m_width > 0 && m_height > 0); }
-	inline int GetAdvance() const { return m_advance; }
-	inline int GetMinX() const { return m_minX; }
-	inline int GetMinY() const { return m_minY; }
-	inline int GetMaxX() const { return m_minX + m_width; }
-	inline int GetMaxY() const { return m_minY + m_height; }
-	inline int GetWidth() const { return m_width; }
-	inline int GetHeight() const { return m_height; }
-	inline int GetSourceX() const { return m_sourceX; }
-	inline int GetSourceY() const { return m_sourceY; }
+	inline int32 GetAdvance() const { return m_advance; }
+	inline int32 GetMinX() const { return m_minX; }
+	inline int32 GetMinY() const { return m_minY; }
+	inline int32 GetMaxX() const { return m_minX + m_width; }
+	inline int32 GetMaxY() const { return m_minY + m_height; }
+	inline int32 GetWidth() const { return m_width; }
+	inline int32 GetHeight() const { return m_height; }
+	inline int32 GetSourceX() const { return m_sourceX; }
+	inline int32 GetSourceY() const { return m_sourceY; }
 
 private:
 	Glyph() {}
 	void Init(void* ftGlyphPtr);
 
-	int m_advance; // Amount to move the pen position after drawing this glyph
-	int m_minX; // Image x-draw-offset from pen position
-	int m_minY;  // Image y-draw-offset from pen position
-	int m_width; // Width of glyph image
-	int m_height; // Height of glyph image.
-	int m_sourceX; // Image X-offset in the font's glyph atlas texture
-	int m_sourceY; // Image Y-offset in the font's glyph atlas texture
-	unsigned long m_charcode;
+	int32 m_advance; // Amount to move the pen position horizontally after drawing this glyph
+	int32 m_minX = 0; // Image x-draw-offset from pen position
+	int32 m_minY = 0;  // Image y-draw-offset from pen position
+	int32 m_width; // Width of glyph image
+	int32 m_height; // Height of glyph image
+	int32 m_sourceX = 0; // Image X-offset in the font's glyph atlas texture
+	int32 m_sourceY = 0; // Image Y-offset in the font's glyph atlas texture
 };
 
 
@@ -83,8 +82,8 @@ private:
 
 struct CharacterRegion
 {
-	int begin;	// First character code in the region.
-	int length;	// Number of characters in the region.
+	uint32 begin; // First character code in the region
+	uint32 length; // Number of characters in the region
 };
 
 
@@ -100,9 +99,9 @@ public:
 
 	// Accessors
 	const Glyph* GetGlyph(char c) const;
-	const Glyph* GetGlyph(int charCode) const;
-	bool IsCharDefined(int charCode) const;
-	inline int GetSize() const { return m_size; }
+	const Glyph* GetGlyph(uint32 charCode) const;
+	bool IsCharDefined(uint32 charCode) const;
+	inline int32 GetSize() const { return m_size; }
 	inline const String& GetFamilyName() const { return m_familyName; }
 	inline const String& GetStyleName() const { return m_styleName; }
 	inline const Texture* GetGlyphTexture()	const { return m_glyphAtlasTexture; }
@@ -111,21 +110,28 @@ public:
 	// FreeType library
 	static bool InitFreeTypeLibrary();
 	static void QuitFreeTypeLibrary();
-	static Error LoadFont(Font*& outFont, const Path& path, int size,
-		int charRegionBegin, int charRegionEnd);
+
+	// Font loading
+	static Error LoadFont(Font*& outFont, const Path& path, int32 size,
+		uint32 charRegionBegin, uint32 charRegionEnd);
+	static Error LoadSpriteFont(Font*& outFont, const Path& path,
+		uint32 charsPerRow, uint32 charWidth, uint32 charHeight,
+		uint32 charSpacing = 0);
+	static Error LoadBuiltInFont(Font*& outFont, BuiltInFonts builtInFont);
 
 private:
-	Font(void* ftFace, int size, int charRegionBegin, int charRegionEnd);
+	Font(Texture* texture);
+	Font(void* ftFace, int32 size, uint32 charRegionBegin, uint32 charRegionEnd);
 
 	// Prevent copying
 	Font(const Font& other) {}
 	void operator=(const Font& other) {}
 
-	String m_familyName;
-	String m_styleName;
-	int m_size;
-	Glyph* m_glyphs;
-	Texture* m_glyphAtlasTexture;
+	String m_familyName = "";
+	String m_styleName = "";
+	int32 m_size = 1;
+	Glyph* m_glyphs = nullptr;
+	Texture* m_glyphAtlasTexture = nullptr;
 	CharacterRegion m_charRegion;
 };
 

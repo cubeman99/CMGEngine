@@ -10,6 +10,8 @@ Application::~Application()
 {
 	delete m_renderDevice;
 	m_renderDevice = nullptr;
+
+	Font::QuitFreeTypeLibrary();
 }
 
 bool Application::Initialize(const std::string& title, uint32 width, uint32 height)

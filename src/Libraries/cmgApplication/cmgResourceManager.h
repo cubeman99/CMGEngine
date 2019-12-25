@@ -6,7 +6,6 @@
 #include <cmgGraphics/cmgTexture.h>
 #include <cmgGraphics/cmgMesh.h>
 #include <cmgGraphics/cmgShader.h>
-#include <cmgGraphics/cmgSpriteFont.h>
 #include <cmgGraphics/cmgFont.h>
 #include <unordered_map>
 
@@ -188,7 +187,7 @@ public:
 	Error LoadShader(resource_ptr<Shader>& outShader, const ResourceName& name,
 		const Path& vertexPath, const Path& fragmentPath);
 	Error LoadComputeShader(resource_ptr<Shader>& outShader, const Path& path);
-	Error LoadBuiltInFont(resource_ptr<SpriteFont>& outSpriteFont, BuiltInFonts builtInFont);
+	Error LoadBuiltInFont(resource_ptr<Font>& outFont, BuiltInFonts builtInFont);
 	Error LoadFont(resource_ptr<Font>& outFont, const Path& path,
 		uint32 size, uint32 charRegionBegin, uint32 charRegionEnd);
 
@@ -208,7 +207,6 @@ private:
 	ResourcePool<Texture> m_poolTextures;
 	ResourcePool<Mesh> m_poolMeshes;
 	ResourcePool<Shader> m_poolShaders;
-	ResourcePool<SpriteFont> m_poolSpriteFonts;
 	ResourcePool<Font> m_poolFonts;
 	Array<Path> m_paths;
 	Array<Path> m_shaderIncludePaths;
@@ -256,7 +254,7 @@ ResourcePool<T>* ResourceManager::GetResourcePool()
 template<> ResourcePool<Texture>* ResourceManager::GetResourcePool<Texture>();
 template<> ResourcePool<Mesh>* ResourceManager::GetResourcePool<Mesh>();
 template<> ResourcePool<Shader>* ResourceManager::GetResourcePool<Shader>();
-template<> ResourcePool<SpriteFont>* ResourceManager::GetResourcePool<SpriteFont>();
+template<> ResourcePool<Font>* ResourceManager::GetResourcePool<Font>();
 
 }
 

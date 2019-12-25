@@ -92,5 +92,27 @@ namespace string
 		TrimIP(str);
 		return str;
 	}
+
+	void ToLowerIP(String& str)
+	{
+		std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+	}
+
+	String ToLower(String str)
+	{
+		ToLowerIP(str);
+		return str;
+	}
+
+	void ToUpperIP(String& str)
+	{
+		std::transform(str.begin(), str.end(), str.begin(), ::toupper);
+	}
+
+	String ToUpper(String str)
+	{
+		ToUpperIP(str);
+		return str;
+	}
 };
 

@@ -6,9 +6,9 @@
 // Constructor & destructor
 //-----------------------------------------------------------------------------
 
-DebugDraw::DebugDraw()
-	: m_viewProjection(Matrix4f::IDENTITY)
-	, m_shaded(false)
+DebugDraw::DebugDraw() :
+	m_viewProjection(Matrix4f::IDENTITY),
+	m_shaded(false)
 {
 	String vertexSource = "#version 410"
 		"\n"   "layout (location = 0) in vec3 vertPosition;"
@@ -32,20 +32,14 @@ DebugDraw::DebugDraw()
 		"\n"   "	lightAmount = (lightAmount + 1.0) * 0.5;"
 		"\n"   "	o_color = vec4(u_color.rgb * lightAmount, u_color.a);"
 		"\n"   "}";
-
-	m_shaderShadedColor = new Shader();
-	m_shaderShadedColor->AddStage(ShaderType::k_vertex_shader, vertexSource);
-	m_shaderShadedColor->AddStage(ShaderType::k_fragment_shader, fragmentSource);
-	m_shaderShadedColor->CompileAndLink();
-
-	vertexSource = "#version 410"
+	String shadedVertexSource = "#version 410"
 		"\n"   "layout (location = 0) in vec3 vertPosition;"
 		"\n"   "uniform mat4 u_mvp;"
 		"\n"   "void main()"
 		"\n"   "{"
 		"\n"   "	gl_Position = u_mvp * vec4(vertPosition, 1);"
 		"\n"   "}";
-	fragmentSource = "#version 410"
+	String shadedFragmentSource = "#version 410"
 		"\n"   "uniform vec4 u_color = vec4(1,1,1,1);"
 		"\n"   "out vec4 o_color;"
 		"\n"   "void main()"
@@ -53,11 +47,14 @@ DebugDraw::DebugDraw()
 		"\n"   "	o_color = u_color;"
 		"\n"   "}";
 
+	m_shaderShadedColor = new Shader();
+	m_shaderShadedColor->AddStage(ShaderType::k_vertex_shader, vertexSource);
+	m_shaderShadedColor->AddStage(ShaderType::k_fragment_shader, fragmentSource);
+	m_shaderShadedColor->CompileAndLink();
 	m_shaderSolidColor = new Shader();
-	m_shaderSolidColor->AddStage(ShaderType::k_vertex_shader, vertexSource);
-	m_shaderSolidColor->AddStage(ShaderType::k_fragment_shader, fragmentSource);
+	m_shaderSolidColor->AddStage(ShaderType::k_vertex_shader, shadedVertexSource);
+	m_shaderSolidColor->AddStage(ShaderType::k_fragment_shader, shadedFragmentSource);
 	m_shaderSolidColor->CompileAndLink();
-
 
 	VertexAttributeInfo attribs[4];
 	attribs[0] = VertexAttributeInfo(VertexAttrib::k_position, AttributeType::k_vec3, nullptr);

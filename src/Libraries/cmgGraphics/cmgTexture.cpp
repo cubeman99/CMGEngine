@@ -683,7 +683,29 @@ Error Texture::DecodeImage(DecodedImageData& outImage, const Array<uint8>& data)
 	return CMG_ERROR_SUCCESS;
 }
 
-Error Texture::SaveTexture(Texture* texture, const Path& path, int mipmapLevel)
+Error Texture::SaveTexture(const Texture* texture, const Path& path,
+	int mipmapLevel)
+{
+	ImageEncodingFormat format = ImageEncodingFormat::PNG;
+
+	// Determine the image format by its extension
+	String extension = string::ToLower(path.GetExtension());
+	if (extension == "png")
+		format = ImageEncodingFormat::PNG;
+	else if (extension == "jpg" || extension == "jpeg")
+		format = ImageEncodingFormat::JPEG;
+	else if (extension == "dds")
+		format = ImageEncodingFormat::DDS;
+	else if (extension == "bmp")
+		format = ImageEncodingFormat::BMP;
+	else if (extension == "tga")
+		format = ImageEncodingFormat::TGA;
+
+	return SaveTexture(texture, path, format, mipmapLevel);
+}
+
+Error Texture::SaveTexture(const Texture* texture, const Path& path,
+	ImageEncodingFormat format, int mipmapLevel)
 {
 	// Get the dimensions for this mipmap level
 	int32 width, height;
@@ -699,13 +721,41 @@ Error Texture::SaveTexture(Texture* texture, const Path& path, int mipmapLevel)
 	texture->ReadPixels(mipmapLevel, PixelTransferFormat::RGBA,
 		PixelType::TYPE_UNSIGNED_BYTE, data.data());
 
-	// Encode and save the image as PNG
-	unsigned int error = lodepng::encode(
-		path, data, (unsigned int) width, (unsigned int) height);
-	if (error)
-		return CMG_ERROR_FAILURE;
+	// Encode/save the image data to file
+	if (format == ImageEncodingFormat::PNG)
+	{
+		unsigned int error = lodepng::encode(
+			path, data, (unsigned int) width, (unsigned int) height);
+		if (error != 0)
+			return CMG_ERROR_FAILURE;
+	}
+	else if (format == ImageEncodingFormat::BMP)
+	{
+		int error = SOIL_save_image(path.c_str(), SOIL_SAVE_TYPE_BMP,
+			(int) width, (int) height, 4, data.data());
+		if (error == 0)
+			return CMG_ERROR_FAILURE;
+	}
+	else if (format == ImageEncodingFormat::TGA)
+	{
+		int error = SOIL_save_image(path.c_str(), SOIL_SAVE_TYPE_TGA,
+			(int) width, (int) height, 4, data.data());
+		if (error == 0)
+			return CMG_ERROR_FAILURE;
+	}
+	else if (format == ImageEncodingFormat::DDS)
+	{
+		int error = SOIL_save_image(path.c_str(), SOIL_SAVE_TYPE_DDS,
+			(int) width, (int) height, 4, data.data());
+		if (error == 0)
+			return CMG_ERROR_FAILURE;
+	}
 	else
-		return CMG_ERROR_SUCCESS;
+	{
+		// Unsupported/unknown format!
+		return CMG_ERROR_FAILURE;
+	}
+	return CMG_ERROR_SUCCESS;
 }
 
 

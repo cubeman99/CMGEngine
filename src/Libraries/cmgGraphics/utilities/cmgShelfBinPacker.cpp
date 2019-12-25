@@ -9,7 +9,7 @@ ShelfBinPacker::ShelfBinPacker() :
 }
 
 // Insert a rect into the bin, passing in pointers to where the rect position will by modified.
-void ShelfBinPacker::Insert(int* pX, int* pY, int width, int height, int padding)
+void ShelfBinPacker::Insert(int32* pX, int32* pY, int32 width, int32 height, int32 padding)
 {
 	BinRect r;
 	r.pX      = pX;
@@ -39,7 +39,7 @@ void ShelfBinPacker::Clear()
 
 
 // Pack all the rects, modifying their positions, and output the bin dimensions.
-void ShelfBinPacker::Pack(int* binWidth, int* binHeight)
+void ShelfBinPacker::Pack(int32* binWidth, int32* binHeight)
 {
 	// Determine the minimum power-of-two bin size from the area sum of all rects.
 	int size = 32;

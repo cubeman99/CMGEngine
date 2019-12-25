@@ -4,7 +4,6 @@
 #include <cmgGraphics/cmgVertexData.h>
 #include <cmgGraphics/cmgTexture.h>
 #include <cmgGraphics/cmgFont.h>
-#include <cmgGraphics/cmgSpriteFont.h>
 #include <cmgGraphics/cmgShader.h>
 #include <cmgGraphics/render/cmgRenderTarget.h>
 #include <cmgGraphics/cmgWindow.h>
@@ -62,10 +61,6 @@ public:
 	//-----------------------------------------------------------------------------
 
 	Rect2f MeasureString(const Font* font, const String& string);
-	Vector2f MeasureString(const SpriteFont* font, const String& string);
-	void DrawString(SpriteFont* font, const String& string,
-		const Vector2f& position, const Color& color = Color::WHITE,
-		TextAlign align = TextAlign::TOP_LEFT);
 	void DrawString(Font* font, const String& string,
 		const Vector2f& position, const Color& color = Color::WHITE,
 		TextAlign align = TextAlign::TOP_LEFT);

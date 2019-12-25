@@ -15,30 +15,28 @@ Uses CMake to build. Currently being tested on Windows 10.
 ## Dependencies
 
 - FreeType: Vectorized fonts
-- Glew
-- OpenGL
-- lodepng
-- SOIL: Image loading
-- DirectInput8
+- OpenGL & Glew: Graphics library
+- SOIL: Image loading and saving
+- lodepng: Image saving for PNG
+- DirectInput8: user input
 - WinSDK
 - Catch: unit tests
 - Googletest: unit tests
 
 ## TODO
 - Add event-based code
-	- window: 
-	- input: key, mouse, joystick, plug-in, unplug, physics
-- Keyboard events/mouse events (might need to use Win32 instead of directinput)
+	- window
+	- input: key, mouse, joystick, plug-in, unplug
+		- Keyboard events/mouse events (might need to use Win32 instead of directinput)
+	- physics
 - Mutex and Thread wrapper
 - Better 'Error' handling, that show proper traceback
 - Start using smart pointers where necessary, like Graphics2D
-- Start using FreeType
 - Rework DecodedImageData interface (at least for memory management)
 - Stop using struct/enum pairings, use enum class
-- decide on standard for enum names, k_enum or enum_value, and apply to code
-- Audio engine
+	- decide on standard for enum names, k_enum or enum_value, and apply to code
+- Create an audio engine
 - Start using cmg namespace everywhere
-- remove LodePNG (using SOIL now)
 
 ## FIXME
 - bug where app closes if alt-tabbed during startup

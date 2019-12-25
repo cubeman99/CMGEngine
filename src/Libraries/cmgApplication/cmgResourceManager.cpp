@@ -57,11 +57,13 @@ namespace cmg {
 		return error;
 	}
 
-	Error ResourceManager::LoadBuiltInFont(resource_ptr<SpriteFont>& outSpriteFont, BuiltInFonts builtInFont)
+	Error ResourceManager::LoadBuiltInFont(resource_ptr<Font>& outFont, BuiltInFonts builtInFont)
 	{
-		SpriteFont* font = SpriteFont::LoadBuiltInFont(builtInFont);
-		outSpriteFont = Add(font);
-		return CMG_ERROR_SUCCESS;
+		Font* font = nullptr;
+		Error error = Font::LoadBuiltInFont(font, builtInFont);
+		if (error.Passed())
+			outFont = Add(font);
+		return error.Uncheck();
 	}
 
 	Error ResourceManager::LoadFont(resource_ptr<Font>& outFont,
@@ -105,11 +107,6 @@ namespace cmg {
 	template<> ResourcePool<Shader>* ResourceManager::GetResourcePool<Shader>()
 	{
 		return &m_poolShaders;
-	}
-
-	template<> ResourcePool<SpriteFont>* ResourceManager::GetResourcePool<SpriteFont>()
-	{
-		return &m_poolSpriteFonts;
 	}
 
 	template<> ResourcePool<Font>* ResourceManager::GetResourcePool<Font>()

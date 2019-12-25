@@ -11,8 +11,6 @@ public:
 	DebugDraw();
 	~DebugDraw();
 
-	void Begin();
-
 	// Render options
 	void SetLineWidth(float lineWidth);
 	void SetPointSize(float pointSize);

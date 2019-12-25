@@ -3,6 +3,20 @@
 
 #include <cmgGraphics/types/cmgColor.h>
 
+// Image encoding formats
+enum class ImageEncodingFormat
+{
+	UNKNOWN = -1,
+
+	PNG,
+	JPEG,
+	BMP,
+	TGA,
+	DDS,
+	
+	COUNT,
+	AUTO,
+};
 	
 // Component-wise format for a pixel.
 enum class PixelFormat
