@@ -84,7 +84,6 @@ void Application::Run()
 				Window::DropFilesEvent dropEvent;
 				dropEvent.paths = winEvent.drop.paths;
 				m_eventManager.Publish(&dropEvent);
-				OnDropFile(winEvent.drop.text);
 				OnDropFiles(winEvent.drop.paths);
 			}
 			else if (winEvent.m_type == WindowEvent::k_drop_text)

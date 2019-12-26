@@ -37,6 +37,8 @@ Uses CMake to build. Currently being tested on Windows 10.
 	- decide on standard for enum names, k_enum or enum_value, and apply to code
 - Create an audio engine
 - Start using cmg namespace everywhere
+- Create CMake example project
+- delete Renderer class
 
 ## FIXME
-- bug where app closes if alt-tabbed during startup
+-

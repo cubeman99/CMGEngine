@@ -7,6 +7,7 @@
 #include <cmgGraphics/cmgTexture.h>
 #include <cmgGraphics/cmgShader.h>
 #include <cmgGraphics/cmgMesh.h>
+#include <cmgGraphics/render/cmgRenderParams.h>
 #include <cmgGraphics/types/cmgImageFormat.h>
 #include <cmgMath/types/cmgVector3.h>
 
@@ -19,10 +20,19 @@ public:
 	OpenGLRenderDevice(Window* window);
 	~OpenGLRenderDevice();
 
-	Error CreateTexture2D(Texture** outTexture, int32 width, int32 height,
+	// Resource creation
+	Error CreateTexture2D(Texture*& outTexture, int32 width, int32 height,
 		const TextureParams& params);
+	Error CreateRenderTarget(RenderTarget** outRenderTarget);
+	CMG_DEPRECATED Error CreateShaderProgram(Shader** outShader,
+		const String& vertexCode, const String& fragmentCode);
 
-	Error CreateShaderProgram(Shader** outShader, const String& vertexCode, const String& fragmentCode);
+	// Render parameters
+	const RenderParams& GetRenderParams() const { return m_renderParams; }
+	void SetRenderParams(const RenderParams& renderParams) { m_renderParams = renderParams; }
+	void ApplyRenderSettings(bool clear = false);
+
+	// Uniforms
 	Error SetShaderUniform(Shader::sptr shader, const String& name, int32 value);
 	Error SetShaderUniform(Shader::sptr shader, const String& name, uint32 value);
 	Error SetShaderUniform(Shader::sptr shader, const String& name, float32 value);
@@ -35,15 +45,13 @@ public:
 	Error SetShaderUniform(Shader::sptr shader, const String& name, const Vector4f& value);
 	Error SetShaderUniform(Shader::sptr shader, const String& name, const Matrix4f& value);
 	Error SetTextureSampler(Shader::sptr shader, const String& name,
-		Texture::sptr texture, uint32 slot);
+		Texture* texture, uint32 slot);
 	Error SetShaderSampler(Shader::sptr shader, const String& samplerName,
-		Texture::sptr texture, Sampler* sampler, uint32 slot);
+		Texture* texture, Sampler* sampler, uint32 slot);
 
 	void BindBuffer(const BufferObject& buffer, uint32 slot);
 
-	Error CreateRenderTarget(RenderTarget** outRenderTarget);
-
-
+	// Drawing
 	void Clear(RenderTarget* target, const Color& color, bool clearDepth);
 	void Draw(RenderTarget* target, Shader::sptr shader, Mesh::sptr mesh);
 	void DispatchCompute(Shader::sptr shader, Vector2ui numGroupsXY);
@@ -55,13 +63,15 @@ private:
 	void SetViewport(RenderTarget* renderTarget);
 	void SetShader(Shader::sptr shader);
 
+	Window* m_window;
+	RenderParams m_renderParams;
+
 	Array<RenderTarget*> m_renderTargets;
 	Array<Texture*> m_textures;
 	Array<Font*> m_fonts;
 	Array<Shader*> m_shaders;
 	Array<VertexBuffer*> m_vertexBuffers;
 	Array<IndexBuffer*> m_indexBuffers;
-	Window* m_window;
 };
 
 

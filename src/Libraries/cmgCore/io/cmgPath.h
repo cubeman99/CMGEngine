@@ -39,12 +39,6 @@ public:
 	static Path ResolvePath(const Path& path, const Array<Path>& paths);
 	
 private:
-	CMG_DEPRECATED String GetFileName() const;
-	CMG_DEPRECATED String GetDirectory() const;
-	CMG_DEPRECATED const String& GetPath() const;
-	CMG_DEPRECATED Path operator +(const Path& other) const;
-
-private:
 	mutable String m_path;
 };
 

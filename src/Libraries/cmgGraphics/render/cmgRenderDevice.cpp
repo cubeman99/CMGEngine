@@ -3,6 +3,119 @@
 #include <cmgGraphics/cmgWindow.h>
 
 
+namespace
+{
+	void EnableDisableGL(bool enabled, GLenum cap)
+	{
+		if (enabled)
+			glEnable(cap);
+		else
+			glDisable(cap);
+	}
+
+	GLenum TranslateCompareFunc(CompareFunction::value_type compareFunc)
+	{
+		switch (compareFunc)
+		{
+		case CompareFunction::k_always_fail:	return GL_NEVER;
+		case CompareFunction::k_less:			return GL_LESS;
+		case CompareFunction::k_equal:			return GL_EQUAL;
+		case CompareFunction::k_less_equal:		return GL_LEQUAL;
+		case CompareFunction::k_greater:		return GL_GREATER;
+		case CompareFunction::k_not_equal:		return GL_NOTEQUAL;
+		case CompareFunction::k_greater_equal:	return GL_GEQUAL;
+		case CompareFunction::k_always_pass:	return GL_ALWAYS;
+		}
+		return CompareFunction::k_less_equal;
+	}
+
+	GLenum TranslateBlendFunc(BlendFunc::value_type blendFunc)
+	{
+		switch (blendFunc)
+		{
+		case BlendFunc::k_zero:							return GL_ZERO;
+		case BlendFunc::k_one:							return GL_ONE;
+		case BlendFunc::k_source_color:					return GL_SRC_COLOR;
+		case BlendFunc::k_one_minus_source_color:		return GL_ONE_MINUS_SRC_COLOR;
+		case BlendFunc::k_destination_color:			return GL_DST_COLOR;
+		case BlendFunc::k_one_minus_destination_color:	return GL_ONE_MINUS_DST_COLOR;
+		case BlendFunc::k_source_alpha:					return GL_SRC_ALPHA;
+		case BlendFunc::k_one_minus_source_alpha:		return GL_ONE_MINUS_SRC_ALPHA;
+		case BlendFunc::k_destination_alpha:			return GL_DST_ALPHA;
+		case BlendFunc::k_one_minus_destination_alpha:	return GL_ONE_MINUS_DST_ALPHA;
+		case BlendFunc::k_constant_color:				return GL_CONSTANT_COLOR;
+		case BlendFunc::k_one_minus_constant_color:		return GL_ONE_MINUS_CONSTANT_COLOR;
+		case BlendFunc::k_constant_alpha:				return GL_CONSTANT_ALPHA;
+		case BlendFunc::k_one_minus_constant_alpha:		return GL_ONE_MINUS_CONSTANT_ALPHA;
+		case BlendFunc::k_source_alpha_saturate:		return GL_SRC_ALPHA_SATURATE;
+		case BlendFunc::k_source1_color:				return GL_SRC1_COLOR;
+		case BlendFunc::k_one_minus_source1_color:		return GL_ONE_MINUS_SRC1_COLOR;
+		case BlendFunc::k_source1_alpha:				return GL_SRC1_ALPHA;
+		case BlendFunc::k_one_minus_source1_alpha:		return GL_ONE_MINUS_SRC1_ALPHA;
+		}
+		return GL_ONE;
+	}
+
+	GLbitfield TranslateClearBits(ClearBits::value_type clearBits)
+	{
+		GLbitfield returnClearBits = 0;
+		if (clearBits & ClearBits::k_color_buffer_bit)
+			returnClearBits |= GL_COLOR_BUFFER_BIT;
+		if (clearBits & ClearBits::k_depth_buffer_bit)
+			returnClearBits |= GL_DEPTH_BUFFER_BIT;
+		if (clearBits & ClearBits::k_stencil_buffer_bit)
+			returnClearBits |= GL_STENCIL_BUFFER_BIT;
+		return returnClearBits;
+	}
+
+	GLenum TranslateFrontFace(FrontFace::value_type frontFace)
+	{
+		if (frontFace == FrontFace::k_counter_clockwise)
+			return GL_CCW;
+		else
+			return GL_CW;
+	}
+
+	GLenum TranslateCullFace(CullFace::value_type cullFace)
+	{
+		if (cullFace == CullFace::k_back)
+			return GL_BACK;
+		else if (cullFace == CullFace::k_front)
+			return GL_FRONT;
+		else
+			return GL_FRONT_AND_BACK;
+	}
+
+	GLenum TranslatePolygonMode(PolygonMode::value_type polygonMode)
+	{
+		if (polygonMode == PolygonMode::k_fill)
+			return GL_FILL;
+		else if (polygonMode == PolygonMode::k_line)
+			return GL_LINE;
+		else
+			return GL_POINT;
+	}
+
+	GLenum TranslateVertexPrimitiveType(VertexPrimitiveType::value_type primitiveType)
+	{
+		switch (primitiveType)
+		{
+		case VertexPrimitiveType::k_triangles:		return GL_TRIANGLES;
+		case VertexPrimitiveType::k_points:			return GL_POINTS;
+		case VertexPrimitiveType::k_lines:			return GL_LINES;
+		case VertexPrimitiveType::k_line_strip:		return GL_LINE_STRIP;
+		case VertexPrimitiveType::k_line_loop:		return GL_LINE_LOOP;
+		case VertexPrimitiveType::k_triangle_strip:	return GL_TRIANGLE_STRIP;
+		case VertexPrimitiveType::k_triangle_fan:	return GL_TRIANGLE_FAN;
+		case VertexPrimitiveType::k_quad_strip:		return GL_QUAD_STRIP;
+		case VertexPrimitiveType::k_polygon:		return GL_POLYGON;
+		}
+		return GL_TRIANGLES;
+	}
+}
+
+
+
 OpenGLRenderDevice::OpenGLRenderDevice(Window* window)
 	: m_window(window)
 {
@@ -12,15 +125,49 @@ OpenGLRenderDevice::~OpenGLRenderDevice()
 {
 }
 
+void OpenGLRenderDevice::ApplyRenderSettings(bool clear)
+{
+	glEnable(GL_TEXTURE_2D);
 
-Error OpenGLRenderDevice::CreateTexture2D(Texture** outTexture, int32 width,
+	// Depth
+	EnableDisableGL(m_renderParams.IsDepthTestEnabled(), GL_DEPTH_TEST);
+	EnableDisableGL(!m_renderParams.IsNearFarPlaneClippingEnabled(), GL_DEPTH_CLAMP);
+	glDepthFunc(TranslateCompareFunc(m_renderParams.GetDepthFunction()));
+	glDepthMask(m_renderParams.IsDepthBufferWriteEnabled());				// glDepthMask(true) means writing to the depth buffer is enabled.
+
+																	// Face culling
+	EnableDisableGL(m_renderParams.IsCullFaceEnabled(), GL_CULL_FACE);
+	glFrontFace(TranslateFrontFace(m_renderParams.GetFrontFace()));
+	glCullFace(TranslateCullFace(m_renderParams.GetCullFace()));
+
+	// Smoothing
+	EnableDisableGL(m_renderParams.IsLineSmoothEnabled(), GL_LINE_SMOOTH);
+	EnableDisableGL(m_renderParams.IsPolygonSmoothEnabled(), GL_POLYGON_SMOOTH);
+
+	// Blend
+	EnableDisableGL(m_renderParams.IsBlendEnabled(), GL_BLEND);
+	glBlendFunc(TranslateBlendFunc(m_renderParams.GetBlendFunction().source),
+		TranslateBlendFunc(m_renderParams.GetBlendFunction().destination));
+
+	// Polygon mode
+	glPolygonMode(GL_FRONT_AND_BACK, TranslatePolygonMode(m_renderParams.GetPolygonMode()));
+
+	// Clear color
+	Vector4f clearColorVec = m_renderParams.GetClearColor().ToVector4f();
+	glClearColor(clearColorVec.x, clearColorVec.y,
+		clearColorVec.z, clearColorVec.w);
+
+	if (clear)
+		glClear(TranslateClearBits(m_renderParams.GetClearBits()));
+}
+
+Error OpenGLRenderDevice::CreateTexture2D(Texture*& outTexture, int32 width,
 	int32 height, const TextureParams& params)
 {
-	Texture* texture = new Texture();
-	texture->SetParams(params);
-	texture->WritePixels2D(width, height, PixelTransferFormat::RGBA,
+	outTexture = new Texture();
+	outTexture->SetParams(params);
+	outTexture->WritePixels2D(width, height, PixelTransferFormat::RGBA,
 		PixelType::TYPE_UNSIGNED_BYTE, nullptr);
-	*outTexture = texture;
 	return CMG_ERROR_SUCCESS;
 }
 
@@ -212,7 +359,7 @@ Error OpenGLRenderDevice::SetShaderUniform(Shader::sptr shader, const String& na
 }
 
 Error OpenGLRenderDevice::SetTextureSampler(Shader::sptr shader,
-	const String& name, Texture::sptr texture, uint32 slot)
+	const String& name, Texture* texture, uint32 slot)
 {
 	SetShader(shader);
 	glActiveTexture(GL_TEXTURE0 + slot);
@@ -221,7 +368,7 @@ Error OpenGLRenderDevice::SetTextureSampler(Shader::sptr shader,
 }
 
 Error OpenGLRenderDevice::SetShaderSampler(Shader::sptr shader,
-	const String& samplerName, Texture::sptr texture, Sampler* sampler, uint32 slot)
+	const String& samplerName, Texture* texture, Sampler* sampler, uint32 slot)
 {
 	SetShader(shader);
 	glActiveTexture(GL_TEXTURE0 + slot);

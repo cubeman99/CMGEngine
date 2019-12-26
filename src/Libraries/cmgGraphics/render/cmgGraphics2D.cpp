@@ -54,8 +54,9 @@ Shader* Graphics2D::s_shader = nullptr;
 
 
 Graphics2D::Graphics2D(Window* window) :
-m_transformation(Matrix4f::IDENTITY),
-m_window(window)
+	m_transformation(Matrix4f::IDENTITY),
+	m_window(window),
+	m_renderTarget(nullptr)
 {
 
 	if (s_shader == nullptr)
@@ -91,8 +92,6 @@ m_window(window)
 		0, (float) window->GetWidth(), (float) window->GetHeight(), 0, -1, 1);
 	glMatrixMode(GL_PROJECTION);
 	glLoadMatrixf(projection.data());
-
-	m_renderTarget = nullptr;
 }
 
 void Graphics2D::SetWindowOrthoProjection()

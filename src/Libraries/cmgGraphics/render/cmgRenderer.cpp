@@ -195,24 +195,24 @@ void Renderer::ApplyRenderSettings(bool clear)
 	glDepthFunc(TranslateCompareFunc(m_params.GetDepthFunction()));
 	glDepthMask(m_params.IsDepthBufferWriteEnabled());				// glDepthMask(true) means writing to the depth buffer is enabled.
 
-	// Face culling.
+	// Face culling
 	EnableDisableGL(m_params.IsCullFaceEnabled(), GL_CULL_FACE);
 	glFrontFace(TranslateFrontFace(m_params.GetFrontFace()));
 	glCullFace(TranslateCullFace(m_params.GetCullFace()));
 		
-	// Smoothing.
+	// Smoothing
 	EnableDisableGL(m_params.IsLineSmoothEnabled(), GL_LINE_SMOOTH);
 	EnableDisableGL(m_params.IsPolygonSmoothEnabled(), GL_POLYGON_SMOOTH);
 
-	// Blend.
+	// Blend
 	EnableDisableGL(m_params.IsBlendEnabled(), GL_BLEND);
 	glBlendFunc(TranslateBlendFunc(m_params.GetBlendFunction().source),
 				TranslateBlendFunc(m_params.GetBlendFunction().destination));
 
-	// Polygon mode.
+	// Polygon mode
 	glPolygonMode(GL_FRONT_AND_BACK, TranslatePolygonMode(m_params.GetPolygonMode()));
 
-	// Clear color.
+	// Clear color
 	Vector4f clearColorVec = m_params.GetClearColor().ToVector4f();
 	glClearColor(clearColorVec.x, clearColorVec.y,
 				 clearColorVec.z, clearColorVec.w);

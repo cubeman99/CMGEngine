@@ -44,7 +44,7 @@ void RenderTarget::AddColorAttachment(uint32 location, Texture* texture)
 void RenderTarget::AddColorAttachment(uint32 location, uint32 width, uint32 height, const TextureParams& params)
 {
 	Texture* texture = nullptr;
-	m_device->CreateTexture2D(&texture, (int32) width, (int32) height, params);
+	m_device->CreateTexture2D(texture, (int32) width, (int32) height, params);
 	AddColorAttachment(0, texture);
 }
 

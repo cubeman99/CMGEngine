@@ -197,15 +197,18 @@ void Keyboard::Update()
 
 	// Check if the keyboard has lost input or isn't acquired
 	HRESULT hRes = m_keyboard->GetDeviceState(s_bufferSize, &m_rawBuffer);
-
 	if (hRes == DIERR_INPUTLOST || hRes == DIERR_NOTACQUIRED)
 	{
 		hRes = m_keyboard->Acquire();
 		if (hRes != DIERR_OTHERAPPHASPRIO)
 		{
+			// Another application has priority over the keyboard!
+			// This means this application's window is not in the foreground.
 			m_keyboard->GetDeviceState(sizeof(s_bufferSize), &m_rawBuffer);
 		}
 	}
+	if (hRes != DI_OK)
+		memset(m_rawBuffer, 0, sizeof(m_rawBuffer));
 
 	// Translate the keycodes to put into our buffer
 	for (DWORD i = 0; i < s_bufferSize; ++i)

@@ -180,7 +180,7 @@ Path Path::ResolvePath(const Path& path, const Array<Path>& paths)
 {
 	for (uint32 i = 0; i < paths.size(); i++)
 	{
-		Path relativePath = paths[i] + path;
+		Path relativePath = paths[i] / path;
 		if (relativePath.Exists())
 			return relativePath;
 	}
@@ -189,29 +189,3 @@ Path Path::ResolvePath(const Path& path, const Array<Path>& paths)
 	return path;
 }
 
-
-
-//-----------------------------------------------------------------------------
-// Deprecated
-//-----------------------------------------------------------------------------
-
-Path Path::operator +(const Path& right) const
-{
-	return Path(m_path + "/" + right.m_path);
-}
-
-String Path::GetFileName() const
-{
-	return GetName();
-}
-
-String Path::GetDirectory() const
-{
-	size_t pos = m_path.find_last_of(g_pathSlash);
-	return m_path.substr(0, pos);
-}
-
-const String& Path::GetPath() const
-{
-	return m_path;
-}

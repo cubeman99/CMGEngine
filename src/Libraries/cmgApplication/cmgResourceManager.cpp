@@ -19,7 +19,7 @@ namespace cmg {
 		Error error = Texture::LoadTexture(texture, ResolvePath(path), params);
 		if (error.Passed())
 			outTexture = Add(name, texture);
-		return error;
+		return error.Uncheck();
 	}
 
 	Error ResourceManager::LoadMesh(resource_ptr<Mesh>& outMesh, const Path& path,
@@ -30,7 +30,7 @@ namespace cmg {
 		Error error = Mesh::Load(ResolvePath(path), mesh, options);
 		if (error.Passed())
 			outMesh = Add(name, mesh);
-		return error;
+		return error.Uncheck();
 	}
 
 	Error ResourceManager::LoadShader(resource_ptr<Shader>& outShader,
@@ -42,7 +42,7 @@ namespace cmg {
 			ResolvePath(fragmentPath));
 		if (error.Passed())
 			outShader = Add(name, shader);
-		return error;
+		return error.Uncheck();
 	}
 
 	Error ResourceManager::LoadComputeShader(resource_ptr<Shader>& outShader,
@@ -54,7 +54,7 @@ namespace cmg {
 			ResolvePath(path), m_shaderIncludePaths);
 		if (error.Passed())
 			outShader = Add(name, shader);
-		return error;
+		return error.Uncheck();
 	}
 
 	Error ResourceManager::LoadBuiltInFont(resource_ptr<Font>& outFont, BuiltInFonts builtInFont)

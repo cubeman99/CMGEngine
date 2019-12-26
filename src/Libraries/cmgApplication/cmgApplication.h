@@ -23,7 +23,6 @@ public:
 	virtual void OnQuit() {}
 	virtual void OnResizeWindow(int width, int height) {}
 	virtual void OnDropFiles(const Array<Path>& paths) {}
-	CMG_DEPRECATED virtual void OnDropFile(const String& fileName) {}
 	virtual void OnDropText(const String& text) {}
 	
 	inline float GetFPS() { return m_perceivedFps; }
