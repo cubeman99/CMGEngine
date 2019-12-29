@@ -24,12 +24,12 @@ public:
 	template <typename T>
 	void BufferSubData(uint32 index, uint32 count, const T* data);
 
-	const void* MapBufferDataRead();
-	const void* MapBufferDataRead(uint32 offset, uint32 size);
+	const void* MapBufferDataRead() const;
+	const void* MapBufferDataRead(uint32 offset, uint32 size) const;
 	template<typename T>
-	const T* MapBufferDataRead();
+	const T* MapBufferDataRead() const;
 	template<typename T>
-	const T* MapBufferDataRead(uint32 offset, uint32 size);
+	const T* MapBufferDataRead(uint32 offset, uint32 size) const;
 
 	void* MapBufferDataWrite();
 	void* MapBufferDataWrite(uint32 offset, uint32 size);
@@ -38,7 +38,7 @@ public:
 	template<typename T>
 	T* MapBufferDataWrite(uint32 offset, uint32 count);
 
-	void UnmapBufferData();
+	void UnmapBufferData() const;
 
 protected:
 	BufferObject(uint32 target);
@@ -62,13 +62,13 @@ inline void BufferObject::BufferSubData(uint32 index, uint32 count, const T * da
 }
 
 template<typename T>
-const T * BufferObject::MapBufferDataRead()
+const T * BufferObject::MapBufferDataRead() const
 {
 	return (const T*) MapBufferDataRead(0, m_size);
 }
 
 template<typename T>
-const T * BufferObject::MapBufferDataRead(uint32 index, uint32 count)
+const T * BufferObject::MapBufferDataRead(uint32 index, uint32 count) const
 {
 	return (const T*) MapBufferDataRead(index * sizeof(T), count * sizeof(T));
 }

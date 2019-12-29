@@ -1,14 +1,41 @@
 #include "cmgMesh.h"
 #include <sstream>
 
+
+struct CMGMeshFile
+{
+	static constexpr char MAGIC[] = "CMGMesh_";
+
+	// Header (64 bytes)
+	struct Header
+	{
+		char magic[8] = {'C', 'M', 'G', 'M', 'e', 's', 'h', '_'};
+		uint32 version = 1;
+		uint32 primitiveType;
+		uint32 vertexAttributeFlags;
+		uint32 vertexSize = 4;
+		uint32 vertexCount = 0;
+		uint32 indexSize = 4;
+		uint32 indexCount = 0;
+		uint32 vertexStartOffset = 64;
+		uint32 indexStartOffset = 64;
+		uint32 reserved[5] = { 0, 0, 0, 0, 0 };
+	} header;
+
+	// Data
+	uint8* vertexData;
+	uint8* indexData;
+};
+
+
 //-----------------------------------------------------------------------------
 // Constructors & Destructor
 //-----------------------------------------------------------------------------
 
-Mesh::Mesh()
-	: m_firstIndex(-1)
-	, m_numIndices(0)
-	, m_primitiveType(VertexPrimitiveType::k_triangles)
+Mesh::Mesh() :
+	m_firstIndex(0),
+	m_numIndices(0),
+	m_primitiveType(VertexPrimitiveType::k_triangles)
 {
 }
 
@@ -35,6 +62,22 @@ struct ObjFace
 };
 
 Error Mesh::Load(const Path& path, Mesh*& outMesh, MeshLoadOptions::value_type options)
+{
+	// Open the file to read the magic header ID
+	File file(path);
+	Error error = file.Open(FileAccess::READ, FileType::BINARY);
+	if (error.Failed())
+		return error.Uncheck();
+
+	char magic[9] = { 0 };
+	file.Read(magic, 8);
+	if (strncmp(magic, CMGMeshFile::MAGIC, 8) == 0)
+		return LoadCMG(path, outMesh);
+
+	return LoadOBJ(path, outMesh, options);
+}
+
+Error Mesh::LoadOBJ(const Path& path, Mesh*& outMesh, MeshLoadOptions::value_type options)
 {
 	String fileContents;
 	Error openError = File::OpenAndGetContents(path, fileContents);
@@ -145,5 +188,100 @@ Error Mesh::Load(const Path& path, Mesh*& outMesh, MeshLoadOptions::value_type o
 	mesh->GetIndexData()->BufferIndices((int) indices.size(), indices.data());
 	mesh->SetIndices(0, indices.size());
 	outMesh = mesh;
+	return CMG_ERROR_SUCCESS;
+}
+
+Error Mesh::LoadCMG(const Path& path, Mesh*& outMesh)
+{
+	File file(path);
+	Error error = file.Open(FileAccess::READ, FileType::BINARY);
+	if (error.Failed())
+		return error.Uncheck();
+	return DecodeCMG(file, outMesh);
+}
+
+Error Mesh::SaveCMG(const Path& path, const Mesh* mesh)
+{
+	File file(path);
+	Error error = file.Open(FileAccess::WRITE, FileType::BINARY);
+	if (error.Failed())
+		return error.Uncheck();
+	return EncodeCMG(file, mesh);
+}
+
+Error Mesh::EncodeCMG(File& file, const Mesh* mesh)
+{
+	CMGMeshFile contents;
+	auto vertexData = mesh->GetVertexData();
+	auto vertexBuffer = vertexData->GetVertexBuffer();
+	auto indexData = mesh->GetIndexData();
+	auto indexBuffer = indexData->GetIndexBuffer();
+
+	// Header
+	contents.header.version = 1;
+	contents.header.primitiveType = (uint32) mesh->GetPrimitiveType();
+	contents.header.vertexAttributeFlags = (uint32) vertexBuffer->GetAttributeFlags();
+	contents.header.vertexCount = (uint32) vertexData->GetCount();
+	contents.header.indexCount = (uint32) indexData->GetCount();
+	contents.header.vertexSize = VertexBuffer::CalcVertexSize(vertexBuffer->GetAttributeFlags());
+	contents.header.indexSize = sizeof(uint32);
+	memset(contents.header.reserved, 0, sizeof(contents.header.reserved));
+	contents.header.vertexStartOffset = sizeof(contents.header);
+	contents.header.indexStartOffset = contents.header.vertexStartOffset +
+		(contents.header.vertexCount * contents.header.vertexSize);
+	file.Write(&contents.header, sizeof(contents.header));
+
+	// Vertex data
+	contents.vertexData = (uint8*) vertexBuffer->MapBufferDataRead<uint8>();
+	file.Write(contents.vertexData +
+		(vertexData->GetStart() * contents.header.vertexSize),
+		contents.header.vertexCount * contents.header.vertexSize);
+	vertexBuffer->UnmapBufferData();
+	contents.vertexData = nullptr;
+
+	// Index data
+	contents.indexData = (uint8*) indexBuffer->MapBufferDataRead<uint8>();
+	file.Write(contents.indexData +
+		(indexData->GetStart() * contents.header.indexSize),
+		contents.header.indexCount * contents.header.indexSize);
+	indexBuffer->UnmapBufferData();
+	contents.indexData = nullptr;
+
+	return CMG_ERROR_SUCCESS;
+}
+
+Error Mesh::DecodeCMG(File& file, Mesh*& outMesh)
+{
+	CMGMeshFile contents;
+
+	// Read the header
+	uint32 offset = file.Tell();
+	file.Read(&contents.header, sizeof(contents.header));
+	if (memcmp(contents.header.magic, CMGMeshFile::MAGIC, 8) != 0)
+		return CMG_ERROR(CommonErrorTypes::k_file_corrupt);
+
+	outMesh = new Mesh();
+
+	// Read the vertex data
+	file.SeekFromStart(offset + contents.header.vertexStartOffset);
+	contents.vertexData = new uint8[
+		contents.header.vertexSize * contents.header.vertexCount];
+	file.Read(contents.vertexData, contents.header.vertexSize *
+		contents.header.vertexCount);
+	outMesh->GetVertexData()->BufferVertices(
+		contents.header.vertexAttributeFlags, contents.header.vertexCount, 
+		contents.vertexData);
+	delete [] contents.vertexData;
+
+	// Read the index data
+	file.SeekFromStart(offset + contents.header.indexStartOffset);
+	contents.indexData = new uint8[
+		contents.header.indexSize * contents.header.indexCount];
+	file.Read(contents.indexData, contents.header.indexSize *
+		contents.header.indexCount);
+	outMesh->GetIndexData()->BufferIndices(
+		contents.header.indexCount, (uint32*) contents.indexData);
+	delete [] contents.indexData;
+
 	return CMG_ERROR_SUCCESS;
 }

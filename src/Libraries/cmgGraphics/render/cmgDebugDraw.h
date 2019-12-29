@@ -1,14 +1,14 @@
 #ifndef _CMG_GRAPHICS_DEBUG_DRAW_H_
 #define _CMG_GRAPHICS_DEBUG_DRAW_H_
 
-#include <cmgGraphics/cmg_graphics.h>
 #include <cmgPhysics/cmg_physics.h>
+#include <cmgGraphics/render/cmgRenderDevice.h>
 
 
 class DebugDraw
 {
 public:
-	DebugDraw();
+	DebugDraw(RenderDevice& renderDevice);
 	~DebugDraw();
 
 	// Render options
@@ -65,28 +65,34 @@ public:
 	void BeginImmediate(const Matrix4f& transform = Matrix4f::IDENTITY);
 	
 	void DrawMesh(Mesh* mesh, const Matrix4f& modelMatrix, const Color& color);
+	void DrawSkinnedMesh(Mesh* mesh, const Matrix4f& modelMatrix,
+		const Array<Matrix4f>& jointTransforms, const Color& color);
 
 private:
 	void BeginDrawWire();
 	void BeginDrawFill();
 	
+	RenderDevice& m_renderDevice;
+
 	// Graphics options
-	Matrix4f m_viewProjection;
-	float m_lineWidth;
-	float m_pointSize;
-	bool m_shaded;
-	Vector3f m_lightDirection;
+	Matrix4f m_viewProjection = Matrix4f::IDENTITY;
+	float m_lineWidth = 1.0f;
+	float m_pointSize = 1.0f;
+	bool m_shaded = false;
+	Vector3f m_lightDirection = -Vector3f::UNITY;
 
 	// Shaders
-	Shader* m_shaderSolidColor;
-	Shader* m_shaderShadedColor;
+	Shader* m_shaderSolidColor = nullptr;
+	Shader* m_shaderShadedColor = nullptr;
+	Shader* m_shaderSkinnedShadedColor = nullptr;
+	Shader* m_shaderSkinnedSolidColor = nullptr;
 
 	// Meshes
-	Mesh* m_meshCube;
-	Mesh* m_meshSphere;
-	Mesh* m_meshSphereLowRes;
-	Mesh* m_meshCylinder;
-	Mesh* m_meshCone;
+	Mesh* m_meshCube = nullptr;
+	Mesh* m_meshSphere = nullptr;
+	Mesh* m_meshSphereLowRes = nullptr;
+	Mesh* m_meshCylinder = nullptr;
+	Mesh* m_meshCone = nullptr;
 };
 
 

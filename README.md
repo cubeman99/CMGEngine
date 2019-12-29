@@ -32,6 +32,7 @@ Uses CMake to build. Currently being tested on Windows 10.
 - Mutex and Thread wrapper
 - Better 'Error' handling, that show proper traceback
 - Start using smart pointers where necessary, like Graphics2D
+	- remove sptr where not necessary like in SetShaderUniform
 - Rework DecodedImageData interface (at least for memory management)
 - Stop using struct/enum pairings, use enum class
 	- decide on standard for enum names, k_enum or enum_value, and apply to code
@@ -39,6 +40,22 @@ Uses CMake to build. Currently being tested on Windows 10.
 - Start using cmg namespace everywhere
 - Create CMake example project
 - delete Renderer class
+- Make FreeType/SOIL compiled into cmgGraphics lib
+- 3D Model importing
+- ECS systems for rendering
+- fix attribute location mismatches (use constant index or varying per mesh?)
+- let shader uniforms be referenced as 'array' and 'array[0]'
 
 ## FIXME
 -
+
+
+ECS plannig:
+parent/child of entities
+transform built-in to entity
+1 component type per entity
+components inheriting other components?
+Update() in component
+systems?
+
+

@@ -25,11 +25,22 @@ set(CMG_GRAPHICS_SOURCE_FILES
 	cmgPrimitiveMeshes.cpp
 	cmgMaterial.h
 	cmgMaterial.cpp
+	cmgSkeleton.h
+	cmgSkeleton.cpp
+	cmgModel.h
+	cmgModel.cpp
+	cmgAnimationClip.h
+	cmgAnimationClip.cpp
 
 	cmgBufferObject.h
 	cmgBufferObject.cpp
 		
 	ecs/cmgArcBall.h
+
+	importers/cmgObjModelImporter.h
+	importers/cmgObjModelImporter.cpp
+	importers/cmgSourceModelImporter.h
+	importers/cmgSourceModelImporter.cpp
 
 	render/cmgDebugDraw.h
 	render/cmgDebugDraw.cpp

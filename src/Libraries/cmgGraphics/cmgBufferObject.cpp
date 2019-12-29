@@ -67,18 +67,18 @@ void * BufferObject::MapBufferDataWrite(uint32 offset, uint32 size)
 	return glMapBufferRange(m_glTarget, offset, size, GL_MAP_WRITE_BIT);
 }
 
-const void * BufferObject::MapBufferDataRead()
+const void * BufferObject::MapBufferDataRead() const
 {
 	return MapBufferDataRead(0, m_size);
 }
 
-const void * BufferObject::MapBufferDataRead(uint32 offset, uint32 size)
+const void * BufferObject::MapBufferDataRead(uint32 offset, uint32 size) const
 {
 	glBindBuffer(m_glTarget, m_glBuffer);
 	return glMapBufferRange(m_glTarget, offset, size, GL_MAP_READ_BIT);
 }
 
-void BufferObject::UnmapBufferData()
+void BufferObject::UnmapBufferData() const
 {
 	glBindBuffer(m_glTarget, m_glBuffer);
 	glUnmapBuffer(m_glTarget);

@@ -541,13 +541,13 @@ static void CreateIcosahedronRaw(float radius, bool smooth, VertexList& vertices
 Mesh* Primitives::CreateCube()
 {
 	float r = 1.0f;
-
+	
 	VertexPosTexNorm vertices[] = {
 		VertexPosTexNorm(Vector3f(-r,  r, -r), Vector2f(0.0f, 0.0f), Vector3f::UNITY), // Top
 		VertexPosTexNorm(Vector3f( r,  r, -r), Vector2f(1.0f, 0.0f), Vector3f::UNITY),
 		VertexPosTexNorm(Vector3f( r,  r,  r), Vector2f(1.0f, 1.0f), Vector3f::UNITY),
 		VertexPosTexNorm(Vector3f(-r,  r,  r), Vector2f(0.0f, 1.0f), Vector3f::UNITY),
-
+	
 		VertexPosTexNorm(Vector3f(-r, -r,  r), Vector2f(0.0f, 0.0f), Vector3f::NEG_UNITY), // Bottom
 		VertexPosTexNorm(Vector3f( r, -r,  r), Vector2f(1.0f, 0.0f), Vector3f::NEG_UNITY),
 		VertexPosTexNorm(Vector3f( r, -r, -r), Vector2f(1.0f, 1.0f), Vector3f::NEG_UNITY),
@@ -557,7 +557,7 @@ Mesh* Primitives::CreateCube()
 		VertexPosTexNorm(Vector3f( r,  r,  r), Vector2f(1.0f, 0.0f), Vector3f::UNITX),
 		VertexPosTexNorm(Vector3f( r,  r, -r), Vector2f(1.0f, 1.0f), Vector3f::UNITX),
 		VertexPosTexNorm(Vector3f( r, -r, -r), Vector2f(0.0f, 1.0f), Vector3f::UNITX),
-
+	
 		VertexPosTexNorm(Vector3f(-r, -r, -r), Vector2f(0.0f, 0.0f), Vector3f::NEG_UNITX), // Left
 		VertexPosTexNorm(Vector3f(-r,  r, -r), Vector2f(1.0f, 0.0f), Vector3f::NEG_UNITX),
 		VertexPosTexNorm(Vector3f(-r,  r,  r), Vector2f(1.0f, 1.0f), Vector3f::NEG_UNITX),
@@ -573,7 +573,7 @@ Mesh* Primitives::CreateCube()
 		VertexPosTexNorm(Vector3f( r,  r,  r), Vector2f(1.0f, 1.0f), Vector3f::UNITZ),
 		VertexPosTexNorm(Vector3f( r, -r,  r), Vector2f(0.0f, 1.0f), Vector3f::UNITZ),
 	};
-
+	
 	uint32 indices[] = {
 		0,1,2, 0,2,3,
 		4,5,6, 4,6,7,
@@ -582,11 +582,27 @@ Mesh* Primitives::CreateCube()
 		16,17,18, 16,18,19,
 		20,21,22, 20,22,23
 	};
-
+	
 	Mesh* mesh = new Mesh();
 	mesh->GetVertexData()->BufferVertices(24, vertices);
 	mesh->GetIndexData()->BufferIndices(36, indices);
 	return mesh;
+	/*
+	VertexAttributeInfo attribs[4];
+	Primitives::InitializeCube();
+	attribs[0] = VertexAttributeInfo(VertexAttrib::k_position,
+		AttributeType::k_vec3, Primitives::GetCubePositions());
+	attribs[1] = VertexAttributeInfo(VertexAttrib::k_normal,
+		AttributeType::k_vec3, Primitives::GetCubeNormals());
+	attribs[2] = VertexAttributeInfo(VertexAttrib::k_tex_coord,
+		AttributeType::k_vec2, Primitives::GetCubeTexCoords());
+	attribs[3] = VertexAttributeInfo(VertexAttrib::k_color,
+		AttributeType::k_vec3, Primitives::GetCubeColors());
+	Mesh* mesh = new Mesh();
+	mesh->GetVertexData()->BufferVertices(Primitives::GetCubeVertexCount(), attribs, 4);
+	mesh->GetIndexData()->BufferIndices(0, nullptr);
+	mesh->SetIndices(0, Primitives::GetCubeVertexCount());
+	return mesh;*/
 }
 
 Mesh* Primitives::CreateWireframeCube()

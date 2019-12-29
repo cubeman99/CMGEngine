@@ -22,10 +22,12 @@ public:
 	
 	// Accessors
 	int GetVertexCount() const;
+	inline uint32 GetAttributeFlags() const { return m_vertexType; }
 	inline uint32 GetGLVertexBuffer() const { return GetGLBuffer(); }
 	inline uint32 GetGLVertexArray() const { return m_glVertexArray; }
 
 	// Mutators
+	void SetVertices(uint32 attribFlags, uint32 count, const uint8* vertices);
 	void SetVertices(int numVertices, const Vector3f* vertices);
 	template <class T>
 	void SetVertices(int numVertices, const T* vertices);
@@ -35,8 +37,10 @@ public:
 		const VertexAttributeInfo* attribs,
 		uint32 numAttribs);
 
+	static uint32 CalcVertexSize(uint32 attribFlags);
+
 private:
-	void SetVerticesRaw(uint32 vertexType, int sizeOfVertex, int numVertices, const void* vertices);
+	void SetVerticesRaw(uint32 attribFlags, int sizeOfVertex, int numVertices, const void* vertices);
 
 	int m_numVertices; // Number of vertices in the buffer.
 	int m_bufferSize; // Size in bytes of the vertex buffer.
@@ -79,6 +83,13 @@ public:
 	VertexData();
 	VertexData(uint32 start, uint32 count);
 	~VertexData();
+
+	inline void BufferVertices(uint32 attribFlags, uint32 count, const uint8* vertices)
+	{
+		m_vertexStart = 0;
+		m_vertexCount = count;
+		m_vertexBuffer.SetVertices(attribFlags, count, vertices);
+	}
 
 	inline void BufferVertices(int numVertices, const VertexAttributeInfo* attribs, uint32 numAttribs)
 	{
@@ -129,6 +140,7 @@ public:
 	inline uint32 GetStart() const { return m_vertexStart; }
 	inline uint32 GetCount() const { return m_vertexCount; }
 	inline VertexBuffer* GetVertexBuffer() { return &m_vertexBuffer; }
+	inline const VertexBuffer* GetVertexBuffer() const { return &m_vertexBuffer; }
 
 
 public:
@@ -151,6 +163,7 @@ public:
 	inline uint32 GetStart() const { return m_indexStart; }
 	inline uint32 GetCount() const { return m_indexCount; }
 	inline IndexBuffer* GetIndexBuffer() { return &m_indexBuffer; }
+	inline const IndexBuffer* GetIndexBuffer() const { return &m_indexBuffer; }
 
 	inline void SetIndexStart(uint32 start) { m_indexStart = start; }
 	inline void SetIndexCount(uint32 count) { m_indexCount = count; }

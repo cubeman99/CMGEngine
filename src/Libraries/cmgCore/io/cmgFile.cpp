@@ -84,7 +84,37 @@ Error File::Close()
 //-----------------------------------------------------------------------------
 // Read & Write
 //-----------------------------------------------------------------------------
-	
+
+Error File::SeekFromStart(uint32 offset)
+{
+	CMG_ASSERT_MSG(IsOpen(), "Attempting to operate on a closed file");
+	if (fseek(m_file, offset, SEEK_SET) != 0)
+		return CMG_ERROR_FAILURE;
+	return CMG_ERROR_SUCCESS;
+}
+
+uint32 File::Tell()
+{
+	CMG_ASSERT_MSG(IsOpen(), "Attempting to operate on a closed file");
+	return (uint32) ftell(m_file);
+}
+
+Error File::SeekFromEnd(uint32 offset)
+{
+	CMG_ASSERT_MSG(IsOpen(), "Attempting to operate on a closed file");
+	if (fseek(m_file, offset, SEEK_END) != 0)
+		return CMG_ERROR_FAILURE;
+	return CMG_ERROR_SUCCESS;
+}
+
+Error File::SeekFromCurrent(uint32 offset)
+{
+	CMG_ASSERT_MSG(IsOpen(), "Attempting to operate on a closed file");
+	if (fseek(m_file, offset, SEEK_CUR) != 0)
+		return CMG_ERROR_FAILURE;
+	return CMG_ERROR_SUCCESS;
+}
+
 Error File::Read(void* destination, uint32 size)
 {
 	CMG_ASSERT_MSG(IsOpen(), "Attempting to read a file that is not open");

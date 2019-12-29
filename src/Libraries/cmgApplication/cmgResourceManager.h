@@ -7,6 +7,8 @@
 #include <cmgGraphics/cmgMesh.h>
 #include <cmgGraphics/cmgShader.h>
 #include <cmgGraphics/cmgFont.h>
+#include <cmgGraphics/cmgModel.h>
+#include <cmgGraphics/cmgAnimationClip.h>
 #include <unordered_map>
 
 namespace cmg
@@ -190,6 +192,8 @@ public:
 	Error LoadBuiltInFont(resource_ptr<Font>& outFont, BuiltInFonts builtInFont);
 	Error LoadFont(resource_ptr<Font>& outFont, const Path& path,
 		uint32 size, uint32 charRegionBegin, uint32 charRegionEnd);
+	Error LoadModel(resource_ptr<Model>& outModel, const Path& path);
+	Error LoadAnimationClip(resource_ptr<AnimationClip>& outAnimation, const Path& path);
 
 	void AddShaderIncludePath(const Path& path);
 	void AddPath(const Path& path);
@@ -204,6 +208,8 @@ private:
 	}
 
 	ResourceID m_resourceIdCounter;
+	ResourcePool<AnimationClip> m_poolAnimationClips;
+	ResourcePool<Model> m_poolModels;
 	ResourcePool<Texture> m_poolTextures;
 	ResourcePool<Mesh> m_poolMeshes;
 	ResourcePool<Shader> m_poolShaders;
@@ -255,6 +261,8 @@ template<> ResourcePool<Texture>* ResourceManager::GetResourcePool<Texture>();
 template<> ResourcePool<Mesh>* ResourceManager::GetResourcePool<Mesh>();
 template<> ResourcePool<Shader>* ResourceManager::GetResourcePool<Shader>();
 template<> ResourcePool<Font>* ResourceManager::GetResourcePool<Font>();
+template<> ResourcePool<Model>* ResourceManager::GetResourcePool<Model>();
+template<> ResourcePool<AnimationClip>* ResourceManager::GetResourcePool<AnimationClip>();
 
 }
 

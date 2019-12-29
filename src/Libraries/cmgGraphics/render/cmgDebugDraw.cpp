@@ -6,22 +6,23 @@
 // Constructor & destructor
 //-----------------------------------------------------------------------------
 
-DebugDraw::DebugDraw() :
+DebugDraw::DebugDraw(RenderDevice& renderDevice) :
 	m_viewProjection(Matrix4f::IDENTITY),
+	m_renderDevice(renderDevice),
 	m_shaded(false)
 {
-	String vertexSource = "#version 410"
-		"\n"   "layout (location = 0) in vec3 vertPosition;"
-		"\n"   "layout (location = 2) in vec3 vertNormal;"
+	String shadedVertexSource = "#version 410"
+		"\n"   "layout (location = 0) in vec3 a_vertPosition;"
+		"\n"   "layout (location = 2) in vec3 a_vertNormal;"
 		"\n"   "uniform mat4 u_mvp;"
 		"\n"   "uniform mat4 u_model;"
 		"\n"   "out vec3 v_normal;"
 		"\n"   "void main()"
 		"\n"   "{"
-		"\n"   "	gl_Position = u_mvp * vec4(vertPosition, 1);"
-		"\n"   "	v_normal = (u_model * vec4(vertNormal, 0)).xyz;"
+		"\n"   "	gl_Position = u_mvp * vec4(a_vertPosition, 1);"
+		"\n"   "	v_normal = (u_model * vec4(a_vertNormal, 0)).xyz;"
 		"\n"   "}";
-	String fragmentSource = "#version 410"
+	String shadedFragmentSource = "#version 410"
 		"\n"   "uniform vec4 u_color = vec4(1,1,1,1);"
 		"\n"   "uniform vec3 u_lightDirection;"
 		"\n"   "in vec3 v_normal;"
@@ -32,29 +33,70 @@ DebugDraw::DebugDraw() :
 		"\n"   "	lightAmount = (lightAmount + 1.0) * 0.5;"
 		"\n"   "	o_color = vec4(u_color.rgb * lightAmount, u_color.a);"
 		"\n"   "}";
-	String shadedVertexSource = "#version 410"
-		"\n"   "layout (location = 0) in vec3 vertPosition;"
+	String solidVertexSource = "#version 410"
+		"\n"   "layout (location = 0) in vec3 a_vertPosition;"
 		"\n"   "uniform mat4 u_mvp;"
 		"\n"   "void main()"
 		"\n"   "{"
-		"\n"   "	gl_Position = u_mvp * vec4(vertPosition, 1);"
+		"\n"   "	gl_Position = u_mvp * vec4(a_vertPosition, 1);"
 		"\n"   "}";
-	String shadedFragmentSource = "#version 410"
+	String solidFragmentSource = "#version 410"
 		"\n"   "uniform vec4 u_color = vec4(1,1,1,1);"
 		"\n"   "out vec4 o_color;"
 		"\n"   "void main()"
 		"\n"   "{"
 		"\n"   "	o_color = u_color;"
 		"\n"   "}";
+	String shadedSkinnedVertexSource = "#version 410"
+		"\n"   "layout (location = 0) in vec3 a_vertPosition;"
+		"\n"   "layout (location = 2) in vec3 a_vertNormal;"
+		"\n"   "layout (location = 4) in ivec4 a_jointIndices;"
+		"\n"   "layout (location = 5) in vec4 a_jointWeights;"
+		"\n"   "uniform mat4 u_mvp;"
+		"\n"   "uniform mat4 u_model;"
+		"\n"   "uniform mat4 u_jointTransforms[220];"
+		"\n"   "out vec3 v_normal;"
+		"\n"   "void main()"
+		"\n"   "{"
+		"\n"   "	mat4 boneTransform = u_jointTransforms[a_jointIndices[0]] * a_jointWeights[0];"
+		"\n"   "	boneTransform += u_jointTransforms[a_jointIndices[1]] * a_jointWeights[1];"
+		"\n"   "	boneTransform += u_jointTransforms[a_jointIndices[2]] * a_jointWeights[2];"
+		"\n"   "	boneTransform += u_jointTransforms[a_jointIndices[3]] * a_jointWeights[3];"
+		"\n"   "	gl_Position = u_mvp * boneTransform * vec4(a_vertPosition, 1.0);"
+		"\n"   "	v_normal = (u_model * vec4(a_vertNormal, 0)).xyz;"
+		"\n"   "}";
+	String solidSkinnedVertexSource = "#version 410"
+		"\n"   "layout (location = 0) in vec3 a_vertPosition;"
+		"\n"   "layout (location = 4) in ivec4 a_jointIndices;"
+		"\n"   "layout (location = 5) in vec4 a_jointWeights;"
+		"\n"   "uniform mat4 u_mvp;"
+		"\n"   "uniform mat4 u_model;"
+		"\n"   "uniform mat4 u_jointTransforms[220];"
+		"\n"   "void main()"
+		"\n"   "{"
+		"\n"   "	mat4 boneTransform = u_jointTransforms[a_jointIndices[0]] * a_jointWeights[0];"
+		"\n"   "	boneTransform += u_jointTransforms[a_jointIndices[1]] * a_jointWeights[1];"
+		"\n"   "	boneTransform += u_jointTransforms[a_jointIndices[2]] * a_jointWeights[2];"
+		"\n"   "	boneTransform += u_jointTransforms[a_jointIndices[3]] * a_jointWeights[3];"
+		"\n"   "	gl_Position = u_mvp * boneTransform * vec4(a_vertPosition, 1.0);"
+		"\n"   "}";
 
 	m_shaderShadedColor = new Shader();
-	m_shaderShadedColor->AddStage(ShaderType::k_vertex_shader, vertexSource);
-	m_shaderShadedColor->AddStage(ShaderType::k_fragment_shader, fragmentSource);
+	m_shaderShadedColor->AddStage(ShaderType::k_vertex_shader, shadedVertexSource);
+	m_shaderShadedColor->AddStage(ShaderType::k_fragment_shader, shadedFragmentSource);
 	m_shaderShadedColor->CompileAndLink();
 	m_shaderSolidColor = new Shader();
-	m_shaderSolidColor->AddStage(ShaderType::k_vertex_shader, shadedVertexSource);
-	m_shaderSolidColor->AddStage(ShaderType::k_fragment_shader, shadedFragmentSource);
+	m_shaderSolidColor->AddStage(ShaderType::k_vertex_shader, solidVertexSource);
+	m_shaderSolidColor->AddStage(ShaderType::k_fragment_shader, solidFragmentSource);
 	m_shaderSolidColor->CompileAndLink();
+	m_shaderSkinnedShadedColor = new Shader();
+	m_shaderSkinnedShadedColor->AddStage(ShaderType::k_vertex_shader, shadedSkinnedVertexSource);
+	m_shaderSkinnedShadedColor->AddStage(ShaderType::k_fragment_shader, shadedFragmentSource);
+	m_shaderSkinnedShadedColor->CompileAndLink();
+	m_shaderSkinnedSolidColor = new Shader();
+	m_shaderSkinnedSolidColor->AddStage(ShaderType::k_vertex_shader, solidSkinnedVertexSource);
+	m_shaderSkinnedSolidColor->AddStage(ShaderType::k_fragment_shader, solidFragmentSource);
+	m_shaderSkinnedSolidColor->CompileAndLink();
 
 	VertexAttributeInfo attribs[4];
 	attribs[0] = VertexAttributeInfo(VertexAttrib::k_position, AttributeType::k_vec3, nullptr);
@@ -568,46 +610,26 @@ void DebugDraw::DrawMesh(Mesh* mesh, const Matrix4f& modelMatrix, const Color& c
 {
 	Matrix4f mvp = m_viewProjection * modelMatrix;
 	Shader* shader = (m_shaded ? m_shaderShadedColor : m_shaderSolidColor);
-	// Activate the shader
-	glUseProgram(shader->GetGLProgram());
-
-	// Update uniforms
-	int uniformLocation = -1;
-	if (shader->GetUniformLocation("u_color", uniformLocation))
-		glUniform4fv(uniformLocation, 1, color.ToVector4f().v);
-	if (shader->GetUniformLocation("u_mvp", uniformLocation))
-		glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, mvp.m);
-	if (shader->GetUniformLocation("u_model", uniformLocation))
-		glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, modelMatrix.m);
-	if (shader->GetUniformLocation("u_lightDirection", uniformLocation))
-		glUniform3fv(uniformLocation, 1, m_lightDirection.v);
-
-	// Draw polygons.
-
-	//glEnable(GL_CULL_FACE);
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	//glColor4ubv(Color::GREEN.data());
-	glBindVertexArray(mesh->GetVertexData()->
-		GetVertexBuffer()->GetGLVertexArray());
-
-	if (mesh->GetIndexData()->GetCount() == 0)
-	{
-		// Draw non indexed
-		glDrawArrays(GL_TRIANGLES, mesh->GetFirstIndex(),
-			mesh->GetNumIndices());
-	}
-	else
-	{
-		// Draw indexed
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,
-			mesh->GetIndexData()->GetIndexBuffer()->GetGLIndexBuffer());
-		glDrawElements(GL_TRIANGLES, mesh->GetNumIndices(),
-			GL_UNSIGNED_INT, ((unsigned int*) 0) + mesh->GetFirstIndex());
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	}
-
-	glBindVertexArray(0);
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	//glDisable(GL_CULL_FACE);
+	m_renderDevice.SetShaderUniform(shader, "u_color", color.ToVector4f());
+	m_renderDevice.SetShaderUniform(shader, "u_mvp", mvp);
+	m_renderDevice.SetShaderUniform(shader, "u_model", modelMatrix);
+	m_renderDevice.SetShaderUniform(shader, "u_lightDirection", m_lightDirection);
+	m_renderDevice.Draw(nullptr, shader, mesh);
 }
+
+void DebugDraw::DrawSkinnedMesh(Mesh* mesh, const Matrix4f& modelMatrix,
+	const Array<Matrix4f>& jointTransforms, const Color& color)
+{
+
+	Shader* shader = (m_shaded ? m_shaderSkinnedShadedColor : m_shaderSkinnedSolidColor);
+	Matrix4f mvp = m_viewProjection * modelMatrix;
+	m_renderDevice.SetShaderUniform(shader,
+		"u_jointTransforms[0]", jointTransforms.size(), jointTransforms.data());
+	m_renderDevice.SetShaderUniform(shader, "u_color", color.ToVector4f());
+	m_renderDevice.SetShaderUniform(shader, "u_mvp", mvp);
+	m_renderDevice.SetShaderUniform(shader, "u_model", modelMatrix);
+	m_renderDevice.SetShaderUniform(shader, "u_lightDirection", m_lightDirection);
+	m_renderDevice.Draw(nullptr, shader, mesh);
+}
+
 

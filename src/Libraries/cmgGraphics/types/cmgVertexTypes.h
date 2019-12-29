@@ -55,15 +55,17 @@ struct PrimitiveList
 enum class VertexAttrib
 {
 	k_position		= 0,
-	k_bone_weights	= 1,
+	k_tex_coord		= 1,
 	k_normal		= 2,
 	k_color			= 3,
+	k_bone_indices	= 4,
+	k_bone_weights	= 5,
+	//k_tbn_matrix	= 6,
 	k_unused1,
 	k_unused2,
 	k_unused3,
-	k_bone_indices	= 7,
-	k_tex_coord		= 8,
-	//k_tbn_matrix	= 6,
+
+	k_count,
 };
 
 enum class AttributeType
@@ -84,13 +86,13 @@ struct VertexType
 {
 	enum
 	{
-		k_position		= 0x1, // All vertices should have a position.
-		k_normal		= 0x2,
-		k_tex_coord		= 0x4,
+		k_position		= 0x1, // All vertices should have a position
+		k_tex_coord		= 0x2,
+		k_normal		= 0x4,
 		k_color			= 0x8,
-		k_bone_weights	= 0x10,
-		k_bone_indices	= 0x20,
-		//k_tbn_matrix		= 0x40, // TODO: TBN Matrix support
+		k_bone_indices	= 0x10,
+		k_bone_weights	= 0x20,
+		//k_tbn_matrix	= 0x40, // TODO: TBN Matrix support
 	};
 };
 
@@ -129,12 +131,12 @@ struct ModelVertex
 						VertexType::k_bone_weights |
 						VertexType::k_bone_indices);
 
-	Vector3f	position;
-	Vector3f	normal;
-	Vector2f	texCoord;
-	Color		color;
-	float		boneWeights[NUM_BONES_PER_VERTEX];
-	int			boneIndices[NUM_BONES_PER_VERTEX];
+	Vector3f position;
+	Vector2f texCoord;
+	Vector3f normal;
+	Vector4f color;
+	int32 boneIndices[NUM_BONES_PER_VERTEX];
+	float boneWeights[NUM_BONES_PER_VERTEX];
 };
 
 
@@ -145,10 +147,10 @@ struct VertexPosTexNormCol
 						VertexType::k_normal|
 						VertexType::k_color);
 
-	Vector3f	position;
-	Vector2f	texCoord;
-	Vector3f	normal;
-	Vector4f	color;
+	Vector3f position;
+	Vector2f texCoord;
+	Vector3f normal;
+	Vector4f color;
 };
 
 // A vertex with a position, texture coordinate, and normal.
@@ -187,9 +189,9 @@ struct VertexPosNormCol
 						VertexType::k_normal |
 						VertexType::k_color);
 
-	Vector3f	position;
-	Vector3f	normal;
-	Vector4f	color;
+	Vector3f position;
+	Vector3f normal;
+	Vector4f color;
 
 	VertexPosNormCol() {}
 
@@ -197,11 +199,13 @@ struct VertexPosNormCol
 		position(position)
 	{}
 	
-	VertexPosNormCol(const Vector3f& position, const Vector3f& normal, const Vector4f& color) :
+	VertexPosNormCol(const Vector3f& position, const Vector3f& normal,
+		const Vector4f& color) :
 		position(position), normal(normal), color(color)
 	{}
 
-	VertexPosNormCol(const Vector3f& position, const Vector3f& normal, const Color& color) :
+	VertexPosNormCol(const Vector3f& position, const Vector3f& normal,
+		const Color& color) :
 		position(position), normal(normal), color(color.ToVector4f())
 	{}
 };

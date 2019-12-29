@@ -437,7 +437,6 @@ void Shader::GenerateUniforms()
 	for (int i = 0; i < numUniforms; ++i)
 	{
 		Uniform& uniform = m_uniforms[i];
-		uniform.m_location = i;
 		uniform.m_name = new char[maxNameLength];
 
 		GLint size;
@@ -446,6 +445,7 @@ void Shader::GenerateUniforms()
 			maxNameLength, NULL, &size, &type, uniformName);
 
 		uniform.m_name = uniformName;
+		uniform.m_location = glGetUniformLocation(m_glProgram, uniformName);
 
 		switch (type)
 		{

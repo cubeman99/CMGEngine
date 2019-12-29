@@ -199,13 +199,12 @@ void Keyboard::Update()
 	HRESULT hRes = m_keyboard->GetDeviceState(s_bufferSize, &m_rawBuffer);
 	if (hRes == DIERR_INPUTLOST || hRes == DIERR_NOTACQUIRED)
 	{
+		// Try to re-acquire the device. If this fails, then another
+		// application has priority over the keyboard! This means this
+		// application's window is not in the foreground.
 		hRes = m_keyboard->Acquire();
-		if (hRes != DIERR_OTHERAPPHASPRIO)
-		{
-			// Another application has priority over the keyboard!
-			// This means this application's window is not in the foreground.
+		if (hRes == DI_OK)
 			m_keyboard->GetDeviceState(sizeof(s_bufferSize), &m_rawBuffer);
-		}
 	}
 	if (hRes != DI_OK)
 		memset(m_rawBuffer, 0, sizeof(m_rawBuffer));

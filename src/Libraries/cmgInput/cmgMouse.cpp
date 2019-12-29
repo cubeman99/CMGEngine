@@ -41,23 +41,20 @@ void Mouse::Update()
 	m_previousState = m_currentState;
 	m_currentState.buttons = 0;
 
-	// Get the mouse's device state.
+	// Get the mouse's device state
 	HRESULT hRes = m_mouse->GetDeviceState(s_mouseBufferSize, &m_mouseBuffer);
 
-	// Try to reacquire the mouse.
+	// Try to reacquire the mouse
 	if (hRes == DIERR_INPUTLOST || hRes == DIERR_NOTACQUIRED)
 	{
 		hRes = m_mouse->Acquire();
-		if (!FAILED(hRes))
-		{
+		if (hRes == DI_OK)
 			hRes = m_mouse->GetDeviceState(s_mouseBufferSize, &m_mouseBuffer);
-		}
 	}
-
-	if (FAILED(hRes))
+	if (hRes != DI_OK)
 		return;
 
-	// Get the mouse X,Y location.
+	// Get the mouse X,Y location
 	POINT point;
 	GetCursorPos(&point);
 	ScreenToClient(m_windowHandle, &point);

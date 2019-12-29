@@ -41,6 +41,10 @@ public:
 	Error Close();
 
 	// Read & write
+	uint32 Tell();
+	Error SeekFromEnd(uint32 offset);
+	Error SeekFromStart(uint32 offset);
+	Error SeekFromCurrent(uint32 offset);
 	Error Read(void* destination, uint32 size);
 	Error Write(const void* data, uint32 size);
 	Error GetContents(String& out);

@@ -32,9 +32,11 @@ public:
 	inline int GetNumIndices() const { return m_numIndices; }
 	//inline const Bounds& GetBounds() const { return m_bounds; }
 	inline VertexPrimitiveType::value_type GetPrimitiveType() const { return m_primitiveType; }
-		
+
 	inline VertexData* GetVertexData() { return &m_vertexData; }
 	inline IndexData* GetIndexData() { return &m_indexData; }
+	inline const VertexData* GetVertexData() const { return &m_vertexData; }
+	inline const IndexData* GetIndexData() const { return &m_indexData; }
 
 	// Mutators
 	inline void SetIndices(int firstIndex, int numIndices) { m_firstIndex = firstIndex; m_numIndices = numIndices; }
@@ -42,7 +44,12 @@ public:
 	inline void SetPrimitiveType(VertexPrimitiveType::value_type type) { m_primitiveType = type; }
 
 	// Static methods
-	static Error Load(const Path& path, Mesh*& mesh, MeshLoadOptions::value_type options = MeshLoadOptions::k_none);
+	static Error Load(const Path& path, Mesh*& outMesh, MeshLoadOptions::value_type options = MeshLoadOptions::k_none);
+	static Error LoadOBJ(const Path& path, Mesh*& outMesh, MeshLoadOptions::value_type options = MeshLoadOptions::k_none);
+	static Error LoadCMG(const Path& path, Mesh*& outMesh);
+	static Error SaveCMG(const Path& path, const Mesh* mesh);
+	static Error DecodeCMG(File& file, Mesh*& outMesh);
+	static Error EncodeCMG(File& file, const Mesh* mesh);
 
 private:
 	// Prevent copying

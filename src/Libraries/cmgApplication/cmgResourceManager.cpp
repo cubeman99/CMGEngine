@@ -75,6 +75,33 @@ namespace cmg {
 			size, charRegionBegin, charRegionEnd);
 		if (error.Passed())
 			outFont = Add(name, font);
+		else
+			delete font;
+		return error.Uncheck();
+	}
+
+	Error ResourceManager::LoadModel(resource_ptr<Model>& outModel, const Path& path)
+	{
+		Model* model = nullptr;
+		ResourceName name = path.ToString();
+		Error error = Model::Load(ResolvePath(path), model);
+		if (error.Passed())
+			outModel = Add(name, model);
+		else
+			delete model;
+		return error.Uncheck();
+	}
+
+	Error ResourceManager::LoadAnimationClip(
+		resource_ptr<AnimationClip>& outAnimation, const Path& path)
+	{
+		AnimationClip* clip = nullptr;
+		ResourceName name = path.ToString();
+		Error error = AnimationClip::Load(ResolvePath(path), clip);
+		if (error.Passed())
+			outAnimation = Add(name, clip);
+		else
+			delete clip;
 		return error.Uncheck();
 	}
 
@@ -92,6 +119,16 @@ namespace cmg {
 	Path ResourceManager::ResolvePath(const Path & path)
 	{
 		return Path::ResolvePath(path, m_paths);
+	}
+
+	template<> ResourcePool<Model>* ResourceManager::GetResourcePool<Model>()
+	{
+		return &m_poolModels;
+	}
+
+	template<> ResourcePool<AnimationClip>* ResourceManager::GetResourcePool<AnimationClip>()
+	{
+		return &m_poolAnimationClips;
 	}
 
 	template<> ResourcePool<Texture>* ResourceManager::GetResourcePool<Texture>()

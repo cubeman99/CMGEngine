@@ -13,6 +13,9 @@
 #include <cmgGraphics/cmgMaterial.h>
 #include <cmgGraphics/cmgMesh.h>
 #include <cmgGraphics/cmgPrimitiveMeshes.h>
+#include <cmgGraphics/cmgSkeleton.h>
+#include <cmgGraphics/cmgModel.h>
+#include <cmgGraphics/cmgAnimationClip.h>
 
 #include <cmgGraphics/ecs/cmgArcBall.h>
 

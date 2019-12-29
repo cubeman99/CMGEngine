@@ -14,7 +14,7 @@ struct CommonErrorTypes
 		k_null_pointer,
 		k_initialize,
 		k_already_initialized,
-		k_no_data,                    // used for null
+		k_no_data,  // used for null
 		k_corrupt_data,
 		k_size_mismatch,
 		k_path_incorrect,

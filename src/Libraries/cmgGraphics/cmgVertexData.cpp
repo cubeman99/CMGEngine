@@ -72,6 +72,12 @@ int VertexBuffer::GetVertexCount() const
 	return m_numVertices;
 }
 
+void VertexBuffer::SetVertices(uint32 attribFlags, uint32 count, const uint8* vertices)
+{
+	uint32 sizeOfVertex = VertexBuffer::CalcVertexSize(attribFlags);
+	SetVerticesRaw(attribFlags, sizeOfVertex, count, vertices);
+}
+
 void VertexBuffer::SetVertices(int numVertices, const Vector3f* vertices)
 {
 	SetVerticesRaw(VertexType::k_position, sizeof(Vector3f), numVertices, vertices);
@@ -129,6 +135,20 @@ void VertexBuffer::SetVerticesRaw(uint32 vertexType,
 		offset += sizeof(Vector4f);
 	}
 	index++;
+	if (m_vertexType & VertexType::k_bone_indices)
+	{
+		glEnableVertexAttribArray(index);
+		glVertexAttribIPointer(index, 4, GL_INT, sizeOfVertex, (void*) offset);
+		offset += sizeof(int32) * 4;
+	}
+	index++;
+	if (m_vertexType & VertexType::k_bone_weights)
+	{
+		glEnableVertexAttribArray(index);
+		glVertexAttribPointer(index, 4, GL_FLOAT, GL_FALSE, sizeOfVertex, (void*) offset);
+		offset += sizeof(Vector4f);
+	}
+	index++;
 	// TODO: Bone and TBN attributes.
 
 	glBindVertexArray(0);
@@ -176,6 +196,24 @@ void VertexBuffer::BufferVertices(
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	m_numVertices = numVertices;
+}
+
+uint32 VertexBuffer::CalcVertexSize(uint32 attribFlags)
+{
+	uint32 size = 0;
+	if (attribFlags & VertexType::k_position)
+		size += sizeof(Vector3f);
+	if (attribFlags & VertexType::k_tex_coord)
+		size += sizeof(Vector2f);
+	if (attribFlags & VertexType::k_normal)
+		size += sizeof(Vector3f);
+	if (attribFlags & VertexType::k_color)
+		size += sizeof(Vector4f);
+	if (attribFlags & VertexType::k_bone_indices)
+		size += sizeof(uint32) * 4;
+	if (attribFlags & VertexType::k_bone_weights)
+		size += sizeof(Vector4f);
+	return size;
 }
 
 
