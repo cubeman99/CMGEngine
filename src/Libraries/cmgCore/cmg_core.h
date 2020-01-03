@@ -15,6 +15,8 @@
 #include <cmgCore/smart_ptr/cmg_smart_ptr.h>
 #include <cmgCore/string/cmgString.h>
 #include <cmgCore/cmgEventSystem.h>
+#include <cmgCore/resource/cmgResource.h>
+#include <cmgCore/resource/cmgResourceLoader.h>
 
 
 #endif // _CMG_CORE_INCLUDE_ALL_H_

@@ -2,67 +2,48 @@
 
 namespace cmg {
 
-	ResourceManager::ResourceManager():
-		m_resourceIdCounter(1)
+	ResourceManager::ResourceManager()
 	{
+		RegisterResourceType<Texture>();
+		RegisterResourceType<Mesh>();
+		RegisterResourceType<Model>();
+		RegisterResourceType<Font>();
+		RegisterResourceType<Shader>();
+		RegisterResourceType<AnimationClip>();
 	}
 
 	ResourceManager::~ResourceManager()
 	{
 	}
 
-	Error ResourceManager::LoadTexture(resource_ptr<Texture>& outTexture,
-		const Path& path, const TextureParams& params)
-	{
-		Texture* texture = nullptr;
-		ResourceName name = path.ToString();
-		Error error = Texture::LoadTexture(texture, ResolvePath(path), params);
-		if (error.Passed())
-			outTexture = Add(name, texture);
-		return error.Uncheck();
-	}
-
-	Error ResourceManager::LoadMesh(resource_ptr<Mesh>& outMesh, const Path& path,
-		MeshLoadOptions::value_type options)
-	{
-		Mesh* mesh = nullptr;
-		ResourceName name = path.ToString();
-		Error error = Mesh::Load(ResolvePath(path), mesh, options);
-		if (error.Passed())
-			outMesh = Add(name, mesh);
-		return error.Uncheck();
-	}
-
 	Error ResourceManager::LoadShader(resource_ptr<Shader>& outShader,
-		const ResourceName& name, const Path& vertexPath, const Path& fragmentPath)
+		const String& name, const Path& vertexPath, const Path& fragmentPath)
 	{
-		Shader* shader = new Shader();
-		Error error = Shader::LoadShader(shader,
-			ResolvePath(vertexPath),
-			ResolvePath(fragmentPath));
-		if (error.Passed())
-			outShader = Add(name, shader);
-		return error.Uncheck();
+		ShaderLoadArgs args;
+		args.stages[ShaderType::k_vertex_shader] = vertexPath;
+		args.stages[ShaderType::k_fragment_shader] = fragmentPath;
+		outShader = Load<Shader>(name, args);
+		return CMG_ERROR_SUCCESS;
 	}
 
 	Error ResourceManager::LoadComputeShader(resource_ptr<Shader>& outShader,
 		const Path& path)
 	{
-		Shader* shader = new Shader();
-		ResourceName name = path.ToString();
-		Error error = Shader::LoadComputeShader(shader,
-			ResolvePath(path), m_shaderIncludePaths);
-		if (error.Passed())
-			outShader = Add(name, shader);
-		return error.Uncheck();
+		ShaderLoadArgs args;
+		args.stages[ShaderType::k_compute_shader] = path;
+		outShader = Load<Shader>(path, args);
+		return CMG_ERROR_SUCCESS;
 	}
 
 	Error ResourceManager::LoadBuiltInFont(resource_ptr<Font>& outFont, BuiltInFonts builtInFont)
 	{
 		Font* font = nullptr;
 		Error error = Font::LoadBuiltInFont(font, builtInFont);
+		std::stringstream ss;
+		ss << ".cmg/built_in_fonts/" << (int) builtInFont;
+		String name = ss.str();
 		if (error.Passed())
-			outFont = Add(font);
+			outFont = Add(name, font);
 		return error.Uncheck();
 	}
 
@@ -70,7 +51,8 @@ namespace cmg {
 		const Path& path, uint32 size, uint32 charRegionBegin, uint32 charRegionEnd)
 	{
 		Font* font = nullptr;
-		ResourceName name = path.ToString();
+		String name = path.ToString();
+		CMG_LOG_INFO() << "Loading font: " << path;
 		Error error = Font::LoadFont(font, ResolvePath(path),
 			size, charRegionBegin, charRegionEnd);
 		if (error.Passed())
@@ -80,74 +62,22 @@ namespace cmg {
 		return error.Uncheck();
 	}
 
-	Error ResourceManager::LoadModel(resource_ptr<Model>& outModel, const Path& path)
-	{
-		Model* model = nullptr;
-		ResourceName name = path.ToString();
-		Error error = Model::Load(ResolvePath(path), model);
-		if (error.Passed())
-			outModel = Add(name, model);
-		else
-			delete model;
-		return error.Uncheck();
-	}
-
-	Error ResourceManager::LoadAnimationClip(
-		resource_ptr<AnimationClip>& outAnimation, const Path& path)
-	{
-		AnimationClip* clip = nullptr;
-		ResourceName name = path.ToString();
-		Error error = AnimationClip::Load(ResolvePath(path), clip);
-		if (error.Passed())
-			outAnimation = Add(name, clip);
-		else
-			delete clip;
-		return error.Uncheck();
-	}
-
 	void ResourceManager::AddShaderIncludePath(const Path& path)
 	{
 		m_shaderIncludePaths.push_back(path);
 	}
 
-	void ResourceManager::AddPath(const Path & path)
+	void ResourceManager::AddPath(const Path& path)
 	{
 		if (std::find(m_paths.begin(), m_paths.end(), path) == m_paths.end())
 			m_paths.push_back(path);
+		for (auto it : m_resourceLoaders)
+			it.second->AddPath(path);
 	}
 
-	Path ResourceManager::ResolvePath(const Path & path)
+	Path ResourceManager::ResolvePath(const Path& path)
 	{
 		return Path::ResolvePath(path, m_paths);
 	}
 
-	template<> ResourcePool<Model>* ResourceManager::GetResourcePool<Model>()
-	{
-		return &m_poolModels;
-	}
-
-	template<> ResourcePool<AnimationClip>* ResourceManager::GetResourcePool<AnimationClip>()
-	{
-		return &m_poolAnimationClips;
-	}
-
-	template<> ResourcePool<Texture>* ResourceManager::GetResourcePool<Texture>()
-	{
-		return &m_poolTextures;
-	}
-
-	template<> ResourcePool<Mesh>* ResourceManager::GetResourcePool<Mesh>()
-	{
-		return &m_poolMeshes;
-	}
-
-	template<> ResourcePool<Shader>* ResourceManager::GetResourcePool<Shader>()
-	{
-		return &m_poolShaders;
-	}
-
-	template<> ResourcePool<Font>* ResourceManager::GetResourcePool<Font>()
-	{
-		return &m_poolFonts;
-	}
 }

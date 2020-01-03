@@ -22,6 +22,12 @@ BufferObject::~BufferObject()
 	glDeleteBuffers(1, &m_glBuffer);
 }
 
+void BufferObject::Clear()
+{
+	m_size = 0;
+	BufferData(0, nullptr);
+}
+
 void BufferObject::BufferData(const BufferObject & source)
 {
 	BufferData(0, source.GetSize(), source, 0);
@@ -32,7 +38,7 @@ void BufferObject::BufferData(uint32 offset, const BufferObject & source)
 	BufferData(offset, source.GetSize(), source, 0);
 }
 
-void BufferObject::BufferData(uint32 offset, uint32 size, const BufferObject & source, uint32 sourceOffset)
+void BufferObject::BufferData(uint32 offset, uint32 size, const BufferObject& source, uint32 sourceOffset)
 {
 	if (offset + size > m_size)
 		BufferData(offset + size, nullptr);
@@ -41,7 +47,7 @@ void BufferObject::BufferData(uint32 offset, uint32 size, const BufferObject & s
 	glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, sourceOffset, offset, size);
 }
 
-void BufferObject::BufferData(uint32 size, const void * data)
+void BufferObject::BufferData(uint32 size, const void* data)
 {
 	m_size = size;
 	glBindBuffer(m_glTarget, m_glBuffer);

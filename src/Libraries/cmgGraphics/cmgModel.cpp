@@ -1,6 +1,8 @@
 #include "cmgModel.h"
 #include <cmgGraphics/importers/cmgSourceModelImporter.h>
 #include <cmgGraphics/importers/cmgObjModelImporter.h>
+#include <cmgCore/resource/cmgResourceLoader.h>
+#include <cmgGraphics/cmgTexture.h>
 
 
 struct CMGModelFile
@@ -94,9 +96,14 @@ void Model::SetMaterial(uint32 index, Material* material)
 	m_materials[index] = material;
 }
 
-Error Model::Load(const Path& path, Model*& outModel)
+void Model::SetSkeleton(const Skeleton& skeleton)
 {
-	String extension = string::ToLower(path.GetExtension());
+	m_skeleton = skeleton;
+}
+
+Error Model::LoadModel(const Path& path, Model*& outModel)
+{
+	String extension = cmg::string::ToLower(path.GetExtension());
 
 	if (extension == "smd")
 	{
@@ -105,8 +112,7 @@ Error Model::Load(const Path& path, Model*& outModel)
 	}
 	else if (extension == "obj")
 	{
-		ObjModelImporter importer;
-		return importer.ImportModel(path, outModel);
+		return CMG_ERROR_NOT_IMPLEMENTED;
 	}
 	else
 	{
@@ -115,20 +121,20 @@ Error Model::Load(const Path& path, Model*& outModel)
 		Error error = file.Open(FileAccess::READ, FileType::BINARY);
 		if (error.Failed())
 			return error.Uncheck();
-		return Decode(file, outModel);
+		return outModel->Decode(file);
 	}
 }
 
-Error Model::Save(const Path& path, const Model* model)
+Error Model::SaveModel(const Path& path, const Model* model)
 {
 	File file(path);
 	Error error = file.Open(FileAccess::WRITE, FileType::BINARY);
 	if (error.Failed())
 		return error.Uncheck();
-	return Encode(file, model);
+	return model->Encode(file);
 }
 
-Error Model::Decode(File& file, Model*& outModel)
+Error Model::Decode(File& file)
 {
 	CMGModelFile contents;
 
@@ -137,60 +143,101 @@ Error Model::Decode(File& file, Model*& outModel)
 	if (memcmp(contents.header.magic, CMGModelFile::MAGIC, 8) != 0)
 		return CMG_ERROR(CommonErrorTypes::k_file_corrupt);
 
-	outModel = new Model();
-	outModel->m_meshes.resize(contents.header.meshCount);
-	outModel->m_materials.resize(contents.header.meshCount);
+	m_meshes.resize(contents.header.meshCount);
+	m_materials.resize(contents.header.meshCount);
+	m_skeleton.ClearJoints();
 
 	// Skeleton
 	if (contents.header.hasSkeleton == 1)
 	{
-		Skeleton::Decode(file, outModel->m_skeleton);
+		Skeleton::Decode(file, m_skeleton);
 	}
 
 	// Read the mesh data
 	for (uint32 i = 0; i < contents.header.meshCount; i++)
 	{
-		Mesh*& mesh = outModel->m_meshes[i];
+		Mesh*& mesh = m_meshes[i];
 		mesh = nullptr;
-		Mesh::DecodeCMG(file, mesh);
+		mesh->DecodeCMG(file);
 	}
 
 	// Read the material data
 	for (uint32 i = 0; i < contents.header.meshCount; i++)
 	{
-		Material*& material = outModel->m_materials[i];
+		Material*& material = m_materials[i];
 		material = nullptr;
 	}
 
 	return CMG_ERROR_SUCCESS;
 }
 
-Error Model::Encode(File& file, const Model* model)
+Error Model::Encode(File& file) const
 {
 	CMGModelFile contents;
 
 	// Header
 	contents.header.version = 1;
-	contents.header.hasSkeleton = (model->HasSkeleton() ? 1 : 0);
-	contents.header.meshCount = (uint32) model->m_meshes.size();
+	contents.header.hasSkeleton = (HasSkeleton() ? 1 : 0);
+	contents.header.meshCount = (uint32) m_meshes.size();
 	file.Write(&contents.header, sizeof(contents.header));
 
 	// Skeleton
-	if (model->HasSkeleton())
+	if (HasSkeleton())
 	{
-		Skeleton::Encode(file, &model->m_skeleton);
+		Skeleton::Encode(file, &m_skeleton);
 	}
 
 	// Meshes
-	for (uint32 i = 0; i < model->m_meshes.size(); i++)
+	for (uint32 i = 0; i < m_meshes.size(); i++)
 	{
-		auto mesh = model->m_meshes[i];
-		Mesh::EncodeCMG(file, mesh);
+		auto mesh = m_meshes[i];
+		mesh->EncodeCMG(file);
 	}
-	for (uint32 i = 0; i < model->m_meshes.size(); i++)
+	for (uint32 i = 0; i < m_meshes.size(); i++)
 	{
-		auto material = model->m_materials[i];
+		auto material = m_materials[i];
 	}
+	return CMG_ERROR_SUCCESS;
+}
+
+Error Model::UnloadImpl()
+{
+	m_meshes.clear();
+	m_materials.clear();
+	m_skeleton.Unload();
+	return CMG_ERROR_SUCCESS;
+}
+
+Error Model::LoadImpl()
+{
+	Path path = GetResourceLoader()->GetResourcePath(GetResourceName());
+	if (!path.FileExists())
+		return CMG_ERROR_FILE_NOT_FOUND;
+
+	String extension = cmg::string::ToLower(path.GetExtension());
+	Model* model = this;
+
+	if (extension == "smd")
+	{
+		SourceModelImporter importer;
+		return importer.ImportModel(path, model);
+	}
+	else if (extension == "obj")
+	{
+		cmg::ObjModelImporter importer(
+			*GetResourceLoader()->GetResourceManager()->GetResourcePool<Texture>());
+		return importer.ImportModel(path, model);
+	}
+	else
+	{
+		// Load a CMG model file
+		File file(path);
+		Error error = file.Open(FileAccess::READ, FileType::BINARY);
+		if (error.Failed())
+			return error.Uncheck();
+		return Decode(file);
+	}
+
 	return CMG_ERROR_SUCCESS;
 }
 

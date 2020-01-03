@@ -1,7 +1,7 @@
 #ifndef _CMG_GRAPHICS_TEXTURE_H_
 #define _CMG_GRAPHICS_TEXTURE_H_
 
-#include <cmgCore/smart_ptr/cmg_smart_ptr.h>
+#include <cmgCore/resource/cmgResourceLoader.h>
 #include <cmgGraphics/types/cmgColor.h>
 #include <cmgGraphics/cmgTextureParams.h>
 #include <cmgGraphics/types/cmgImageFormat.h>
@@ -26,14 +26,19 @@ struct DecodedImageData
 // Supported image load formats:
 //   - PNG (non-interlaced)
 //   - JPEG
-//
-// Supported image save formats:
-//   - PNG
 //   - BMP
 //   - TGA
 //   - DDS
+//   - PSD
+//   - HDR
 //
-class Texture
+// Supported image save formats:
+//   - PNG
+//   - TGA
+//   - BMP
+//   - DDS
+//
+class Texture : public cmg::ResourceArgsImpl<Texture, const TextureParams&>
 {
 	friend class Font;
 	friend class RenderTarget;
@@ -49,7 +54,7 @@ public:
 	Texture(const TextureParams& params);
 	Texture(const DecodedImageData& data,
 		const TextureParams& params = TextureParams());
-	~Texture();
+	virtual ~Texture();
 
 	// Texture Parameters
 	const TextureParams& GetParams() const;
@@ -135,6 +140,11 @@ public:
 
 
 	inline unsigned int GetGLTextureID() const { return m_glTextureId; }
+
+protected:
+	virtual Error UnloadImpl() override;
+	virtual Error LoadImpl() override;
+	virtual Error LoadImpl(const TextureParams& params) override;
 
 private:
 	void DoBindTexture();

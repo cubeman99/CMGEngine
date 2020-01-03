@@ -9,7 +9,7 @@ TEST(String, Split)
 	Array<String> result;
 	uint32 count;
 
-	result = string::Split("hello world   how are u", " ");
+	result = cmg::string::Split("hello world   how are u", " ");
 	EXPECT_EQ(result.size(), 5);
 	EXPECT_EQ(result[0], "hello");
 	EXPECT_EQ(result[1], "world");
@@ -18,7 +18,7 @@ TEST(String, Split)
 	EXPECT_EQ(result[4], "u");
 
 	result.clear();
-	count = string::Split(result, "hello world   how are u", " ");
+	count = cmg::string::Split(result, "hello world   how are u", " ");
 	EXPECT_EQ(count, 5);
 	EXPECT_EQ(result.size(), 5);
 	EXPECT_EQ(result[0], "hello");
@@ -28,21 +28,21 @@ TEST(String, Split)
 	EXPECT_EQ(result[4], "u");
 
 	result.clear();
-	count = string::Split(result, "hello world   how are u", " ", 2);
+	count = cmg::string::Split(result, "hello world   how are u", " ", 2);
 	EXPECT_EQ(count, 2);
 	EXPECT_EQ(result.size(), 2);
 	EXPECT_EQ(result[0], "hello");
 	EXPECT_EQ(result[1], "world");
 
 	result.clear();
-	count = string::Split(result, "quick brown ", " ");
+	count = cmg::string::Split(result, "quick brown ", " ");
 	EXPECT_EQ(count, 2);
 	EXPECT_EQ(result.size(), 2);
 	EXPECT_EQ(result[0], "quick");
 	EXPECT_EQ(result[1], "brown");
 
 	result.clear();
-	count = string::Split(result, "milk, eggs, ham, bacon", ", ");
+	count = cmg::string::Split(result, "milk, eggs, ham, bacon", ", ");
 	EXPECT_EQ(count, 4);
 	EXPECT_EQ(result.size(), 4);
 	EXPECT_EQ(result[0], "milk");
@@ -54,36 +54,36 @@ TEST(String, Split)
 TEST(String, Trim)
 {
 	String str = "  word  ";
-	string::TrimIP(str);
+	cmg::string::TrimIP(str);
 	EXPECT_EQ(str, "word");
 	str = "  word  ";
-	string::TrimLeftIP(str);
+	cmg::string::TrimLeftIP(str);
 	EXPECT_EQ(str, "word  ");
 	str = "  word  ";
-	string::TrimRightIP(str);
+	cmg::string::TrimRightIP(str);
 	EXPECT_EQ(str, "  word");
 
-	EXPECT_EQ(string::Trim("hello"), "hello");
-	EXPECT_EQ(string::Trim(" hello"), "hello");
-	EXPECT_EQ(string::Trim("   hello     "), "hello");
-	EXPECT_EQ(string::Trim("    hello "), "hello");
+	EXPECT_EQ(cmg::string::Trim("hello"), "hello");
+	EXPECT_EQ(cmg::string::Trim(" hello"), "hello");
+	EXPECT_EQ(cmg::string::Trim("   hello     "), "hello");
+	EXPECT_EQ(cmg::string::Trim("    hello "), "hello");
 
-	EXPECT_EQ(string::TrimLeft("hello"), "hello");
-	EXPECT_EQ(string::TrimLeft(" hello"), "hello");
-	EXPECT_EQ(string::TrimLeft("   hello     "), "hello     ");
-	EXPECT_EQ(string::TrimLeft("    hello "), "hello ");
+	EXPECT_EQ(cmg::string::TrimLeft("hello"), "hello");
+	EXPECT_EQ(cmg::string::TrimLeft(" hello"), "hello");
+	EXPECT_EQ(cmg::string::TrimLeft("   hello     "), "hello     ");
+	EXPECT_EQ(cmg::string::TrimLeft("    hello "), "hello ");
 
-	EXPECT_EQ(string::TrimRight("hello"), "hello");
-	EXPECT_EQ(string::TrimRight(" hello"), " hello");
-	EXPECT_EQ(string::TrimRight("   hello     "), "   hello");
-	EXPECT_EQ(string::TrimRight("    hello "), "    hello");
+	EXPECT_EQ(cmg::string::TrimRight("hello"), "hello");
+	EXPECT_EQ(cmg::string::TrimRight(" hello"), " hello");
+	EXPECT_EQ(cmg::string::TrimRight("   hello     "), "   hello");
+	EXPECT_EQ(cmg::string::TrimRight("    hello "), "    hello");
 
-	EXPECT_EQ(string::ToLower("Hello"), "hello");
-	EXPECT_EQ(string::ToLower("HELLO"), "hello");
-	EXPECT_EQ(string::ToLower("hello"), "hello");
-	EXPECT_EQ(string::ToUpper("Hello"), "HELLO");
-	EXPECT_EQ(string::ToUpper("HELLO"), "HELLO");
-	EXPECT_EQ(string::ToUpper("hello"), "HELLO");
+	EXPECT_EQ(cmg::string::ToLower("Hello"), "hello");
+	EXPECT_EQ(cmg::string::ToLower("HELLO"), "hello");
+	EXPECT_EQ(cmg::string::ToLower("hello"), "hello");
+	EXPECT_EQ(cmg::string::ToUpper("Hello"), "HELLO");
+	EXPECT_EQ(cmg::string::ToUpper("HELLO"), "HELLO");
+	EXPECT_EQ(cmg::string::ToUpper("hello"), "HELLO");
 }
 
 

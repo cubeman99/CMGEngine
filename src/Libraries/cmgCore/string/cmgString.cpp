@@ -3,8 +3,7 @@
 #include <cctype>
 #include <locale>
 
-namespace string
-{
+namespace cmg { namespace string {
 	
 	size_t CharAsciiToWide(wchar_t* destination, const char* source, size_t size)
 	{
@@ -114,5 +113,6 @@ namespace string
 		ToUpperIP(str);
 		return str;
 	}
-};
+
+}}
 

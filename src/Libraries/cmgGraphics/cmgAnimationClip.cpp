@@ -44,9 +44,7 @@ AnimationClip::AnimationClip(Skeleton* skeleton) :
 
 AnimationClip::~AnimationClip()
 {
-	for (unsigned int i = 0; i < m_frames.size(); ++i)
-		delete m_frames[i];
-	m_frames.clear();
+	UnloadImpl();
 }
 
 
@@ -75,7 +73,7 @@ AnimationFrame* AnimationClip::AddFrame(float time)
 
 Error AnimationClip::Load(const Path& path, AnimationClip*& outAnimation)
 {
-	String extension = string::ToLower(path.GetExtension());
+	String extension = cmg::string::ToLower(path.GetExtension());
 
 	if (extension == "smd")
 	{
@@ -89,7 +87,7 @@ Error AnimationClip::Load(const Path& path, AnimationClip*& outAnimation)
 		Error error = file.Open(FileAccess::READ, FileType::BINARY);
 		if (error.Failed())
 			return error.Uncheck();
-		return Decode(file, outAnimation);
+		return outAnimation->Decode(file);
 	}
 }
 
@@ -99,16 +97,53 @@ Error AnimationClip::Save(const Path& path, const AnimationClip* animation)
 	Error error = file.Open(FileAccess::WRITE, FileType::BINARY);
 	if (error.Failed())
 		return error.Uncheck();
-	return Encode(file, animation);
+	return animation->Encode(file);
 }
 
-Error AnimationClip::Decode(File& file, AnimationClip*& outAnimation)
+Error AnimationClip::Decode(File& file)
 {
-	return Error();
+	return CMG_ERROR_NOT_IMPLEMENTED;
 }
 
-Error AnimationClip::Encode(File& file, const AnimationClip* animation)
+Error AnimationClip::Encode(File& file) const
 {
-	return Error();
+	return CMG_ERROR_NOT_IMPLEMENTED;
+}
+
+Error AnimationClip::UnloadImpl()
+{
+	m_skeleton.ClearJoints();
+	m_jointNames.clear();
+	m_jointIndices.clear();
+	m_duration = 0.0f;
+	m_loops = false;
+	for (unsigned int i = 0; i < m_frames.size(); ++i)
+		delete m_frames[i];
+	m_frames.clear();
+	return CMG_ERROR_SUCCESS;
+}
+
+Error AnimationClip::LoadImpl()
+{
+	Path path = GetResourceLoader()->GetResourcePath(GetResourceName());
+	if (!path.FileExists())
+		return CMG_ERROR_FILE_NOT_FOUND;
+	String extension = cmg::string::ToLower(path.GetExtension());
+	AnimationClip* animation = this;
+
+	if (extension == "smd")
+	{
+		SourceModelImporter importer;
+		return importer.ImportAnimation(path, animation);
+	}
+	else
+	{
+		// Load a CMG model file
+		File file(path);
+		Error error = file.Open(FileAccess::READ, FileType::BINARY);
+		if (error.Failed())
+			return error.Uncheck();
+		return Decode(file);
+	}
 }
 

@@ -23,6 +23,7 @@ struct CommonErrorTypes
 		k_file_read,
 		k_file_write,
 		k_invalid_handle,
+		k_not_implemented, // unimplemented function
 	};
 };
 	
@@ -63,8 +64,8 @@ private:
 	int m_line;
 	// Message text
 	String m_message;
+
 	mutable bool m_errorCheckedByUser;
-	//char padding[3];
 };
 
 #define CMG_ERROR_MSG(_errorCode_, _message)\
@@ -76,6 +77,10 @@ private:
   CMG_ERROR(CommonErrorTypes::k_success)
 #define CMG_ERROR_FAILURE \
   CMG_ERROR(CommonErrorTypes::k_failure)
+#define CMG_ERROR_NOT_IMPLEMENTED \
+  CMG_ERROR(CommonErrorTypes::k_failure)
+#define CMG_ERROR_FILE_NOT_FOUND \
+  CMG_ERROR(CommonErrorTypes::k_file_not_found)
 
 
 #endif // _CMG_CORE_ERROR_H_

@@ -30,7 +30,7 @@ struct CMGSkeletonFile
 };
 
 
-SkeletonJoint::SkeletonJoint(const Skeleton& skeleton, const String& name,
+SkeletonJoint::SkeletonJoint(const Skeleton* skeleton, const String& name,
 	int32 index, int32 parentIndex) :
 	m_skeleton(skeleton),
 	m_name(name),
@@ -41,12 +41,12 @@ SkeletonJoint::SkeletonJoint(const Skeleton& skeleton, const String& name,
 
 inline SkeletonJoint & SkeletonJoint::GetParent()
 {
-	return (SkeletonJoint&) m_skeleton.GetJoint(m_parentIndex);
+	return (SkeletonJoint&) m_skeleton->GetJoint(m_parentIndex);
 }
 
 inline const SkeletonJoint& SkeletonJoint::GetParent() const
 {
-	return m_skeleton.GetJoint(m_parentIndex);
+	return m_skeleton->GetJoint(m_parentIndex);
 }
 
 
@@ -57,7 +57,7 @@ Skeleton::Skeleton()
 SkeletonJoint& Skeleton::AddJoint(const String& name, int32 parentIndex)
 {
 	m_joints.push_back(SkeletonJoint(
-		*this, name, (int32) m_joints.size(), parentIndex));
+		this, name, (int32) m_joints.size(), parentIndex));
 	return m_joints.back();
 }
 
@@ -68,7 +68,17 @@ void Skeleton::ClearJoints()
 
 SkeletonJoint* Skeleton::FindJoint(const String& name)
 {
-	for (unsigned int i = 0; i < m_joints.size(); ++i)
+	for (uint32 i = 0; i < m_joints.size(); ++i)
+	{
+		if (m_joints[i].m_name == name)
+			return &m_joints[i];
+	}
+	return nullptr;
+}
+
+const SkeletonJoint* Skeleton::FindJoint(const String& name) const
+{
+	for (uint32 i = 0; i < m_joints.size(); ++i)
 	{
 		if (m_joints[i].m_name == name)
 			return &m_joints[i];
@@ -187,6 +197,17 @@ void Skeleton::CalcTransforms()
 			joint.m_globalInvMatrix = joint.m_localInvMatrix;
 		}
 	}
+}
+
+Error Skeleton::UnloadImpl()
+{
+	m_joints.clear();
+	return CMG_ERROR_SUCCESS;
+}
+
+Error Skeleton::LoadImpl()
+{
+	return CMG_ERROR_FAILURE;
 }
 
 

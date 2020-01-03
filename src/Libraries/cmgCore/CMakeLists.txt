@@ -28,6 +28,11 @@ set(CMG_CORE_SOURCE_FILES
 	error/cmgError.h
 	error/cmgError.cpp
 
+	resource/cmgResource.h
+	resource/cmgResource.cpp
+	resource/cmgResourceLoader.h
+	resource/cmgResourceLoader.cpp
+
 	io/cmgFile.h
 	io/cmgFile.cpp
 	io/cmgPath.h

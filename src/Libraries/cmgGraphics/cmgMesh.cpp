@@ -1,4 +1,6 @@
 #include "cmgMesh.h"
+#include <cmgGraphics/importers/cmgSourceModelImporter.h>
+#include <cmgGraphics/importers/cmgObjModelImporter.h>
 #include <sstream>
 
 
@@ -48,19 +50,6 @@ Mesh::~Mesh()
 // Static Methods
 //-----------------------------------------------------------------------------
 
-struct ObjFace
-{
-	int position;
-	int texCoord;
-	int normal;
-
-	ObjFace() :
-		position(-1),
-		texCoord(-1),
-		normal(-1)
-	{}
-};
-
 Error Mesh::Load(const Path& path, Mesh*& outMesh, MeshLoadOptions::value_type options)
 {
 	// Open the file to read the magic header ID
@@ -68,127 +57,17 @@ Error Mesh::Load(const Path& path, Mesh*& outMesh, MeshLoadOptions::value_type o
 	Error error = file.Open(FileAccess::READ, FileType::BINARY);
 	if (error.Failed())
 		return error.Uncheck();
-
 	char magic[9] = { 0 };
 	file.Read(magic, 8);
 	if (strncmp(magic, CMGMeshFile::MAGIC, 8) == 0)
 		return LoadCMG(path, outMesh);
-
+	file.Close();
 	return LoadOBJ(path, outMesh, options);
 }
 
 Error Mesh::LoadOBJ(const Path& path, Mesh*& outMesh, MeshLoadOptions::value_type options)
 {
-	String fileContents;
-	Error openError = File::OpenAndGetContents(path, fileContents);
-	if (openError.Failed())
-	{
-		openError.Uncheck();
-		return openError;
-	}
-
-	bool flipTriangles = (options & MeshLoadOptions::k_flip_triangles) != 0;
-
-	Array<Vector3f> positions;
-	Array<Vector3f> normals;
-	Array<Vector2f> texCoords;
-	Array<ObjFace> faces;
-	std::string line;
-	std::stringstream fileStream(fileContents);
-
-	while (std::getline(fileStream, line))
-	{
-		// Ignore empty lines or commented lines.
-		if (line.length() == 0 || line[0] == '#')
-			continue;
-
-		std::stringstream lineStream(line);
-		std::string lineType;
-		lineStream >> lineType;
-		
-		Vector3f v3;
-		Vector2f v2;
-
-		if (lineType == "v")
-		{
-			if (lineStream >> v3.x >> v3.y >> v3.z)
-				positions.push_back(v3);
-		}
-		else if (lineType == "vt")
-		{
-			if (lineStream >> v2.x >> v2.y)
-				texCoords.push_back(v2);
-		}
-		else if (lineType == "vn")
-		{
-			if (lineStream >> v3.x >> v3.y >> v3.z)
-				normals.push_back(v3);
-		}
-		else if (lineType == "f")
-		{
-			String token;
-			unsigned int faceVertex = 0;
-			unsigned int firstVertex = faces.size();
-			while (lineStream >> token)
-			{
-				ObjFace face;
-
-				// Parse indices.
-				unsigned int index = token.find_first_of('/', 0);
-				if (index > 0)
-					face.position = atoi(token.substr(0, index).c_str()) - 1;
-				unsigned int start = index + 1;
-				index = token.find_first_of('/', start);
-				if (index > start)
-					face.texCoord = atoi(token.substr(start, index - start).c_str()) - 1;
-				start = index + 1;
-				if (start < token.length())
-					face.normal = atoi(token.substr(start, token.length() - start).c_str()) - 1;
-				
-				// Triangulate faces with more than three vertices.
-				if (faceVertex >= 3)
-				{
-					faces.push_back(faces[firstVertex]);
-					faces.push_back(faces[faces.size() - 2]);
-				}
-
-				//cout << position << " / " << texCoord << " / " << normal << endl;
-
-				if (flipTriangles)
-					faces.insert(faces.begin(), face);
-				else
-					faces.push_back(face);
-				faceVertex++;
-			}
-		}
-		else if (lineType == "o")
-		{
-		}
-		else if (lineType == "s")
-		{
-		}
-	}
-
-	Array<VertexPosNorm> vertices;
-	Array<unsigned int> indices;
-
-	for (unsigned int i = 0; i < faces.size(); i++)
-	{
-		VertexPosNorm vertex;
-		vertex.position = positions[faces[i].position];
-		vertex.normal = normals[faces[i].normal];
-		vertex.normal.Normalize();
-		vertices.push_back(vertex);
-		indices.push_back(i);
-	}
-
-
-	Mesh* mesh = new Mesh();
-	mesh->GetVertexData()->BufferVertices((int) vertices.size(), vertices.data());
-	mesh->GetIndexData()->BufferIndices((int) indices.size(), indices.data());
-	mesh->SetIndices(0, indices.size());
-	outMesh = mesh;
-	return CMG_ERROR_SUCCESS;
+	return CMG_ERROR_NOT_IMPLEMENTED;
 }
 
 Error Mesh::LoadCMG(const Path& path, Mesh*& outMesh)
@@ -197,7 +76,7 @@ Error Mesh::LoadCMG(const Path& path, Mesh*& outMesh)
 	Error error = file.Open(FileAccess::READ, FileType::BINARY);
 	if (error.Failed())
 		return error.Uncheck();
-	return DecodeCMG(file, outMesh);
+	return outMesh->DecodeCMG(file);
 }
 
 Error Mesh::SaveCMG(const Path& path, const Mesh* mesh)
@@ -206,23 +85,21 @@ Error Mesh::SaveCMG(const Path& path, const Mesh* mesh)
 	Error error = file.Open(FileAccess::WRITE, FileType::BINARY);
 	if (error.Failed())
 		return error.Uncheck();
-	return EncodeCMG(file, mesh);
+	return mesh->EncodeCMG(file);
 }
 
-Error Mesh::EncodeCMG(File& file, const Mesh* mesh)
+Error Mesh::EncodeCMG(File& file) const
 {
 	CMGMeshFile contents;
-	auto vertexData = mesh->GetVertexData();
-	auto vertexBuffer = vertexData->GetVertexBuffer();
-	auto indexData = mesh->GetIndexData();
-	auto indexBuffer = indexData->GetIndexBuffer();
+	auto vertexBuffer = m_vertexData.GetVertexBuffer();
+	auto indexBuffer = m_indexData.GetIndexBuffer();
 
 	// Header
 	contents.header.version = 1;
-	contents.header.primitiveType = (uint32) mesh->GetPrimitiveType();
+	contents.header.primitiveType = (uint32) m_primitiveType;
 	contents.header.vertexAttributeFlags = (uint32) vertexBuffer->GetAttributeFlags();
-	contents.header.vertexCount = (uint32) vertexData->GetCount();
-	contents.header.indexCount = (uint32) indexData->GetCount();
+	contents.header.vertexCount = (uint32) m_vertexData.GetCount();
+	contents.header.indexCount = (uint32) m_indexData.GetCount();
 	contents.header.vertexSize = VertexBuffer::CalcVertexSize(vertexBuffer->GetAttributeFlags());
 	contents.header.indexSize = sizeof(uint32);
 	memset(contents.header.reserved, 0, sizeof(contents.header.reserved));
@@ -234,7 +111,7 @@ Error Mesh::EncodeCMG(File& file, const Mesh* mesh)
 	// Vertex data
 	contents.vertexData = (uint8*) vertexBuffer->MapBufferDataRead<uint8>();
 	file.Write(contents.vertexData +
-		(vertexData->GetStart() * contents.header.vertexSize),
+		(m_vertexData.GetStart() * contents.header.vertexSize),
 		contents.header.vertexCount * contents.header.vertexSize);
 	vertexBuffer->UnmapBufferData();
 	contents.vertexData = nullptr;
@@ -242,7 +119,7 @@ Error Mesh::EncodeCMG(File& file, const Mesh* mesh)
 	// Index data
 	contents.indexData = (uint8*) indexBuffer->MapBufferDataRead<uint8>();
 	file.Write(contents.indexData +
-		(indexData->GetStart() * contents.header.indexSize),
+		(m_indexData.GetStart() * contents.header.indexSize),
 		contents.header.indexCount * contents.header.indexSize);
 	indexBuffer->UnmapBufferData();
 	contents.indexData = nullptr;
@@ -250,7 +127,7 @@ Error Mesh::EncodeCMG(File& file, const Mesh* mesh)
 	return CMG_ERROR_SUCCESS;
 }
 
-Error Mesh::DecodeCMG(File& file, Mesh*& outMesh)
+Error Mesh::DecodeCMG(File& file)
 {
 	CMGMeshFile contents;
 
@@ -260,15 +137,13 @@ Error Mesh::DecodeCMG(File& file, Mesh*& outMesh)
 	if (memcmp(contents.header.magic, CMGMeshFile::MAGIC, 8) != 0)
 		return CMG_ERROR(CommonErrorTypes::k_file_corrupt);
 
-	outMesh = new Mesh();
-
 	// Read the vertex data
 	file.SeekFromStart(offset + contents.header.vertexStartOffset);
 	contents.vertexData = new uint8[
 		contents.header.vertexSize * contents.header.vertexCount];
 	file.Read(contents.vertexData, contents.header.vertexSize *
 		contents.header.vertexCount);
-	outMesh->GetVertexData()->BufferVertices(
+	m_vertexData.BufferVertices(
 		contents.header.vertexAttributeFlags, contents.header.vertexCount, 
 		contents.vertexData);
 	delete [] contents.vertexData;
@@ -279,9 +154,52 @@ Error Mesh::DecodeCMG(File& file, Mesh*& outMesh)
 		contents.header.indexSize * contents.header.indexCount];
 	file.Read(contents.indexData, contents.header.indexSize *
 		contents.header.indexCount);
-	outMesh->GetIndexData()->BufferIndices(
+	m_indexData.BufferIndices(
 		contents.header.indexCount, (uint32*) contents.indexData);
 	delete [] contents.indexData;
 
 	return CMG_ERROR_SUCCESS;
 }
+
+
+Error Mesh::UnloadImpl()
+{
+	m_jointNames.clear();
+	m_vertexData.Clear();
+	m_indexData.Clear();
+	return CMG_ERROR_SUCCESS;
+}
+
+Error Mesh::LoadImpl()
+{
+	m_jointNames.clear();
+	m_vertexData.Clear();
+	m_indexData.Clear();
+
+	Path path = GetResourceLoader()->GetResourcePath(GetResourceName());
+	if (!path.FileExists())
+		return CMG_ERROR_FILE_NOT_FOUND;
+
+	String extension = cmg::string::ToLower(path.GetExtension());
+
+	if (extension == "smd")
+	{
+		return CMG_ERROR_NOT_IMPLEMENTED;
+	}
+	else if (extension == "obj")
+	{
+		return CMG_ERROR_NOT_IMPLEMENTED;
+	}
+	else
+	{
+		// Load a CMG model file
+		File file(path);
+		Error error = file.Open(FileAccess::READ, FileType::BINARY);
+		if (error.Failed())
+			return error.Uncheck();
+		return DecodeCMG(file);
+	}
+
+	return CMG_ERROR_SUCCESS;
+}
+

@@ -1,8 +1,9 @@
 #ifndef _CMG_SHADER_H_
 #define _CMG_SHADER_H_
 
-#include <cmgGraphics/types/cmgColor.h>
 #include <cmgCore/cmg_core.h>
+#include <cmgCore/resource/cmgResourceLoader.h>
+#include <cmgGraphics/types/cmgColor.h>
 
 class Texture;
 class Sampler;
@@ -101,6 +102,8 @@ public:
 	inline bool IsEnabled() const { return m_isEnabled; }
 	inline uint32 GetGLShader() const { return m_glShaderName; }
 
+	void Unload();
+
 private:
 	ShaderStage();
 	~ShaderStage();
@@ -114,11 +117,15 @@ private:
 	ShaderType m_type;
 };
 
+struct ShaderLoadArgs
+{
+	Map<ShaderType, String> stages;
+};
 
 //-----------------------------------------------------------------------------
 // Shader
 //-----------------------------------------------------------------------------
-class Shader
+class Shader : public cmg::ResourceArgsImpl<Texture, const ShaderLoadArgs&>
 {
 public:
 	friend class OpenGLRenderDevice;
@@ -142,19 +149,25 @@ public:
 	Error CompileAndLink();
 	Error CompileAndLink(const Array<Path>& paths);
 	
-	template<typename T>
-	Error SetUniform(const String& name, T value)
-	{
-		return m_device->SetShaderUniform(this, name, value);
-	}
-
 	inline uint32 GetGLProgram() const { return m_glProgram; }
 
 	static Error LoadShader(Shader*& outShader, const Path& vertexPath, const Path& fragmentPath);
 	static Error LoadComputeShader(Shader*& outShader, const Path& path);
 	static Error LoadComputeShader(Shader*& outShader, const Path& path, const Array<Path>& paths);
 
+protected:
+	virtual Error UnloadImpl() override;
+	virtual Error LoadImpl() override;
+	virtual Error LoadImpl(const ShaderLoadArgs& args) override;
+
 private:
+	template<typename T>
+	Error SetUniform(const String& name, T value)
+	{
+		return m_device->SetShaderUniform(this, name, value);
+	}
+	void CreateGLProgram();
+	void DeleteGLProgram();
 	Error Compile(const Array<Path>& paths);
 	Error PreprocessStage(ShaderStage& stage, const Array<Path>& paths);
 	Error CompileStage(ShaderStage& stage);

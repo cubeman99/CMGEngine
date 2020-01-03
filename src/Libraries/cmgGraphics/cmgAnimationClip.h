@@ -54,7 +54,7 @@ private:
 
 
 
-class AnimationClip
+class AnimationClip : public cmg::ResourceImpl<AnimationClip>
 {
 public:
 	using sptr = cmg::shared_ptr<AnimationClip>;
@@ -78,8 +78,12 @@ public:
 
 	static Error Load(const Path& path, AnimationClip*& outAnimation);
 	static Error Save(const Path& path, const AnimationClip* animation);
-	static Error Decode(File& file, AnimationClip*& outAnimation);
-	static Error Encode(File& file, const AnimationClip* animation);
+	Error Decode(File& file);
+	Error Encode(File& file) const;
+
+protected:
+	virtual Error UnloadImpl();
+	virtual Error LoadImpl();
 
 private:
 	Skeleton m_skeleton;

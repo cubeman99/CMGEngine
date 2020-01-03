@@ -1,7 +1,7 @@
 #include "cmgLogging.h"
+#include <iostream>
 
-
-const LogLevel LogUtility::DEFAULT_LOG_LEVEL = LogLevel::WARN;
+const LogLevel LogUtility::DEFAULT_LOG_LEVEL = LogLevel::ALL;
 
 
 LogUtility globalLogUtility;
@@ -22,12 +22,14 @@ LogUtility::LogUtility() :
 
 void LogUtility::HandleLogMessage(const LogMessage& message)
 {
-	if (m_callback != nullptr && message.level <= m_level)
+	if (message.level <= m_level)
 	{
-		// TODO: format the message.
+		// TODO: format the message
+		std::cout << message.text << std::endl;
 
-		// Invoke the callback.
-		m_callback(message);
+		// Invoke the callback
+		if (m_callback != nullptr)
+			m_callback(message);
 	}
 }
 
@@ -37,7 +39,8 @@ void LogUtility::HandleLogMessage(const LogMessage& message)
 // LogStream
 //-----------------------------------------------------------------------------
 
-LogStream::LogStream(LogLevel level, const std::string& fileName, int lineNumber, LogUtility* logUtility) :
+LogStream::LogStream(LogLevel level, const std::string& fileName,
+	int lineNumber, LogUtility* logUtility) :
 	m_level(level),
 	m_fileName(fileName),
 	m_lineNumber(lineNumber),

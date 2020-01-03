@@ -2,9 +2,9 @@
 #define _CMG_VERTEX_DATA_H_
 
 #include <cmgGraphics/cmgOpenGLIncludes.h>
-#include <cmgCore/cmg_core.h>
 #include <cmgGraphics/types/cmgVertexTypes.h>
 #include <cmgGraphics/cmgBufferObject.h>
+#include <cmgCore/containers/cmgArray.h>
 
 
 //-----------------------------------------------------------------------------
@@ -31,11 +31,11 @@ public:
 	void SetVertices(int numVertices, const Vector3f* vertices);
 	template <class T>
 	void SetVertices(int numVertices, const T* vertices);
-
 	void BufferVertices(
 		uint32 numVertices,
 		const VertexAttributeInfo* attribs,
 		uint32 numAttribs);
+	virtual void Clear() override;
 
 	static uint32 CalcVertexSize(uint32 attribFlags);
 
@@ -68,7 +68,8 @@ public:
 	
 	// Mutators
 	void SetIndices(uint32 count, const uint32* indices);
-	
+	virtual void Clear() override;
+
 private:
 	uint32 m_numIndices;
 };
@@ -83,6 +84,8 @@ public:
 	VertexData();
 	VertexData(uint32 start, uint32 count);
 	~VertexData();
+
+	void Clear();
 
 	inline void BufferVertices(uint32 attribFlags, uint32 count, const uint8* vertices)
 	{
@@ -170,6 +173,7 @@ public:
 	void BufferIndices(const Array<uint32>& indices);		
 	void BufferIndices(uint32 numIndices, const uint32* indices);
 	void SetIndexRange(uint32 start, uint32 count);
+	void Clear();
 
 
 public:

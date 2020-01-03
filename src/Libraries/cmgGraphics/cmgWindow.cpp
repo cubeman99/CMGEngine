@@ -212,7 +212,7 @@ void Window::Create(const GraphicsMode& graphicsMode, const WindowSettings& winS
 	// Convert the title string to a wide-character string.
 	const size_t wTitleSize = 256;
 	wchar_t wTitle[wTitleSize];// = L"Title"; // TODO
-	size_t retIndex = string::CharAsciiToWide(wTitle, winSettings.GetTitle().c_str(), wTitleSize);
+	size_t retIndex = cmg::string::CharAsciiToWide(wTitle, winSettings.GetTitle().c_str(), wTitleSize);
 	wTitle[retIndex] = L'\0';
 
 	// Get the appropriate window styles from the window flags.

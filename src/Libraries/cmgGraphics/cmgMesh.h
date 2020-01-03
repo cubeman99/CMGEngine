@@ -1,7 +1,7 @@
 #ifndef _CMG_GRAPHICS_MESH_H_
 #define _CMG_GRAPHICS_MESH_H_
 
-#include <cmgCore/smart_ptr/cmg_smart_ptr.h>
+#include <cmgCore/resource/cmgResourceLoader.h>
 #include <cmgGraphics/cmgVertexData.h>
 
 
@@ -17,7 +17,7 @@ struct MeshLoadOptions
 };
 
 
-class Mesh
+class Mesh : public cmg::ResourceImpl<Mesh>
 {
 public:
 	using sptr = cmg::shared_ptr<Mesh>;
@@ -48,14 +48,20 @@ public:
 	static Error LoadOBJ(const Path& path, Mesh*& outMesh, MeshLoadOptions::value_type options = MeshLoadOptions::k_none);
 	static Error LoadCMG(const Path& path, Mesh*& outMesh);
 	static Error SaveCMG(const Path& path, const Mesh* mesh);
-	static Error DecodeCMG(File& file, Mesh*& outMesh);
-	static Error EncodeCMG(File& file, const Mesh* mesh);
+	Error DecodeCMG(File& file);
+	Error EncodeCMG(File& file) const;
+
+	const Array<String>& GetJointNames() const { return m_jointNames; }
+	void SetJointNames(const Array<String>& jointNames) { m_jointNames = jointNames; }
+
+protected:
+	virtual Error UnloadImpl();
+	virtual Error LoadImpl();
 
 private:
 	// Prevent copying
 	Mesh(Mesh& other) {}
 	void operator=(Mesh& other) {}
-
 
 private:
 	//Bounds m_bounds; // The axis-aligned bounding box of the submesh's vertices,
@@ -64,6 +70,8 @@ private:
 
 	VertexData m_vertexData;
 	IndexData m_indexData;
+
+	Array<String> m_jointNames;
 
 	VertexPrimitiveType::value_type m_primitiveType; // How the index buffer is organized into primitives.
 };

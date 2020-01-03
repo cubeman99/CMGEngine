@@ -1,5 +1,6 @@
 #include "cmgVertexData.h"
 #include <cmgGraphics/cmgOpenGLIncludes.h>
+#include <cmgCore/cmgAssert.h>
 
 
 //-----------------------------------------------------------------------------
@@ -198,6 +199,13 @@ void VertexBuffer::BufferVertices(
 	m_numVertices = numVertices;
 }
 
+void VertexBuffer::Clear()
+{
+	BufferObject::Clear();
+	m_numVertices = 0;
+	m_bufferSize = 0;
+}
+
 uint32 VertexBuffer::CalcVertexSize(uint32 attribFlags)
 {
 	uint32 size = 0;
@@ -234,6 +242,12 @@ void IndexBuffer::SetIndices(uint32 count, const uint32* indices)
 	BufferData(count, indices);
 }
 
+void IndexBuffer::Clear()
+{
+	BufferObject::Clear();
+	m_numIndices = 0;
+}
+
 uint32 IndexBuffer::GetIndexCount() const
 {
 	return m_numIndices;
@@ -258,6 +272,13 @@ VertexData::VertexData(uint32 start, uint32 count) :
 
 VertexData::~VertexData()
 {
+}
+
+void VertexData::Clear()
+{
+	m_vertexBuffer.Clear();
+	m_vertexCount = 0;
+	m_vertexStart = 0;
 }
 
 
@@ -297,5 +318,12 @@ void IndexData::SetIndexRange(uint32 start, uint32 count)
 {
 	m_indexStart = start;
 	m_indexCount = count;
+}
+
+void IndexData::Clear()
+{
+	m_indexBuffer.Clear();
+	m_indexCount = 0;
+	m_indexStart = 0;
 }
 

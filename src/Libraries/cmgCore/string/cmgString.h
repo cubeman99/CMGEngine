@@ -7,8 +7,8 @@
 using String = std::string;
 
 	
-namespace string
-{
+namespace cmg { namespace string {
+
 	size_t CharAsciiToWide(wchar_t* destination, const char* source, size_t size);
 
 	// Split string on delimiter into a given container
@@ -40,7 +40,8 @@ namespace string
 	String ToLower(String str);
 	void ToUpperIP(String& str);
 	String ToUpper(String str);
-};
+
+}}
 
 /*class String : public std::string
 {

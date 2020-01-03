@@ -61,7 +61,7 @@ struct UniformValue
 };
 
 
-class Material
+class Material : public cmg::ResourceImpl<Material>
 {
 public:
 	using sptr = cmg::shared_ptr<Material>;

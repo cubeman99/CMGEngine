@@ -31,11 +31,13 @@ enum class FileType
 class File
 {
 public:
+	File();
 	File(const Path& path);
 	File(const File& other);
 	~File();
 
 	// Open & close
+	Error Open(const Path& path, FileAccess access, FileType type);
 	Error Open(FileAccess access, FileType type);
 	bool IsOpen() const;
 	Error Close();

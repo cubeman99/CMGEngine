@@ -10,7 +10,7 @@ class SkeletonJoint
 	friend class Skeleton;
 
 public:
-	SkeletonJoint(const Skeleton& skeleton, const String& name, int32 index, int32 parentIndex = -1);
+	SkeletonJoint(const Skeleton* skeleton, const String& name, int32 index, int32 parentIndex = -1);
 
 	inline const String& GetName() const { return m_name; }
 	inline int32 GetIndex() const { return m_index; }
@@ -18,7 +18,7 @@ public:
 	inline int32 GetParentIndex() const { return m_parentIndex; }
 	inline SkeletonJoint& GetParent();
 	inline const SkeletonJoint& GetParent() const;
-	inline const Skeleton& GetSkeleton() const { return m_skeleton; }
+	inline const Skeleton& GetSkeleton() const { return *m_skeleton; }
 	inline const Transform3f& GetLocalTransform() const { return m_transform; }
 	inline const Vector3f& GetLocalPosition() const { return m_transform.position; }
 	inline const Quaternion& GetLocalRotation() const { return m_transform.rotation; }
@@ -36,7 +36,7 @@ public:
 	inline void SetInverseBindTransform(const Matrix4f& transform) { m_globalInvMatrix = transform; }
 
 private:
-	const Skeleton& m_skeleton;
+	const Skeleton* m_skeleton;
 	String m_name;
 	int32 m_index = 0;
 	int32 m_parentIndex = -1;
@@ -50,7 +50,7 @@ private:
 };
 
 
-class Skeleton
+class Skeleton : public cmg::ResourceImpl<Skeleton>
 {
 public:
 	Skeleton();
@@ -61,6 +61,7 @@ public:
 	Array<SkeletonJoint>& GetJoints() { return m_joints; }
 	const Array<SkeletonJoint>& GetJoints() const { return m_joints; }
 	SkeletonJoint* FindJoint(const String& name);
+	const SkeletonJoint* FindJoint(const String& name) const;
 
 	SkeletonJoint& AddJoint(const String& name, int32 parentIndex = -1);
 	void ClearJoints();
@@ -71,6 +72,10 @@ public:
 	static Error Encode(File& file, const Skeleton* skeleton);
 
 	void CalcTransforms();
+
+protected:
+	virtual Error UnloadImpl();
+	virtual Error LoadImpl();
 
 private:
 

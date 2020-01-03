@@ -2,8 +2,10 @@
 #include <sstream>
 #include <fstream>
 
+namespace cmg {
 
-ObjModelImporter::ObjModelImporter()
+ObjModelImporter::ObjModelImporter(ResourceLoader<Texture>& textureLoader) :
+	m_textureLoader(textureLoader)
 {
 
 }
@@ -34,7 +36,7 @@ ObjFaceVertex ObjModelImporter::ParseFaceVertex(const String& str)
 	return faceVertex;
 }
 
-void ObjModelImporter::AddVertex(const ObjFaceVertex& faceVertex)
+void ObjModelImporter::AddVertex(ObjMesh* mesh, const ObjFaceVertex& faceVertex)
 {
 	// Append a new vertex
 	VertexPosTexNorm vertex;
@@ -50,18 +52,18 @@ void ObjModelImporter::AddVertex(const ObjFaceVertex& faceVertex)
 		vertex.normal = m_normals[faceVertex.normal - 1];
 	else if (faceVertex.normal < 0)
 		vertex.normal = m_normals[m_normals.size() - faceVertex.normal];
-	m_vertices.push_back(vertex);
-	m_indices.push_back((uint32) m_indices.size());
+	mesh->indices.push_back((uint32) mesh->vertices.size());
+	mesh->vertices.push_back(vertex);
 }
 
-void ObjModelImporter::CalcNormals()
+void ObjModelImporter::CalcNormals(ObjMesh* objMesh)
 {
 	Vector3f normal;
-	for (uint32 i = 0; i < m_vertices.size() - 2; i += 3)
+	for (uint32 i = 0; i < objMesh->vertices.size() - 2; i += 3)
 	{
-		VertexPosTexNorm& a = m_vertices[i];
-		VertexPosTexNorm& b = m_vertices[i + 1];
-		VertexPosTexNorm& c = m_vertices[i + 2];
+		VertexPosTexNorm& a = objMesh->vertices[i];
+		VertexPosTexNorm& b = objMesh->vertices[i + 1];
+		VertexPosTexNorm& c = objMesh->vertices[i + 2];
 		normal = Vector3f::Cross(c.position - b.position,
 			a.position - b.position);
 		normal.Normalize();
@@ -71,29 +73,40 @@ void ObjModelImporter::CalcNormals()
 	}
 }
 
-void ObjModelImporter::BeginNewObject()
+ObjMesh* ObjModelImporter::BeginNewMesh(const String& name)
 {
-	m_vertices.clear();
-	m_indices.clear();
+	ObjMesh* mesh = new ObjMesh();
+	mesh->material = name;
+	m_objModel.meshes[name] = mesh;
+	return mesh;
 }
 
-void ObjModelImporter::CompleteObject()
+void ObjModelImporter::CompleteMesh(ObjMesh* objMesh)
 {
-	if (m_vertices.empty())
+	if (objMesh == nullptr || objMesh->vertices.empty())
 		return;
 
-	CalcNormals();
+	CalcNormals(objMesh);
 
 	Mesh* mesh = new Mesh();
-	mesh->GetVertexData()->BufferVertices(m_vertices);
-	mesh->GetIndexData()->BufferIndices(m_indices);
+	mesh->GetVertexData()->BufferVertices(objMesh->vertices);
+	mesh->GetIndexData()->BufferIndices(objMesh->indices);
+
+	Material* material = nullptr;
+	auto it = m_objModel.materials.find(objMesh->material);
+	if (it != m_objModel.materials.end())
+	{
+		ObjMaterial* objMaterial = it->second;
+		material = new Material();
+		material->SetUniform("u_color",
+			Vector4f(objMaterial->diffuseColor, 1.0f));
+		material->SetUniform("s_diffuse", objMaterial->diffuseMap);
+	}
 
 	uint32 meshIndex = m_model->GetMeshCount();
 	m_model->SetMeshCount(meshIndex + 1);
 	m_model->SetMesh(meshIndex, mesh);
-	
-	m_vertices.clear();
-	m_indices.clear();
+	m_model->SetMaterial(meshIndex, material);
 }
 
 
@@ -105,19 +118,21 @@ Error ObjModelImporter::ImportModel(const Path& path, Model*& outModel)
 	if (!file.is_open())
 		return CMG_ERROR_FAILURE;
 
-	outModel = new Model();
+	if (outModel == nullptr)
+		outModel = new Model();
 	m_model = outModel;
 
-	m_positions.clear();
-	m_texCoords.clear();
-	m_normals.clear();
-	BeginNewObject();
+	m_objModel.materials.clear();
+	m_objModel.meshes.clear();
+	//BeginNewObject();
 
 	Vector3f v;
 	ObjFace face;
-	int objectIndex = 0;
 	String line;
 	String token;
+	ObjMaterial* currentMaterial = nullptr;
+	ObjMesh* currentMesh = nullptr;
+	String value;
 
 	while (std::getline(file, line))
 	{
@@ -129,17 +144,11 @@ Error ObjModelImporter::ImportModel(const Path& path, Model*& outModel)
 		token = "";
 		ss >> token;
 
-		if (token == "g")
+		if (token == "mtllib")
 		{
-			CompleteObject();
-			BeginNewObject();
-			objectIndex++;
-		}
-		else if (token == "usemtl")
-		{
-		}
-		else if (token == "mtllib")
-		{
+			String mtllibPath;
+			ss >> mtllibPath;
+			LoadMaterials(path.GetParent() / mtllibPath);
 		}
 		else if (token == "v")
 		{
@@ -154,7 +163,21 @@ Error ObjModelImporter::ImportModel(const Path& path, Model*& outModel)
 		else if (token == "vt")
 		{
 			ss >> v.x; ss >> v.y;
+			if (v.x < 0.0f)
+				v.x = -v.x;
+			if (v.y < 0.0f)
+				v.y = -v.y;
 			m_texCoords.push_back(v.xy);
+		}
+		else if (token == "g")
+		{
+		}
+		else if (token == "usemtl")
+		{
+			ss >> value;
+			CompleteMesh(currentMesh);
+			currentMesh = BeginNewMesh(value);
+			currentMaterial = m_objModel.materials.at(value);
 		}
 		else if (token == "f")
 		{
@@ -163,21 +186,127 @@ Error ObjModelImporter::ImportModel(const Path& path, Model*& outModel)
 			{
 				if (index >= 3)
 				{
-					AddVertex(face.vertices[0]);
-					AddVertex(face.vertices[2]);
+					AddVertex(currentMesh, face.vertices[0]);
+					AddVertex(currentMesh, face.vertices[2]);
 				}
 
 				ObjFaceVertex faceVertex = ParseFaceVertex(token);
 				face.vertices[Math::Min(index, 2u)] = faceVertex;
-				AddVertex(faceVertex);
+				AddVertex(currentMesh, faceVertex);
 
 				index++;
 			}
 		}
 	}
 
-	CompleteObject();
+	CompleteMesh(currentMesh);
 	return CMG_ERROR_SUCCESS;
+}
+
+// Load an OBJ model's list of materials from an MTL file.
+Error ObjModelImporter::LoadMaterials(const Path& mtlFilePath)
+{
+	// Open the file
+	std::ifstream file;
+	file.open(mtlFilePath.ToString());
+	if (!file.is_open())
+		return CMG_ERROR_FAILURE;
+
+	Vector3f v;
+	String line;
+	String token;
+	String value;
+	ObjMaterial* material;
+
+	while (std::getline(file, line))
+	{
+		// Ignore comments
+		if (line[0] == '#')
+			continue;
+
+		std::stringstream ss(line);
+		token = "";
+		ss >> token;
+
+		// Parse the tokens
+		if (token == "newmtl")
+		{
+			String name;
+			ss >> name;
+			material = GetOrCreateMaterial(name);
+		}
+		else if (token == "Kd")
+		{
+			ss >> v.x; ss >> v.y; ss >> v.z;
+			material->diffuseColor = v;
+		}
+		else if (token == "Ka")
+		{
+			ss >> v.x; ss >> v.y; ss >> v.z;
+			material->ambientColor = v;
+		}
+		else if (token == "Ks")
+		{
+			ss >> v.x; ss >> v.y; ss >> v.z;
+			material->specularColor = v;
+		}
+		else if (token == "illum")
+		{
+			ss >> material->illuminationModel;
+		}
+		else if (token == "Ns")
+		{
+			ss >> material->specularExponent;
+		}
+		else if (token == "d")
+		{
+			ss >> material->opacity;
+		}
+		else if (token == "Tr")
+		{
+			ss >> material->opacity;
+			material->opacity = 1.0f - material->opacity;
+		}
+		else if (token == "map_Kd")
+		{
+			ss >> value;
+			Path texturePath = mtlFilePath.GetParent() / value;
+			material->diffuseMap = m_textureLoader.Load(texturePath);
+		}
+	}
+	
+	return CMG_ERROR_SUCCESS;
+}
+
+ObjMaterial* ObjModelImporter::GetOrCreateMaterial(const String& name)
+{
+	// First, search the for the material
+	auto it = m_objModel.materials.find(name);
+	if (it == m_objModel.materials.end())
+	{
+		// Initialize a new material
+		ObjMaterial* material = new ObjMaterial();
+		material->name = name;
+		material->opacity = 1.0f;
+		material->diffuseColor = Vector3f(1.0f, 1.0f, 1.0f);
+		material->ambientColor = Vector3f(0.0f);
+		material->specularColor = Vector3f(0.0f);
+		material->specularExponent = 1.0f;
+		material->illuminationModel = 2;
+		m_objModel.materials[name] = material;
+	}
+	return m_objModel.materials.at(name);
+}
+
+ObjMesh* ObjModelImporter::GetOrCreateMesh(const String& name)
+{
+	auto it = m_objModel.meshes.find(name);
+	if (it == m_objModel.meshes.end())
+	{
+		m_objModel.meshes[name] = new ObjMesh();
+		m_objModel.meshes[name]->material = name;
+	}
+	return m_objModel.meshes.at(name);
 }
 
 //
@@ -807,3 +936,5 @@ Error ObjModelImporter::ImportModel(const Path& path, Model*& outModel)
 //	fclose(file);
 //	return 1;
 //}
+
+}

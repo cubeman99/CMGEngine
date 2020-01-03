@@ -61,10 +61,6 @@ enum class VertexAttrib
 	k_bone_indices	= 4,
 	k_bone_weights	= 5,
 	//k_tbn_matrix	= 6,
-	k_unused1,
-	k_unused2,
-	k_unused3,
-
 	k_count,
 };
 

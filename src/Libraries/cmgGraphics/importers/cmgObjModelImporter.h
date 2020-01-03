@@ -4,6 +4,7 @@
 #include <cmgCore/cmg_core.h>
 #include <cmgGraphics/cmgModel.h>
 
+namespace cmg {
 
 // Normal calculation mode
 enum class ObjMeshNormalMode
@@ -62,14 +63,14 @@ struct ObjMaterial
 	float opacity;					// d/Tr
 	uint32 illuminationModel;		// illum
 
-	String ambientMap;				// map_Ka
-	String diffuseMap;				// map_Kd
-	String specularMap;				// map_Ks
-	String specularHighlightMap;	// map_Ns
-	String alphaMap;				// map_d
-	String bumpMap;					// map_bump/bump
-	String displacementMap;			// disp
-	String stencilDecalMap;			// decal
+	Texture::sptr ambientMap = nullptr;				// map_Ka
+	Texture::sptr diffuseMap = nullptr;				// map_Kd
+	Texture::sptr specularMap = nullptr;			// map_Ks
+	Texture::sptr specularHighlightMap = nullptr;	// map_Ns
+	Texture::sptr alphaMap = nullptr;				// map_d
+	Texture::sptr bumpMap = nullptr;				// map_bump/bump
+	Texture::sptr displacementMap = nullptr;		// disp
+	Texture::sptr stencilDecalMap = nullptr;		// decal
 };
 
 union ObjFaceVertex
@@ -99,11 +100,10 @@ union ObjFace
 struct ObjMesh
 {
 	String material;
-	Array<Vector3f> positions;
-	Array<Vector2f> texCoords;
-	Array<Vector3f> normals;
-	Array<ObjFace> faces;
 	//BoundingBox boundingBox;
+	Array<ObjFace> faces;
+	Array<VertexPosTexNorm> vertices;
+	Array<uint32> indices;
 };
 
 
@@ -115,8 +115,8 @@ struct ObjModel
 	String name;
 	String objPath;
 	String mtlPath;
-	Array<ObjMesh> meshes;
-	Map<String, ObjMaterial> materials;
+	Map<String, ObjMesh*> meshes;
+	Map<String, ObjMaterial*> materials;
 };
 
 
@@ -124,24 +124,26 @@ struct ObjModel
 class ObjModelImporter
 {
 public:
-	ObjModelImporter();
+	ObjModelImporter(ResourceLoader<Texture>& textureLoader);
 
 	Error ImportModel(const Path& path, Model*& outModel);
 
-
 private:
-	void BeginNewObject();
-	void CompleteObject();
+	ObjMesh* BeginNewMesh(const String& name);
+	void CompleteMesh(ObjMesh* mesh);
 	ObjFaceVertex ParseFaceVertex(const String& token);
-	void AddVertex(const ObjFaceVertex& faceVertex);
-	void CalcNormals();
+	void AddVertex(ObjMesh* mesh, const ObjFaceVertex& faceVertex);
+	void CalcNormals(ObjMesh* mesh);
+	Error LoadMaterials(const Path& mtlFileName);
+	ObjMaterial* GetOrCreateMaterial(const String& name);
+	ObjMesh* GetOrCreateMesh(const String& name);
 
+	ResourceLoader<Texture>& m_textureLoader;
+	ObjModel m_objModel;
 	Model* m_model;
 	Array<Vector3f> m_positions;
 	Array<Vector2f> m_texCoords;
 	Array<Vector3f> m_normals;
-	Array<VertexPosTexNorm> m_vertices;
-	Array<uint32> m_indices;
 };
 
 
@@ -175,5 +177,7 @@ int objModelSaveBinary(const ObjModel* model, const char* fileName);
 int objModelLoadBinary(ObjModel* model, const char* fileName);
 
 */
+
+};
 
 #endif // _CMG_GRAPHICS_OBJ_MODEL_IMPORTER_H_

@@ -625,7 +625,7 @@ Texture* Texture::LoadTexture(const std::string& fileName, const TextureParams& 
 
 Error Texture::LoadTexture(Texture*& outTexture, const Path& path, const TextureParams& params)
 {
-	/* load an image file directly as a new OpenGL texture */
+	// Load an image file directly as a new OpenGL texture
 	GLuint glId = SOIL_load_OGL_texture(
 		path.c_str(), SOIL_LOAD_AUTO,
 		SOIL_CREATE_NEW_ID, SOIL_FLAG_COMPRESS_TO_DXT);
@@ -689,7 +689,7 @@ Error Texture::SaveTexture(const Texture* texture, const Path& path,
 	ImageEncodingFormat format = ImageEncodingFormat::PNG;
 
 	// Determine the image format by its extension
-	String extension = string::ToLower(path.GetExtension());
+	String extension = cmg::string::ToLower(path.GetExtension());
 	if (extension == "png")
 		format = ImageEncodingFormat::PNG;
 	else if (extension == "jpg" || extension == "jpeg")
@@ -755,6 +755,52 @@ Error Texture::SaveTexture(const Texture* texture, const Path& path,
 		// Unsupported/unknown format!
 		return CMG_ERROR_FAILURE;
 	}
+	return CMG_ERROR_SUCCESS;
+}
+
+
+//-----------------------------------------------------------------------------
+// Resource loading
+//-----------------------------------------------------------------------------
+
+Error Texture::LoadImpl()
+{
+	return LoadImpl(TextureParams());
+}
+
+Error Texture::LoadImpl(const TextureParams& params)
+{
+	// Open the file and read its contents
+	File file;
+	Error error = GetResourceLoader()->OpenResourceFile(
+		file, GetResourceName());
+	if (error.Failed())
+		return error.Uncheck();
+	Array<uint8> data;
+	error = file.GetContents(data);
+	if (error.Failed())
+		return error.Uncheck();
+
+	// Decode the image from memory directly into an OpenGL texture
+	m_glTextureId = SOIL_load_OGL_texture_from_memory(
+		data.data(), data.size(), SOIL_LOAD_AUTO,
+		SOIL_CREATE_NEW_ID, SOIL_FLAG_COMPRESS_TO_DXT);
+	if (m_glTextureId == 0)
+		return CMG_ERROR(CommonErrorTypes::k_corrupt_data);
+
+	// Set the texture params
+	TextureParams texParams = params;
+	texParams.SetTarget(TextureTarget::TEXTURE_2D);
+	SetParams(texParams);
+
+	GenerateMipMaps();
+	return CMG_ERROR_SUCCESS;
+}
+
+Error Texture::UnloadImpl()
+{
+	glDeleteTextures(1, &m_glTextureId);
+	m_glTextureId = 0;
 	return CMG_ERROR_SUCCESS;
 }
 

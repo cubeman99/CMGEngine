@@ -6,6 +6,12 @@
 // Constructors & Destructor
 //-----------------------------------------------------------------------------
 	
+File::File() :
+	m_path(""),
+	m_file(nullptr)
+{
+}
+
 File::File(const Path& path) :
 	m_path(path),
 	m_file(nullptr)
@@ -28,6 +34,12 @@ File::~File()
 // Open & Close
 //-----------------------------------------------------------------------------
 	
+Error File::Open(const Path& path, FileAccess access, FileType type)
+{
+	m_path = path;
+	return Open(access, type);
+}
+
 Error File::Open(FileAccess access, FileType type)
 {
 	if (type != FileType::BINARY && type != FileType::TEXT)

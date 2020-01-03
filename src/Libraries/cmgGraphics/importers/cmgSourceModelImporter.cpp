@@ -29,7 +29,8 @@ Error SourceModelImporter::ImportModel(const Path& path, Model *& outModel)
 	ReadSkeleton(file, smdModel.skeleton, &skeleton);
 	ReadAnimation(file, smdModel.skeleton, smdModel.animation,
 		&skeleton, nullptr);
-	outModel = new Model();
+	if (outModel == nullptr)
+		outModel = new Model();
 	ReadMeshes(file, smdModel, outModel);
 	file.close();
 

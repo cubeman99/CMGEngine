@@ -6,12 +6,39 @@
 #include <assert.h>
 #include <regex>
 
+static const char* GetShaderStageName(ShaderType type) 
+{
+	if (type == ShaderType::k_vertex_shader)
+		return "vertex";
+	else if (type == ShaderType::k_fragment_shader)
+		return "fragment";
+	else if (type == ShaderType::k_geometry_shader)
+		return "geometry";
+	else if (type == ShaderType::k_compute_shader)
+		return "compute";
+	CMG_ASSERT_FALSE("invalid shader stage type");
+	return "unknown";
+}
 
 ShaderStage::ShaderStage():
 	m_isEnabled(false),
 	m_isCompiled(false),
 	m_glShaderName(0)
 {
+}
+
+ShaderStage::~ShaderStage()
+{
+	Unload();
+}
+
+void ShaderStage::Unload()
+{
+	if (m_glShaderName != 0)
+	{
+		glDeleteShader(m_glShaderName);
+		m_glShaderName = 0;
+	}
 }
 
 Error ShaderStage::Create(ShaderType type, const String& code, const Path& path)
@@ -39,12 +66,6 @@ Error ShaderStage::Create(ShaderType type, const String& code, const Path& path)
 	return CMG_ERROR_SUCCESS;
 }
 
-ShaderStage::~ShaderStage()
-{
-	if (m_isEnabled != 0)
-		glDeleteShader(m_glShaderName);
-}
-
 
 //-----------------------------------------------------------------------------
 // Constructor & destructor
@@ -52,21 +73,14 @@ ShaderStage::~ShaderStage()
 
 Shader::Shader(OpenGLRenderDevice* device):
 	m_isLinked(false),
-	m_device(device)
+	m_device(device),
+	m_glProgram(0)
 {
-	// Create the shader program
-	m_glProgram = glCreateProgram();
 }
 
 Shader::~Shader()
 {
-	// Delete the shader program.
-	glDeleteProgram(m_glProgram);
-
-	// Delete the shader stages.
-	for (int i = 0; i < (int) ShaderType::k_count; ++i)
-	{
-	}
+	DeleteGLProgram();
 }
 
 
@@ -140,7 +154,9 @@ Error Shader::AddStage(ShaderType type, const String& code, const Path& path)
 	Error error = stage.Create(type, code, path);
 	if (error.Failed())
 		return error.Uncheck();
-	
+
+	CreateGLProgram();
+
 	// Attach the shader stage to the shader program
 	glAttachShader(m_glProgram, stage.m_glShaderName);
 	m_isLinked = false;
@@ -245,10 +261,75 @@ Error Shader::LoadComputeShader(Shader*& outShader, const Path& path, const Arra
 	return outShader->CompileAndLink();
 }
 
+Error Shader::UnloadImpl()
+{
+	DeleteGLProgram();
+	m_isLinked = false;
+	m_uniforms.clear();
+	return CMG_ERROR_SUCCESS;
+}
+
+Error Shader::LoadImpl()
+{
+	// No default load available
+	return CMG_ERROR_NOT_IMPLEMENTED;
+}
+
+Error Shader::LoadImpl(const ShaderLoadArgs& args)
+{
+	Error error;
+
+	DeleteGLProgram();
+	CreateGLProgram();
+
+	for (auto it : args.stages)
+	{
+		ShaderType stageType = it.first;
+		String name = it.second;
+		CMG_LOG_DEBUG() << "  - Compiling " << GetShaderStageName(stageType)
+			<< " shader: " << name;
+
+		// Load the code from the text file
+		File file;
+		error = GetResourceLoader()->OpenResourceFile(
+			file, name, FileAccess::READ, FileType::TEXT);
+		if (error.Failed())
+			return error.Uncheck();
+		String code;
+		error = file.GetContents(code);
+		if (error.Failed())
+			return error.Uncheck();
+
+		// Add the stage to the shader
+		error = AddStage(stageType, code, name);
+		if (error.Failed())
+			return error.Uncheck();
+	}
+
+	return CompileAndLink();
+}
+
 
 //-----------------------------------------------------------------------------
 // Private methods
 //-----------------------------------------------------------------------------
+
+void Shader::CreateGLProgram()
+{
+	if (m_glProgram == 0)
+		m_glProgram = glCreateProgram();
+}
+
+void Shader::DeleteGLProgram()
+{
+	if (m_glProgram != 0)
+	{
+		glDeleteProgram(m_glProgram);
+		m_glProgram = 0;
+	}
+	for (int i = 0; i < (int) ShaderType::k_count; ++i)
+		m_stages[i].Unload();
+}
 
 Error Shader::Compile(const Array<Path>& paths)
 {

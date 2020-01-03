@@ -583,6 +583,7 @@ void DebugDraw::BeginImmediate(const Matrix4f& transform)
 	glLoadMatrixf(m_viewProjection.m);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadMatrixf(transform.m);
+	glDisable(GL_TEXTURE_2D);
 
 	glLineWidth(m_lineWidth);
 	glPointSize(m_pointSize);

@@ -288,6 +288,10 @@ Font::Font(void* ftFace, int32 size, uint32 charRegionBegin,
 	FT_Done_Face(pFace);
 }
 
+Font::Font()
+{
+}
+
 Font::~Font()
 {
 	delete [] m_glyphs;

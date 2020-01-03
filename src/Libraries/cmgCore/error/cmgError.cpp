@@ -22,6 +22,7 @@ namespace
 			case CommonErrorTypes::k_file_read:				return "file read";
 			case CommonErrorTypes::k_file_write:			return "file write";
 			case CommonErrorTypes::k_invalid_handle:		return "invalid handle";
+			case CommonErrorTypes::k_not_implemented:		return "not implemented";
 			default: return "";
 		};
 	}
@@ -84,9 +85,15 @@ Error::~Error()
 {
 	if (!m_errorCheckedByUser && m_error != CommonErrorTypes::k_success)
 	{
-		// TODO: Unchecked failure.
-		CMG_ASSERT_FALSE(m_message.c_str());//"An error went unchecked!");
-		printf("Error: %s", m_message.c_str());
+		cmg::core::console::SetConsoleColor(
+			cmg::core::console::p_color::red,
+			cmg::core::console::p_color::black);
+		printf("An error went unchecked at %s, line %d\n", m_file, m_line);
+		printf("Error reason: %s\n", m_message.c_str());
+		cmg::core::console::SetConsoleColor(
+			cmg::core::console::p_color::light_gray,
+			cmg::core::console::p_color::black);
+		CMG_DEBUGGER_BREAK();
 	}
 }
 

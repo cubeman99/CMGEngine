@@ -14,6 +14,7 @@ public:
 	inline uint32 GetGLTarget() const { return m_glTarget; }
 	inline uint32 GetGLBuffer() const { return m_glBuffer; }
 
+	virtual void Clear();
 	void BufferData(const BufferObject& source);
 	void BufferData(uint32 offset, const BufferObject& source);
 	void BufferData(uint32 offset, uint32 size, const BufferObject& source, uint32 sourceOffset=0);

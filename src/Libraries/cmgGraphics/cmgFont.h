@@ -1,7 +1,6 @@
 #ifndef _CMG_GRAPHICS_FONT_H_
 #define _CMG_GRAPHICS_FONT_H_
 
-#include <cmgCore/smart_ptr/cmg_smart_ptr.h>
 #include <cmgGraphics/cmgTexture.h>
 #include <cmgCore/io/cmgPath.h>
 #include <cmgMath/types/cmgVector2.h>
@@ -89,12 +88,13 @@ struct CharacterRegion
 
 // A fixed-size bitmap font that stores glyph images
 // for a region of character codes.
-class Font
+class Font : public cmg::ResourceImpl<Font>
 {
 public:
 	using sptr = cmg::shared_ptr<Font>;
 
 public:
+	Font();
 	~Font();
 
 	// Accessors
