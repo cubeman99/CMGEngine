@@ -2,6 +2,7 @@
 #define _CMG_VECTOR_2F_H_
 
 #include <iostream>
+#include <cmgCore/cmgBase.h>
 
 struct Matrix3f;
 template <typename T>

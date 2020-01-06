@@ -125,6 +125,16 @@ public:
 		return resource;
 	}
 
+	void ReloadAll()
+	{
+		for (auto resource : m_resources)
+		{
+			resource->Unload();
+			resource->Load();
+		}
+	}
+
+
 private:
 	void Unload(ResourceHandle handle)
 	{

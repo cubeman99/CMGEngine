@@ -20,16 +20,9 @@ public:
 	OpenGLRenderDevice(Window* window);
 	~OpenGLRenderDevice();
 
-	// Resource creation
-	Error CreateTexture2D(Texture*& outTexture, int32 width, int32 height,
-		const TextureParams& params);
-	Error CreateRenderTarget(RenderTarget** outRenderTarget);
-	CMG_DEPRECATED Error CreateShaderProgram(Shader** outShader,
-		const String& vertexCode, const String& fragmentCode);
-
 	// Render parameters
-	const RenderParams& GetRenderParams() const { return m_renderParams; }
-	void SetRenderParams(const RenderParams& renderParams) { m_renderParams = renderParams; }
+	const RenderParams& GetRenderParams() const;
+	void SetRenderParams(const RenderParams& renderParams);
 	void ApplyRenderSettings(bool clear = false);
 
 	// Uniforms
@@ -53,6 +46,10 @@ public:
 	void BindBuffer(const BufferObject& buffer, uint32 slot);
 
 	// Drawing
+	void ClearStencilBuffer(RenderTarget* target, int32 value = 0);
+	void ClearDepthBuffer(RenderTarget* target, float value = 1.0f);
+	void ClearColorBuffer(RenderTarget* target, const Color& color);
+	void ClearColorAndDepth(RenderTarget* target, const Color& color, float clearDepth = 1.0f);
 	void Clear(RenderTarget* target, const Color& color, bool clearDepth);
 	void Draw(RenderTarget* target, Shader* shader, Mesh* mesh);
 	void DispatchCompute(Shader* shader, Vector2ui numGroupsXY);

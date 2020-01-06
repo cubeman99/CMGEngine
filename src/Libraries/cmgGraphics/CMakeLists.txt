@@ -50,8 +50,6 @@ set(CMG_GRAPHICS_SOURCE_FILES
 	render/cmgRenderDevice.cpp
 	render/cmgRenderParams.h
 	render/cmgRenderParams.cpp
-	render/cmgRenderer.h
-	render/cmgRenderer.cpp
 	render/cmgRenderTarget.h
 	render/cmgRenderTarget.cpp
 	render/cmgSampler.h

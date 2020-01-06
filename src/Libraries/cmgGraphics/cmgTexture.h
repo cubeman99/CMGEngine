@@ -126,6 +126,14 @@ public:
 		const TextureParams& params = TextureParams());
 	static Error LoadTexture(Texture*& outTexture, const Path& path,
 		const TextureParams& params = TextureParams());
+	static Error LoadCubeMapTexture(Texture*& outTexture,
+		const Path& pathPosX,
+		const Path& pathNegX,
+		const Path& pathPosY,
+		const Path& pathNegY,
+		const Path& pathPosZ,
+		const Path& pathNegZ,
+		TextureParams params = TextureParams(TextureTarget::k_texture_cube_map));
 
 	// Decode an image from memory into raw pixel data
 	static Error DecodeImage(DecodedImageData& outImage, const Path& path);

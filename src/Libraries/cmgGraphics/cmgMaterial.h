@@ -57,7 +57,7 @@ struct UniformValue
 
 	Value value;
 	Texture::sptr texture;
-	UniformType::value_type type;
+	UniformType type;
 };
 
 

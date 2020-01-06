@@ -5,20 +5,22 @@
 // Constructor
 //-----------------------------------------------------------------------------
 
-TextureParams::TextureParams()
-	: m_target(TextureTarget::TEXTURE_2D)
-		
-	, m_minFilter(TextureFilterOptions::LINEAR) // Default is trilinear filtering.
-	, m_magFilter(TextureFilterOptions::LINEAR)
-	, m_mipFilter(TextureFilterOptions::LINEAR)
-	, m_anisotropy(false)
+TextureParams::TextureParams() :
+	TextureParams(TextureTarget::k_texture_2d)
+{
+}
 
-	, m_wrapS(TextureWrap::CLAMP_TO_EDGE)
-	, m_wrapT(TextureWrap::CLAMP_TO_EDGE)
-	, m_wrapR(TextureWrap::CLAMP_TO_EDGE)
-
-	, m_internalFormat(PixelInternalFormat::RGBA)
-	, m_autoGenMipMaps(true)
+TextureParams::TextureParams(TextureTarget target) :
+	m_target(target),
+	m_minFilter(TextureFilterOptions::k_linear), // Default is trilinear filtering
+	m_magFilter(TextureFilterOptions::k_linear),
+	m_mipFilter(TextureFilterOptions::k_none),
+	m_anisotropy(false),
+	m_wrapS(TextureWrap::k_clamp_to_edge),
+	m_wrapT(TextureWrap::k_clamp_to_edge),
+	m_wrapR(TextureWrap::k_clamp_to_edge),
+	m_internalFormat(PixelInternalFormat::k_rgba),
+	m_autoGenMipMaps(true)
 {
 }
 	
@@ -26,48 +28,48 @@ TextureParams::TextureParams()
 // Mutators
 //-----------------------------------------------------------------------------
 
-void TextureParams::SetFiltering(texture_filter_options_type minFilter,
-	texture_filter_options_type magFilter,
-	texture_filter_options_type mipMapFilter)
+void TextureParams::SetFiltering(TextureFilterOptions minFilter,
+	TextureFilterOptions magFilter,
+	TextureFilterOptions mipMapFilter)
 {
 	m_minFilter = minFilter;
 	m_magFilter = magFilter;
 	m_mipFilter = mipMapFilter;
 }
 
-void TextureParams::SetFiltering(TextureFilter::value_type filtering)
+void TextureParams::SetFiltering(TextureFilter filtering)
 {
-	if (filtering == TextureFilter::NEAREST)
+	if (filtering == TextureFilter::k_nearest)
 	{
-		m_minFilter = TextureFilterOptions::NEAREST;
-		m_magFilter = TextureFilterOptions::NEAREST;
-		m_mipFilter = TextureFilterOptions::NONE;
+		m_minFilter = TextureFilterOptions::k_nearest;
+		m_magFilter = TextureFilterOptions::k_nearest;
+		m_mipFilter = TextureFilterOptions::k_none;
 		m_anisotropy = false;
 	}
-	else if (filtering == TextureFilter::BILINEAR)
+	else if (filtering == TextureFilter::k_bilinear)
 	{
-		m_minFilter = TextureFilterOptions::LINEAR;
-		m_magFilter = TextureFilterOptions::LINEAR;
-		m_mipFilter = TextureFilterOptions::NEAREST;
+		m_minFilter = TextureFilterOptions::k_linear;
+		m_magFilter = TextureFilterOptions::k_linear;
+		m_mipFilter = TextureFilterOptions::k_nearest;
 		m_anisotropy = false;
 	}
-	else if (filtering == TextureFilter::TRILINEAR)
+	else if (filtering == TextureFilter::k_trilinear)
 	{
-		m_minFilter = TextureFilterOptions::LINEAR;
-		m_magFilter = TextureFilterOptions::LINEAR;
-		m_mipFilter = TextureFilterOptions::LINEAR;
+		m_minFilter = TextureFilterOptions::k_linear;
+		m_magFilter = TextureFilterOptions::k_linear;
+		m_mipFilter = TextureFilterOptions::k_linear;
 		m_anisotropy = false;
 	}
-	else if (filtering == TextureFilter::ANISOTROPIC)
+	else if (filtering == TextureFilter::k_anisotropic)
 	{
-		m_minFilter = TextureFilterOptions::LINEAR;
-		m_magFilter = TextureFilterOptions::LINEAR;
-		m_mipFilter = TextureFilterOptions::LINEAR;
+		m_minFilter = TextureFilterOptions::k_linear;
+		m_magFilter = TextureFilterOptions::k_linear;
+		m_mipFilter = TextureFilterOptions::k_linear;
 		m_anisotropy = true;
 	}
 }
 
-void TextureParams::SetWrap(texture_wrap_type wrap)
+void TextureParams::SetWrap(TextureWrap wrap)
 {
 	m_wrapS = wrap;
 	m_wrapT = wrap;

@@ -6,90 +6,92 @@
 // Image encoding formats
 enum class ImageEncodingFormat
 {
-	UNKNOWN = -1,
-
-	PNG,
-	JPEG,
-	BMP,
-	TGA,
-	DDS,
-	
-	COUNT,
-	AUTO,
+	k_unknown = -1,
+	k_png,
+	k_jpeg,
+	k_bmp,
+	k_tga,
+	k_dds,
+	k_count,
+	k_auto,
 };
 	
 // Component-wise format for a pixel.
 enum class PixelFormat
 {
-	UNKNOWN = -1,
-
-	RED,
-	GREEN,
-	BLUE,
-
-	RGB,
-	BGR,
-	RGBA,
-	BGRA,
-	
-	LUMINANCE,		// Deprecated
-	ALPHA,			// Deprecated
-	LUMINANCE_ALPHA	// Deprecated
+	k_unknown = -1,
+	k_red,
+	k_green,
+	k_blue,
+	k_rgb,
+	k_bgr,
+	k_rgba,
+	k_bgra,
+	k_luminance,		// deprecated
+	k_alpha,			// deprecated
+	k_luminance_alpha	// deprecated
 };
 
 enum class PixelInternalFormat
 {
 	// Base Internal Formats
-	RED,
-	RG,
-	RGB,
-	RGBA,
-	DEPTH_COMPONENT,
-	STENCIL_INDEX,
-	DEPTH_STENCIL,
+	k_red,
+	k_rg,
+	k_rgb,
+	k_rgba,
+	k_depth_component,
+	k_stencil_index,
+	k_depth_stencil,
 			
-	// TODO: Sized Internal Formats
+	// Sized Internal Formats
+	k_rgba_16f,
+	k_rgba_32f,
+	k_depth_16,
+	k_depth_24,
+	k_depth_32,
+	k_depth_32f,
+	k_depth24_stencil8,
 };
 
 // Formats for transfering pixel data.
 enum class PixelTransferFormat
 {
 	// Transfers of normalized integer or floating-point color image data:
-	RED,
-	GREEN,
-	BLUE,
-	RG,
-	RGB,
-	BGR,
-	RGBA,
-	BGRA,
+	k_red,
+	k_green,
+	k_blue,
+	k_rg,
+	k_rgb,
+	k_bgr,
+	k_rgba,
+	k_bgra,
 
 	// Transfers of non-normalized integer data:
-	RED_INTEGER,
-	GREEN_INTEGER,
-	BLUE_INTEGER,
-	RG_INTEGER,
-	RGB_INTEGER,
-	BGR_INTEGER,
-	RGBA_INTEGER,
-	BGRA_INTEGER,
+	k_red_integer,
+	k_green_integer,
+	k_blue_integer,
+	k_rg_integer,
+	k_rgb_integer,
+	k_bgr_integer,
+	k_rgba_integer,
+	k_bgra_integer,
 			
 	// Transfers of depth, stencil, or depth/stencil data:
-	DEPTH_COMPONENT,	// Each element is a single depth value.
-	STENCIL_INDEX,		// Each element is a single depth index.
-	DEPTH_STENCIL,		// Each element is a pair of depth and stencil values
+	k_depth_component,	// Each element is a single depth value
+	k_stencil_index,	// Each element is a single depth index
+	k_depth_stencil,	// Each element is a pair of depth and stencil values
 };
 
 // Data type of the pixel data.
 enum class PixelType
 {
-	TYPE_UNSIGNED_BYTE,
-	TYPE_BYTE,
-	TYPE_UNSIGNED_SHORT,
-	TYPE_SHORT,
-	TYPE_UNSIGNED_INT,
-	TYPE_INT,
-	TYPE_FLOAT,
+	k_unsigned_byte,
+	k_byte,
+	k_unsigned_short,
+	k_short,
+	k_unsigned_int,
+	k_int,
+	k_float,
 
 	// TODO: Different bit storage formats.
 	// Ex: TYPE_UNSIGNED_BYTE_3_3_2

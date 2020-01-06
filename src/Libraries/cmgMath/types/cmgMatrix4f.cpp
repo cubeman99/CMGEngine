@@ -19,11 +19,16 @@ static inline void Swap(float& a, float& b)
 // Matrix constants.
 //-----------------------------------------------------------------------------
 
-// The 4x4 identity matrix.
+// The 4x4 identity matrix
 const Matrix4f Matrix4f::IDENTITY(	1, 0, 0, 0,
 									0, 1, 0, 0,
 									0, 0, 1, 0,
 									0, 0, 0, 1);
+// The 4x4 matrix of all zeros
+const Matrix4f Matrix4f::ZERO(	0, 0, 0, 0,
+								0, 0, 0, 0,
+								0, 0, 0, 0,
+								0, 0, 0, 0);
 
 
 //-----------------------------------------------------------------------------
@@ -757,8 +762,8 @@ Matrix4f& Matrix4f::InitLookAt(const Vector3f& lookAtDir, const Vector3f& upDir)
 	return *this;
 }
 
-Matrix4f& Matrix4f::InitPerspectiveX(float fovX, float aspect,
-									float zNear, float zFar)
+Matrix4f& Matrix4f::InitPerspectiveX(
+	float fovX, float aspect, float zNear, float zFar)
 {
 	float invTanHalfFoV = 1.0f / Math::Tan(fovX * 0.5f);
 	DoInitPerspective(
@@ -768,8 +773,8 @@ Matrix4f& Matrix4f::InitPerspectiveX(float fovX, float aspect,
 	return *this;
 }
 
-Matrix4f& Matrix4f::InitPerspectiveY(float fovY, float aspect,
-									float zNear, float zFar)
+Matrix4f& Matrix4f::InitPerspectiveY(
+	float fovY, float aspect, float zNear, float zFar)
 {
 	float invTanHalfFoV = 1.0f / Math::Tan(fovY * 0.5f);
 	DoInitPerspective(
@@ -779,8 +784,8 @@ Matrix4f& Matrix4f::InitPerspectiveY(float fovY, float aspect,
 	return *this;
 }
 
-Matrix4f& Matrix4f::InitPerspectiveXY(float fovX, float fovY,
-									float zNear, float zFar)
+Matrix4f& Matrix4f::InitPerspectiveXY(
+	float fovX, float fovY, float zNear, float zFar)
 {
 	DoInitPerspective(
 		1.0f / Math::Tan(fovX * 0.5f),
@@ -789,9 +794,40 @@ Matrix4f& Matrix4f::InitPerspectiveXY(float fovX, float fovY,
 	return *this;
 }
 
+Matrix4f& Matrix4f::InitInversePerspectiveX(
+	float fovX, float aspect, float zNear, float zFar)
+{
+	float tanHalfFoV = Math::Tan(fovX * 0.5f);
+	DoInitInversePerspective(
+		tanHalfFoV,
+		tanHalfFoV / aspect,
+		zNear, zFar);
+	return *this;
+}
+
+Matrix4f& Matrix4f::InitInversePerspectiveY(
+	float fovY, float aspect, float zNear, float zFar)
+{
+	float tanHalfFoV = Math::Tan(fovY * 0.5f);
+	DoInitInversePerspective(
+		tanHalfFoV * aspect,
+		tanHalfFoV,
+		zNear, zFar);
+	return *this;
+}
+
+Matrix4f& Matrix4f::InitInversePerspectiveXY(
+	float fovX, float fovY, float zNear, float zFar)
+{
+	DoInitInversePerspective(
+		Math::Tan(fovX * 0.5f),
+		Math::Tan(fovY * 0.5f),
+		zNear, zFar);
+	return *this;
+}
+
 Matrix4f& Matrix4f::InitOrthographic(float left, float right,
-									float bottom, float top,
-									float zNear, float zFar)
+	float bottom, float top, float zNear, float zFar)
 {
 	SetIdentity();
 
@@ -869,6 +905,13 @@ Matrix4f Matrix4f::CreateRotation(const Quaternion& qRotation)
 	return result;
 }
 
+Matrix4f Matrix4f::CreateLookAt(const Vector3f& lookAtDir, const Vector3f& upDir)
+{
+	Matrix4f result;
+	result.InitLookAt(lookAtDir, upDir);
+	return result;
+}
+
 Matrix4f Matrix4f::CreatePerspective(float fovY, float aspect, float znear, float zfar)
 {
 	Matrix4f result;
@@ -890,7 +933,33 @@ Matrix4f Matrix4f::CreatePerspectiveXY(float fovX, float fovY, float znear, floa
 	return result;
 }
 
-Matrix4f Matrix4f::CreateOrthographic(float left, float right, float bottom, float top, float znear, float zfar)
+
+Matrix4f Matrix4f::CreateInversePerspective(
+	float fovY, float aspect, float znear, float zfar)
+{
+	Matrix4f result;
+	result.InitInversePerspectiveY(fovY, aspect, znear, zfar);
+	return result;
+}
+
+Matrix4f Matrix4f::CreateInversePerspectiveX(
+	float fovX, float aspect, float znear, float zfar)
+{
+	Matrix4f result;
+	result.InitInversePerspectiveX(fovX, aspect, znear, zfar);
+	return result;
+}
+
+Matrix4f Matrix4f::CreateInversePerspectiveXY(
+	float fovX, float fovY, float znear, float zfar)
+{
+	Matrix4f result;
+	result.InitInversePerspectiveXY(fovX, fovY, znear, zfar);
+	return result;
+}
+
+Matrix4f Matrix4f::CreateOrthographic(
+	float left, float right, float bottom, float top, float znear, float zfar)
 {
 	Matrix4f result;
 	result.InitOrthographic(left, right, bottom, top, znear, zfar);
@@ -968,7 +1037,7 @@ void Matrix4f::Transpose(const Matrix4f& src, Matrix4f& dst)
 void Matrix4f::Invert(const Matrix4f& inMat, Matrix4f& outResult)
 {
 	// TODO: implement Matrix4f inversion.
-	//CMG_ASSERT_UNIMPLEMENTED_FUNCTION();
+	CMG_ASSERT_UNIMPLEMENTED_FUNCTION();
 }
 
 void Matrix4f::InvertAffine(const Matrix4f& inMat, Matrix4f& outResult)
@@ -1001,11 +1070,40 @@ void Matrix4f::InvertAffine(const Matrix4f& inMat, Matrix4f& outResult)
 void Matrix4f::DoInitPerspective(float x1, float y2, float zNear, float zFar)
 {
 	SetIdentity();
-	m[0]  = x1;
-	m[5]  = y2;
-	m[10] = (-zNear - zFar) / (zFar - zNear);
-	m[15] = 0;
-	m[14] = (-2 * zFar * zNear) / (zFar - zNear);
-	m[11] = -1;
+	c0.x = x1;
+	c1.y = y2;
+	c2.z = (-zNear - zFar) / (zFar - zNear);
+	c3.z = (-2.0f * zFar * zNear) / (zFar - zNear);
+	c2.w = -1.0f;
+	c3.w = 0.0f;
+}
+
+void Matrix4f::DoInitInversePerspective(
+	float x1, float y2, float zNear, float zFar)
+{
+	// https://gist.github.com/gyng/8921328
+	// 
+	// Projection matrix:
+	//   a, 0, 0, 0
+	//   0, b, 0, 0
+	//   0, 0, c, d
+	//   0, 0, e, 0
+	// 
+	// Inverse projection:
+	//   1/a,    0,    0,       0,
+	//     0,  1/b,    0,       0,
+	//     0,    0,    0,     1/e,
+	//     0,    0,  1/d, -c/(d*e)
+	//
+	// Below is a simplified form of this:
+
+	SetZero();
+	float inv2NearFar = 1.0f / (2.0f * zNear * zFar);
+	c0.x = x1;
+	c1.y = y2;
+	c2.z = 0.0f;
+	c3.z = -1.0f;
+	c2.w = (zNear - zFar) * inv2NearFar;
+	c3.w = (zNear + zFar) * inv2NearFar;
 }
 

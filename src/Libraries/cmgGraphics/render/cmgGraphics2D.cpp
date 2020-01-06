@@ -170,12 +170,26 @@ void Graphics2D::DrawTexture(Texture* texture, const Vector2f& position, const C
 
 void Graphics2D::DrawTexture(Texture* texture, const Rect2f& destination, const Color& color)
 {
+	/*
 	ActivateRenderTarget();
 	gl_Transform(m_transformation);
 	glBindTexture(GL_TEXTURE_2D, texture->GetGLTextureID());
 	glBegin(GL_QUADS);
 	gl_Color(color);
 	gl_TexturedRect(destination);
+	glEnd();
+	glBindTexture(GL_TEXTURE_2D, 0);*/
+
+	float w = destination.size.x;
+	float h = destination.size.y;
+	Vector2f position = destination.position;
+
+	ActivateRenderTarget();
+	gl_Transform(m_transformation);
+	glBindTexture(GL_TEXTURE_2D, texture->GetGLTextureID());
+	glBegin(GL_QUADS);
+	gl_Color(color);
+	gl_TexturedRect(Rect2f(position, Vector2f(w, h)));
 	glEnd();
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
@@ -423,6 +437,7 @@ void Graphics2D::FillCircle(const Vector2f& center, float radius, const Color& c
 
 void Graphics2D::ActivateRenderTarget()
 {
+	glUseProgram(0);
 	if (m_renderTarget != nullptr)
 	{
 		uint32 frameBufferId = m_renderTarget->m_glFrameBufferId;

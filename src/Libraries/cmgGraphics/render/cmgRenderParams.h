@@ -1,5 +1,5 @@
-#ifndef _RENDER_PARAMS_H_
-#define _RENDER_PARAMS_H_
+#ifndef _CMG_GRAPHICS_RENDER_PARAMS_H_
+#define _CMG_GRAPHICS_RENDER_PARAMS_H_
 
 #include <cmgGraphics/types/cmgColor.h>
 
@@ -8,62 +8,45 @@
 // Compare Function (used for depth function)
 //-----------------------------------------------------------------------------
 
-struct CompareFunction
+enum class CompareFunction
 {
-	typedef int value_type;
-
-	enum
-	{
-		k_always_pass,
-		k_always_fail,
-		k_less,
-		k_less_equal,
-		k_greater,
-		k_greater_equal,
-		k_equal,
-		k_not_equal,
-	};
+	k_always_pass,
+	k_always_fail,
+	k_less,
+	k_less_equal,
+	k_greater,
+	k_greater_equal,
+	k_equal,
+	k_not_equal,
 };
 
 //-----------------------------------------------------------------------------
 // Blend Function
 //-----------------------------------------------------------------------------
 
-struct BlendFunc
+enum class BlendFunc
 {
-	typedef int value_type;
-		
-	enum
-	{
-		k_zero,
-		k_one,
-		k_source_color,
-		k_one_minus_source_color,
-		k_destination_color,
-		k_one_minus_destination_color,
-		k_source_alpha,
-		k_one_minus_source_alpha,
-		k_destination_alpha,
-		k_one_minus_destination_alpha,
-		k_constant_color,
-		k_one_minus_constant_color,
-		k_constant_alpha,
-		k_one_minus_constant_alpha,
-		k_source_alpha_saturate,
-		k_source1_color,
-		k_one_minus_source1_color,
-		k_source1_alpha,
-		k_one_minus_source1_alpha,
-	};
-
-	BlendFunc(value_type source, value_type destination)
-		: source(source)
-		, destination(destination)
-	{ }
-
-	value_type source;
-	value_type destination;
+	k_zero,
+	k_one,
+	k_source_color,
+	k_one_minus_source_color,
+	k_destination_color,
+	k_one_minus_destination_color,
+	k_source_alpha,
+	k_one_minus_source_alpha,
+	k_destination_alpha,
+	k_one_minus_destination_alpha,
+	k_constant_color,
+	k_one_minus_constant_color,
+	k_constant_alpha,
+	k_one_minus_constant_alpha,
+	k_source_alpha_saturate,
+	k_source1_color,
+	k_one_minus_source1_color,
+	k_source1_alpha,
+	k_one_minus_source1_alpha,
 };
+
 
 //-----------------------------------------------------------------------------
 // Clear Bits
@@ -75,9 +58,9 @@ struct ClearBits
 
 	enum
 	{
-		k_color_buffer_bit		= 0x1,
-		k_depth_buffer_bit		= 0x2,
-		k_stencil_buffer_bit	= 0x4,
+		k_color		= 0x1,
+		k_depth		= 0x2,
+		k_stencil	= 0x4,
 	};
 };
 
@@ -86,28 +69,18 @@ struct ClearBits
 //-----------------------------------------------------------------------------
 
 // Winding order that defines the front of a face.
-struct FrontFace
+enum class FrontFace
 {
-	typedef int value_type;
-		
-	enum
-	{
-		k_clockwise,
-		k_counter_clockwise,
-	};
+	k_clockwise,
+	k_counter_clockwise,
 };
 
 // Which side(s) of a face is culled.
-struct CullFace
+enum class CullFace
 {
-	typedef int value_type;
-		
-	enum
-	{
-		k_front,
-		k_back,
-		k_front_and_back,
-	};
+	k_front,
+	k_back,
+	k_front_and_back,
 };
 
 //-----------------------------------------------------------------------------
@@ -115,16 +88,11 @@ struct CullFace
 //-----------------------------------------------------------------------------
 
 // Method for rasterizing polygon shapes.
-struct PolygonMode
+enum class PolygonMode
 {
-	typedef int value_type;
-		
-	enum
-	{
-		k_point,
-		k_line,
-		k_fill,
-	};
+	k_point,
+	k_line,
+	k_fill,
 };
 
 
@@ -138,60 +106,69 @@ public:
 	RenderParams();
 
 	//-----------------------------------------------------------------------------
-	// Getters.
+	// Getters
 
-	CompareFunction::value_type	GetDepthFunction()	const { return m_depthFunc; }
-	FrontFace::value_type		GetFrontFace()		const { return m_frontFace; }
-	CullFace::value_type		GetCullFace()		const { return m_cullFace; }
-	PolygonMode::value_type		GetPolygonMode()	const { return m_polygonMode; }
-	ClearBits::value_type		GetClearBits()		const { return m_clearBits; }
-	const BlendFunc&			GetBlendFunction()	const { return m_blendFunc; }
-	const Color&				GetClearColor()		const { return m_clearColor; }
+	CompareFunction GetDepthFunction() const { return m_depthFunc; }
+	FrontFace GetFrontFace() const { return m_frontFace; }
+	CullFace GetCullFace() const { return m_cullFace; }
+	PolygonMode GetPolygonMode() const { return m_polygonMode; }
+	ClearBits::value_type GetClearBits() const { return m_clearBits; }
+	BlendFunc GetBlendFunctionSource() const { return m_blendFuncSource; }
+	BlendFunc GetBlendFunctionDestination() const { return m_blendFuncDestination; }
+	const Color& GetClearColor() const { return m_clearColor; }
+	float GetClearDepth() const { return m_clearDepth; }
+	int32 GetClearStencil() const { return m_clearStencil; }
 		
-	bool IsBlendEnabled()					const {	return m_blendEnabled; }
-	bool IsDepthTestEnabled()				const { return m_depthTestEnabled; }
-	bool IsDepthBufferWriteEnabled()		const {	return m_depthWriteEnabled; }
-	bool IsNearFarPlaneClippingEnabled()	const {	return m_nearFarClippingEnabled; }
-	bool IsCullFaceEnabled()				const {	return m_cullFaceEnabled; }
-	bool IsLineSmoothEnabled()				const {	return m_lineSmoothEnabled; }
-	bool IsPolygonSmoothEnabled()			const { return m_polygonSmoothEnabled; }
+	bool IsBlendEnabled() const { return m_blendEnabled; }
+	bool IsDepthTestEnabled() const { return m_depthTestEnabled; }
+	bool IsDepthBufferWriteEnabled() const { return m_depthWriteEnabled; }
+	bool IsNearFarPlaneClippingEnabled() const { return m_nearFarClippingEnabled; }
+	bool IsCullFaceEnabled() const { return m_cullFaceEnabled; }
+	bool IsLineSmoothEnabled() const { return m_lineSmoothEnabled; }
+	bool IsPolygonSmoothEnabled() const { return m_polygonSmoothEnabled; }
 		
 	//-----------------------------------------------------------------------------
-	// Setters.
+	// Setters
 		
-	void SetDepthFunction(CompareFunction::value_type depthFunc)	{ m_depthFunc = depthFunc; }
-	void SetFrontFace(FrontFace::value_type frontFace)				{ m_frontFace = frontFace; }
-	void SetCullFace(CullFace::value_type cullFace)					{ m_cullFace = cullFace; }
-	void SetPolygonMode(PolygonMode::value_type polygonMode)		{ m_polygonMode = polygonMode; }
-	void SetClearBits(ClearBits::value_type clearBits)				{ m_clearBits = clearBits; }
-	void SetClearColor(const Color& clearColor)						{ m_clearColor = clearColor; }
+	void SetDepthFunction(CompareFunction depthFunc) { m_depthFunc = depthFunc; }
+	void SetFrontFace(FrontFace frontFace) { m_frontFace = frontFace; }
+	void SetCullFace(CullFace cullFace) { m_cullFace = cullFace; }
+	void SetPolygonMode(PolygonMode polygonMode) { m_polygonMode = polygonMode; }
+	void SetClearBits(ClearBits::value_type clearBits) { m_clearBits = clearBits; }
+	void SetClearBits(bool clearColor, bool clearDepth, bool clearStencil);
+	void SetClearColor(const Color& clearColor) { m_clearColor = clearColor; }
+	void SetClearDepth(float clearDepth) { m_clearDepth = clearDepth; }
+	void SetClearStencil(int32 clearStencil) { m_clearStencil = clearStencil; }
 		
-	void EnableBlend(bool enabled)					{ m_blendEnabled = enabled; }
-	void EnableDepthTest(bool enabled)				{ m_depthTestEnabled = enabled; }
-	void EnableDepthBufferWrite(bool enabled)		{ m_depthWriteEnabled = enabled; }
-	void EnableNearFarPlaneClipping(bool enabled)	{ m_nearFarClippingEnabled = enabled; }
-	void EnableCullFace(bool enabled)				{ m_cullFaceEnabled = enabled; }
-	void EnableLineSmooth(bool enabled)				{ m_lineSmoothEnabled = enabled; }
-	void EnablePolygonSmooth(bool enabled)			{ m_polygonSmoothEnabled = enabled; }
+	void EnableBlend(bool enabled) { m_blendEnabled = enabled; }
+	void EnableDepthTest(bool enabled) { m_depthTestEnabled = enabled; }
+	void EnableDepthBufferWrite(bool enabled) { m_depthWriteEnabled = enabled; }
+	void EnableNearFarPlaneClipping(bool enabled) { m_nearFarClippingEnabled = enabled; }
+	void EnableCullFace(bool enabled) { m_cullFaceEnabled = enabled; }
+	void EnableLineSmooth(bool enabled) { m_lineSmoothEnabled = enabled; }
+	void EnablePolygonSmooth(bool enabled) { m_polygonSmoothEnabled = enabled; }
 
-	void SetBlendFunction(BlendFunc::value_type source, BlendFunc::value_type destination);
+	void SetBlendFunction(BlendFunc source, BlendFunc destination);
 
 		
 private:
-	CompareFunction::value_type	m_depthFunc;
-	FrontFace::value_type		m_frontFace;
-	CullFace::value_type		m_cullFace;
-	PolygonMode::value_type		m_polygonMode;
-	BlendFunc					m_blendFunc;
-	ClearBits::value_type		m_clearBits;
-	Color						m_clearColor;
-	bool						m_blendEnabled;
-	bool						m_depthTestEnabled;
-	bool						m_depthWriteEnabled;
-	bool						m_nearFarClippingEnabled;
-	bool						m_cullFaceEnabled;
-	bool						m_lineSmoothEnabled;
-	bool						m_polygonSmoothEnabled;
+	CompareFunction m_depthFunc;
+	FrontFace m_frontFace;
+	CullFace m_cullFace;
+	PolygonMode m_polygonMode;
+	BlendFunc m_blendFuncSource;
+	BlendFunc m_blendFuncDestination;
+	ClearBits::value_type m_clearBits;
+	Color m_clearColor;
+	float m_clearDepth;
+	int32 m_clearStencil;
+	bool m_blendEnabled;
+	bool m_depthTestEnabled;
+	bool m_depthWriteEnabled;
+	bool m_nearFarClippingEnabled;
+	bool m_cullFaceEnabled;
+	bool m_lineSmoothEnabled;
+	bool m_polygonSmoothEnabled;
 	
 	// TODO: for RenderParams:
 	//  * m_fbo (Frame buffer object)
@@ -200,4 +177,4 @@ private:
 };
 
 
-#endif // _RENDER_PARAMS_H_
+#endif // _CMG_GRAPHICS_RENDER_PARAMS_H_

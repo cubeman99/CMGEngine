@@ -157,7 +157,7 @@ Error Model::Decode(File& file)
 	for (uint32 i = 0; i < contents.header.meshCount; i++)
 	{
 		Mesh*& mesh = m_meshes[i];
-		mesh = nullptr;
+		mesh = new Mesh();
 		mesh->DecodeCMG(file);
 	}
 

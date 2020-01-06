@@ -12,24 +12,19 @@
 class RigidBody;
 
 
-struct CollisionPrimitiveType
+enum class CollisionPrimitiveType
 {
-	enum
-	{
-		k_unknown = -1,
+	k_unknown = -1,
 
-		k_sphere = 0,
-		k_box,
-		k_plane,
+	k_sphere = 0,
+	k_box,
+	k_plane,
 
-		k_cylinder,
-		k_capsule,
-		k_polyhedra,
+	k_cylinder,
+	k_capsule,
+	k_polyhedra,
 
-		k_count,
-	};
-
-	typedef int value_type;
+	k_count,
 };
 
 
@@ -39,14 +34,11 @@ struct CollisionPrimitiveType
 class CollisionPrimitive
 {
 public:
-	typedef CollisionPrimitiveType::value_type primitive_type;
-
-public:
 	CollisionPrimitive();
 
 	// Virtual mathods
 
-	virtual primitive_type GetType() const = 0;
+	virtual CollisionPrimitiveType GetType() const = 0;
 	virtual float GetVolume() const { return 0.0f; }
 	virtual void CalculateInertiaTensor(float mass, Matrix3f& outInertiaTensor) const {}
 	virtual Vector3f GetSupport(const Vector3f& direction) const { return Vector3f::ZERO; }
@@ -85,8 +77,10 @@ public:
 		radius(radius)
 	{}
 	
-	inline primitive_type GetType() const override
-		{ return CollisionPrimitiveType::k_sphere; }
+	inline CollisionPrimitiveType GetType() const override
+	{
+		return CollisionPrimitiveType::k_sphere;
+	}
 	
 	float GetVolume() const override;
 	void CalculateInertiaTensor(float mass, Matrix3f& outInertiaTensor) const override;
@@ -102,7 +96,7 @@ public:
 class CollisionBox : public CollisionPrimitive
 {
 public:
-	inline primitive_type GetType() const override
+	inline CollisionPrimitiveType GetType() const override
 		{ return CollisionPrimitiveType::k_box; }
 	
 	CollisionBox() :
@@ -134,6 +128,9 @@ public:
 class CollisionPlane : public CollisionPrimitive
 {
 public:
+	inline CollisionPrimitiveType GetType() const override
+	{ return CollisionPrimitiveType::k_plane; }
+
 	CollisionPlane() :
 		CollisionPrimitive()
 	{}

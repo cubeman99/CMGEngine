@@ -8,67 +8,69 @@
 //-----------------------------------------------------------------------------
 namespace
 {
-	GLenum TranslateTextureTarget(TextureTarget::value_type target)
+GLenum TranslateTextureTarget(TextureTarget target)
+{
+	switch (target)
 	{
-		switch (target)
-		{
-		case TextureTarget::TEXTURE_2D:
-			return GL_TEXTURE_2D;
-		case TextureTarget::TEXTURE_3D:
-			return GL_TEXTURE_3D;
-		case TextureTarget::TEXTURE_1D:
-			return GL_TEXTURE_1D;
-		case TextureTarget::TEXTURE_CUBE_MAP:
-			return GL_TEXTURE_CUBE_MAP;
-		}
+	case TextureTarget::k_texture_2d:
 		return GL_TEXTURE_2D;
+	case TextureTarget::k_texture_3d:
+		return GL_TEXTURE_3D;
+	case TextureTarget::k_texture_1d:
+		return GL_TEXTURE_1D;
+	case TextureTarget::k_texture_cube_map:
+		return GL_TEXTURE_CUBE_MAP;
 	}
+	CMG_ASSERT_FALSE("Invalid texture target");
+	return GL_TEXTURE_2D;
+}
 
-	GLenum TranslateTextureWrap(TextureWrap::value_type wrap)
+GLenum TranslateTextureWrap(TextureWrap wrap)
+{
+	switch (wrap)
 	{
-		switch (wrap)
-		{
-		case TextureWrap::CLAMP_TO_BORDER:
-			return GL_CLAMP_TO_BORDER;
-		case TextureWrap::CLAMP_TO_EDGE:
-			return GL_CLAMP_TO_EDGE;
-		case TextureWrap::REPEAT:
-			return GL_REPEAT;
-		case TextureWrap::MIRROR_REPEAT:
-			return GL_MIRRORED_REPEAT;
-		//case TextureWrap::MIRROR_CLAMP_TO_EDGE:
-			//return GL_MIRROR_CLAMP_TO_EDGE; //TODO: Figure this out.
-		}
+	case TextureWrap::k_clamp_to_border:
 		return GL_CLAMP_TO_BORDER;
+	case TextureWrap::k_clamp_to_edge:
+		return GL_CLAMP_TO_EDGE;
+	case TextureWrap::k_repeat:
+		return GL_REPEAT;
+	case TextureWrap::k_mirror_repeat:
+		return GL_MIRRORED_REPEAT;
+		//case TextureWrap::MIRROR_CLAMP_TO_EDGE:
+		//return GL_MIRROR_CLAMP_TO_EDGE; //TODO: Figure this out.
 	}
+	CMG_ASSERT_FALSE("Invalid texture wrap");
+	return GL_CLAMP_TO_BORDER;
+}
 
-	GLenum TranslateMinMagFilter(TextureFilterOptions::value_type minMagFilter,
-									TextureFilterOptions::value_type mipmapFilter)
+GLenum TranslateMinMagFilter(TextureFilterOptions minMagFilter,
+	TextureFilterOptions mipmapFilter)
+{
+	//CMG_ASSERT(minMagFilter != TextureFilterOptions::k_none,
+	//"You must specify a min and mag filter!");
+
+	if (minMagFilter == TextureFilterOptions::k_linear)
 	{
-		//CMG_ASSERT(minMagFilter != TextureFilterOptions::NONE,
-			//"You must specify a min and mag filter!");
-
-		if (minMagFilter == TextureFilterOptions::LINEAR)
-		{
-			if (mipmapFilter == TextureFilterOptions::NONE)
-				return GL_LINEAR;
-			else if (mipmapFilter == TextureFilterOptions::LINEAR)
-				return GL_LINEAR_MIPMAP_LINEAR;
-			else if (mipmapFilter == TextureFilterOptions::NEAREST)
-				return GL_LINEAR_MIPMAP_NEAREST;
-		}
-		else if (minMagFilter == TextureFilterOptions::NEAREST)
-		{
-			if (mipmapFilter == TextureFilterOptions::NONE)
-				return GL_NEAREST;
-			else if (mipmapFilter == TextureFilterOptions::LINEAR)
-				return GL_NEAREST_MIPMAP_LINEAR;
-			else if (mipmapFilter == TextureFilterOptions::NEAREST)
-				return GL_NEAREST_MIPMAP_NEAREST;
-		}
-
-		return GL_LINEAR;
+		if (mipmapFilter == TextureFilterOptions::k_none)
+			return GL_LINEAR;
+		else if (mipmapFilter == TextureFilterOptions::k_linear)
+			return GL_LINEAR_MIPMAP_LINEAR;
+		else if (mipmapFilter == TextureFilterOptions::k_nearest)
+			return GL_LINEAR_MIPMAP_NEAREST;
 	}
+	else if (minMagFilter == TextureFilterOptions::k_nearest)
+	{
+		if (mipmapFilter == TextureFilterOptions::k_none)
+			return GL_NEAREST;
+		else if (mipmapFilter == TextureFilterOptions::k_linear)
+			return GL_NEAREST_MIPMAP_LINEAR;
+		else if (mipmapFilter == TextureFilterOptions::k_nearest)
+			return GL_NEAREST_MIPMAP_NEAREST;
+	}
+
+	return GL_LINEAR;
+}
 }
 
 Sampler::Sampler(OpenGLRenderDevice& device, const TextureParams& params)

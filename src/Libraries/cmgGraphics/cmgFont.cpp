@@ -142,8 +142,8 @@ Error Font::LoadBuiltInFont(Font *& outFont, BuiltInFonts builtInFont)
 
 		// Load the pixels into a texture
 		TextureParams params;
-		params.SetFiltering(TextureFilter::NEAREST);
-		params.SetWrap(TextureWrap::CLAMP_TO_BORDER);
+		params.SetFiltering(TextureFilter::k_nearest);
+		params.SetWrap(TextureWrap::k_clamp_to_border);
 		Texture* texture = new Texture(params);
 		texture->WritePixels2D(width, height, pixels);
 
@@ -252,15 +252,15 @@ Font::Font(void* ftFace, int32 size, uint32 charRegionBegin,
 
 	// Create the glyph atlas texture
 	TextureParams params;
-	params.SetWrap(TextureWrap::CLAMP_TO_BORDER);
-	params.SetFiltering(TextureFilter::BILINEAR);
+	params.SetWrap(TextureWrap::k_clamp_to_border);
+	params.SetFiltering(TextureFilter::k_bilinear);
 	m_glyphAtlasTexture = new Texture(params);
 	glBindTexture(GL_TEXTURE_2D, m_glyphAtlasTexture->GetGLTextureID());
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 2); // Pixel alignment defaults to 4, but we are using two 1-byte components (lum & alpha)
 	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (GLsizei) texWidth, (GLsizei) texHeight,
 	//	0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, nullptr);
 	m_glyphAtlasTexture->WritePixels2D(texWidth, texHeight,
-		PixelTransferFormat::RGBA, PixelType::TYPE_UNSIGNED_BYTE, nullptr);
+		PixelTransferFormat::k_rgba, PixelType::k_unsigned_byte, nullptr);
 
 	// Blit glyph images into the texture sheet
 	for (uint32 i = 0; i < m_charRegion.length; i++)

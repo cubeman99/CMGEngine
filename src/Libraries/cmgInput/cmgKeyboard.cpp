@@ -6,7 +6,7 @@
 namespace
 {
 // Translate a DirectInput keycode to a our keycode type.
-Keys::value_type TranslateKeyCode(DWORD dwOfs)
+Keys TranslateKeyCode(DWORD dwOfs)
 {
 	switch (dwOfs)
 	{
@@ -159,19 +159,19 @@ Keyboard::~Keyboard()
 // Input state checks
 //-----------------------------------------------------------------------------
 
-bool Keyboard::IsKeyDown(Keys::value_type key) const
+bool Keyboard::IsKeyDown(Keys key) const
 {
-	return m_buffer[key];
+	return m_buffer[(int32) key];
 }
 
-bool Keyboard::IsKeyPressed(Keys::value_type key) const
+bool Keyboard::IsKeyPressed(Keys key) const
 {
-	return (m_buffer[key] && !m_bufferPrev[key]);
+	return (m_buffer[(int32) key] && !m_bufferPrev[(int32) key]);
 }
 
-bool Keyboard::IsKeyReleased(Keys::value_type key) const
+bool Keyboard::IsKeyReleased(Keys key) const
 {
-	return (!m_buffer[key] && m_bufferPrev[key]);
+	return (!m_buffer[(int32) key] && m_bufferPrev[(int32) key]);
 }
 
 
@@ -212,12 +212,12 @@ void Keyboard::Update()
 	// Translate the keycodes to put into our buffer
 	for (DWORD i = 0; i < s_bufferSize; ++i)
 	{
-		uint32 key = TranslateKeyCode(i);
+		Keys key = TranslateKeyCode(i);
 		if ((m_rawBuffer[i] & 0x80) != 0)
 		{
-			m_buffer[key] = true;
+			m_buffer[(int32) key] = true;
 
-			if (!m_bufferPrev[key])
+			if (!m_bufferPrev[(int32) key])
 			{
 				for (auto handler : m_eventHandlers)
 					handler->OnKeyDown(key);
@@ -225,9 +225,9 @@ void Keyboard::Update()
 		}
 		else
 		{
-			m_buffer[key] = false;
+			m_buffer[(int32) key] = false;
 
-			if (m_bufferPrev[key])
+			if (m_bufferPrev[(int32) key])
 			{
 				for (auto handler : m_eventHandlers)
 					handler->OnKeyUp(key);

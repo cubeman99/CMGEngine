@@ -271,8 +271,7 @@ Error Shader::UnloadImpl()
 
 Error Shader::LoadImpl()
 {
-	// No default load available
-	return CMG_ERROR_NOT_IMPLEMENTED;
+	return LoadImpl(m_loadArgs);
 }
 
 Error Shader::LoadImpl(const ShaderLoadArgs& args)
@@ -281,6 +280,8 @@ Error Shader::LoadImpl(const ShaderLoadArgs& args)
 
 	DeleteGLProgram();
 	CreateGLProgram();
+
+	m_loadArgs = args;
 
 	for (auto it : args.stages)
 	{

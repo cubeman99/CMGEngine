@@ -12,62 +12,62 @@
 //-----------------------------------------------------------------------------
 namespace
 {
-	GLenum TranslateTextureTarget(TextureTarget::value_type target)
+	GLenum TranslateTextureTarget(TextureTarget target)
 	{
 		switch (target)
 		{
-		case TextureTarget::TEXTURE_2D:
+		case TextureTarget::k_texture_2d:
 			return GL_TEXTURE_2D;
-		case TextureTarget::TEXTURE_3D:
+		case TextureTarget::k_texture_3d:
 			return GL_TEXTURE_3D;
-		case TextureTarget::TEXTURE_1D:
+		case TextureTarget::k_texture_1d:
 			return GL_TEXTURE_1D;
-		case TextureTarget::TEXTURE_CUBE_MAP:
+		case TextureTarget::k_texture_cube_map:
 			return GL_TEXTURE_CUBE_MAP;
 		}
+		CMG_ASSERT_FALSE("Invalid texture target");
 		return GL_TEXTURE_2D;
 	}
 
-	GLenum TranslateTextureWrap(TextureWrap::value_type wrap)
+	GLenum TranslateTextureWrap(TextureWrap wrap)
 	{
 		switch (wrap)
 		{
-		case TextureWrap::CLAMP_TO_BORDER:
+		case TextureWrap::k_clamp_to_border:
 			return GL_CLAMP_TO_BORDER;
-		case TextureWrap::CLAMP_TO_EDGE:
+		case TextureWrap::k_clamp_to_edge:
 			return GL_CLAMP_TO_EDGE;
-		case TextureWrap::REPEAT:
+		case TextureWrap::k_repeat:
 			return GL_REPEAT;
-		case TextureWrap::MIRROR_REPEAT:
+		case TextureWrap::k_mirror_repeat:
 			return GL_MIRRORED_REPEAT;
-			//case TextureWrap::MIRROR_CLAMP_TO_EDGE:
-			//return GL_MIRROR_CLAMP_TO_EDGE; //TODO: Figure this out.
 		}
+		CMG_ASSERT_FALSE("Invalid texture wrap");
 		return GL_CLAMP_TO_BORDER;
 	}
 
-	GLenum TranslateMinMagFilter(TextureFilterOptions::value_type minMagFilter,
-		TextureFilterOptions::value_type mipmapFilter)
+	GLenum TranslateMinMagFilter(TextureFilterOptions minMagFilter,
+		TextureFilterOptions mipmapFilter)
 	{
-		//CMG_ASSERT(minMagFilter != TextureFilterOptions::NONE,
+		//CMG_ASSERT(minMagFilter != TextureFilterOptions::k_none,
 		//"You must specify a min and mag filter!");
 
-		if (minMagFilter == TextureFilterOptions::LINEAR)
+		if (minMagFilter == TextureFilterOptions::k_linear)
 		{
-			if (mipmapFilter == TextureFilterOptions::NONE)
+			if (mipmapFilter == TextureFilterOptions::k_none)
 				return GL_LINEAR;
-			else if (mipmapFilter == TextureFilterOptions::LINEAR)
+			else if (mipmapFilter == TextureFilterOptions::k_linear)
 				return GL_LINEAR_MIPMAP_LINEAR;
-			else if (mipmapFilter == TextureFilterOptions::NEAREST)
+			else if (mipmapFilter == TextureFilterOptions::k_nearest)
 				return GL_LINEAR_MIPMAP_NEAREST;
 		}
-		else if (minMagFilter == TextureFilterOptions::NEAREST)
+		else if (minMagFilter == TextureFilterOptions::k_nearest)
 		{
-			if (mipmapFilter == TextureFilterOptions::NONE)
+			if (mipmapFilter == TextureFilterOptions::k_none)
 				return GL_NEAREST;
-			else if (mipmapFilter == TextureFilterOptions::LINEAR)
+			else if (mipmapFilter == TextureFilterOptions::k_linear)
 				return GL_NEAREST_MIPMAP_LINEAR;
-			else if (mipmapFilter == TextureFilterOptions::NEAREST)
+			else if (mipmapFilter == TextureFilterOptions::k_nearest)
 				return GL_NEAREST_MIPMAP_NEAREST;
 		}
 
@@ -78,45 +78,46 @@ namespace
 	{
 		switch (format)
 		{
-		case PixelTransferFormat::RED:
+		case PixelTransferFormat::k_red:
 			return GL_RED;
-		case PixelTransferFormat::GREEN:
+		case PixelTransferFormat::k_green:
 			return GL_GREEN;
-		case PixelTransferFormat::BLUE:
+		case PixelTransferFormat::k_blue:
 			return GL_BLUE;
-		case PixelTransferFormat::RG:
+		case PixelTransferFormat::k_rg:
 			return GL_RG;
-		case PixelTransferFormat::RGB:
+		case PixelTransferFormat::k_rgb:
 			return GL_RGB;
-		case PixelTransferFormat::BGR:
+		case PixelTransferFormat::k_bgr:
 			return GL_BGR;
-		case PixelTransferFormat::RGBA:
+		case PixelTransferFormat::k_rgba:
 			return GL_RGBA;
-		case PixelTransferFormat::BGRA:
+		case PixelTransferFormat::k_bgra:
 			return GL_BGRA;
-		case PixelTransferFormat::RED_INTEGER:
+		case PixelTransferFormat::k_red_integer:
 			return GL_RED_INTEGER;
-		case PixelTransferFormat::GREEN_INTEGER:
+		case PixelTransferFormat::k_green_integer:
 			return GL_GREEN_INTEGER;
-		case PixelTransferFormat::BLUE_INTEGER:
+		case PixelTransferFormat::k_blue_integer:
 			return GL_BLUE_INTEGER;
-		case PixelTransferFormat::RG_INTEGER:
+		case PixelTransferFormat::k_rg_integer:
 			return GL_RG_INTEGER;
-		case PixelTransferFormat::RGB_INTEGER:
+		case PixelTransferFormat::k_rgb_integer:
 			return GL_RGB_INTEGER;
-		case PixelTransferFormat::BGR_INTEGER:
+		case PixelTransferFormat::k_bgr_integer:
 			return GL_BGR_INTEGER;
-		case PixelTransferFormat::RGBA_INTEGER:
+		case PixelTransferFormat::k_rgba_integer:
 			return GL_RGBA_INTEGER;
-		case PixelTransferFormat::BGRA_INTEGER:
+		case PixelTransferFormat::k_bgra_integer:
 			return GL_BGRA_INTEGER;
-		case PixelTransferFormat::DEPTH_COMPONENT:
+		case PixelTransferFormat::k_depth_component:
 			return GL_DEPTH_COMPONENT;
-		case PixelTransferFormat::STENCIL_INDEX:
+		case PixelTransferFormat::k_stencil_index:
 			return GL_STENCIL_INDEX;
-		case PixelTransferFormat::DEPTH_STENCIL:
+		case PixelTransferFormat::k_depth_stencil:
 			return GL_DEPTH_STENCIL;
 		}
+		CMG_ASSERT_FALSE("Invalid pixel transfer format");
 		return GL_RGBA;
 	}
 
@@ -124,21 +125,36 @@ namespace
 	{
 		switch (format)
 		{
-		case PixelInternalFormat::RED:
+		case PixelInternalFormat::k_red:
 			return GL_RED;
-		case PixelInternalFormat::RG:
+		case PixelInternalFormat::k_rg:
 			return GL_RG;
-		case PixelInternalFormat::RGB:
+		case PixelInternalFormat::k_rgb:
 			return GL_RGB;
-		case PixelInternalFormat::RGBA:
+		case PixelInternalFormat::k_rgba:
 			return GL_RGBA;
-		case PixelInternalFormat::DEPTH_COMPONENT:
+		case PixelInternalFormat::k_rgba_32f:
+			return GL_RGBA32F;
+		case PixelInternalFormat::k_rgba_16f:
+			return GL_RGBA16F;
+		case PixelInternalFormat::k_depth_component:
 			return GL_DEPTH_COMPONENT;
-		case PixelInternalFormat::STENCIL_INDEX:
+		case PixelInternalFormat::k_depth_16:
+			return GL_DEPTH_COMPONENT16;
+		case PixelInternalFormat::k_depth_24:
+			return GL_DEPTH_COMPONENT24;
+		case PixelInternalFormat::k_depth_32:
+			return GL_DEPTH_COMPONENT32;
+		case PixelInternalFormat::k_depth_32f:
+			return GL_DEPTH_COMPONENT32F;
+		case PixelInternalFormat::k_stencil_index:
 			return GL_STENCIL_INDEX;
-		case PixelInternalFormat::DEPTH_STENCIL:
+		case PixelInternalFormat::k_depth_stencil:
 			return GL_DEPTH_STENCIL;
+		case PixelInternalFormat::k_depth24_stencil8:
+			return GL_DEPTH24_STENCIL8;
 		}
+		CMG_ASSERT_FALSE("Invalid internal format");
 		return GL_RGBA;
 	}
 
@@ -146,21 +162,22 @@ namespace
 	{
 		switch (type)
 		{
-		case PixelType::TYPE_UNSIGNED_BYTE:
+		case PixelType::k_unsigned_byte:
 			return GL_UNSIGNED_BYTE;
-		case PixelType::TYPE_BYTE:
+		case PixelType::k_byte:
 			return GL_BYTE;
-		case PixelType::TYPE_UNSIGNED_SHORT:
+		case PixelType::k_unsigned_short:
 			return GL_UNSIGNED_SHORT;
-		case PixelType::TYPE_SHORT:
+		case PixelType::k_short:
 			return GL_SHORT;
-		case PixelType::TYPE_UNSIGNED_INT:
+		case PixelType::k_unsigned_int:
 			return GL_UNSIGNED_INT;
-		case PixelType::TYPE_INT:
+		case PixelType::k_int:
 			return GL_INT;
-		case PixelType::TYPE_FLOAT:
+		case PixelType::k_float:
 			return GL_FLOAT;
 		}
+		CMG_ASSERT_FALSE("Invalid pixel type");
 		return GL_UNSIGNED_BYTE;
 	}
 
@@ -168,19 +185,20 @@ namespace
 	{
 		switch (faceIndex)
 		{
-		case CubeMapFace::POSITIVE_X:
+		case CubeMapFace::k_positive_x:
 			return GL_TEXTURE_CUBE_MAP_POSITIVE_X;
-		case CubeMapFace::NEGATIVE_X:
+		case CubeMapFace::k_negative_x:
 			return GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
-		case CubeMapFace::POSITIVE_Y:
+		case CubeMapFace::k_positive_y:
 			return GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
-		case CubeMapFace::NEGATIVE_Y:
+		case CubeMapFace::k_negative_y:
 			return GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
-		case CubeMapFace::POSITIVE_Z:
+		case CubeMapFace::k_positive_z:
 			return GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
-		case CubeMapFace::NEGATIVE_Z:
+		case CubeMapFace::k_negative_z:
 			return GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
 		}
+		CMG_ASSERT_FALSE("Invalid cube map face");
 		return GL_TEXTURE_CUBE_MAP_POSITIVE_X;
 	}
 };
@@ -202,18 +220,18 @@ Texture::Texture(const TextureParams& params) :
 	SetParams(params);
 }
 
-Texture::Texture(const DecodedImageData & data, const TextureParams& params) :
+Texture::Texture(const DecodedImageData& data, const TextureParams& params) :
 	Texture(params)
 {
-	PixelTransferFormat format = PixelTransferFormat::RGBA;
+	PixelTransferFormat format = PixelTransferFormat::k_rgba;
 	if (data.channels == 3)
-		format = PixelTransferFormat::RGB;
+		format = PixelTransferFormat::k_rgb;
 	else if (data.channels == 2)
-		format = PixelTransferFormat::RG;
+		format = PixelTransferFormat::k_rg;
 	else if (data.channels == 1)
-		format = PixelTransferFormat::RED;
+		format = PixelTransferFormat::k_red;
 	WritePixels2D(data.width, data.height, format,
-		PixelType::TYPE_UNSIGNED_BYTE, data.data);
+		PixelType::k_unsigned_byte, data.data);
 }
 
 Texture::~Texture()
@@ -275,8 +293,8 @@ int Texture::GetDepth() const
 // The pixels will be stored in left-to-right, top-to-bottom order.
 void Texture::ReadPixels(Color* pixels) const
 {
-	ReadPixels(PixelTransferFormat::RGBA,
-		PixelType::TYPE_UNSIGNED_BYTE, pixels);
+	ReadPixels(PixelTransferFormat::k_rgba,
+		PixelType::k_unsigned_byte, pixels);
 }
 
 // Store the texture's pixel data in the provided pixel map in a specified
@@ -291,8 +309,8 @@ void Texture::ReadPixels(PixelTransferFormat format, PixelType type,
 // The pixels will be stored in left-to-right, top-to-bottom order.
 void Texture::ReadPixels(int mipmapLevel, Color* pixels) const
 {
-	ReadPixels(mipmapLevel, PixelTransferFormat::RGBA,
-		PixelType::TYPE_UNSIGNED_BYTE, pixels);
+	ReadPixels(mipmapLevel, PixelTransferFormat::k_rgba,
+		PixelType::k_unsigned_byte, pixels);
 }
 
 // Store the texture's pixel data in the provided pixel map in a specified
@@ -315,8 +333,8 @@ void Texture::WriteFacePixels(cubemap_face_index face, int width, int height,
 	const Color* pixels)
 {
 	WriteFacePixelsAtLevel(face, 0, width, height,
-		PixelTransferFormat::RGBA,
-		PixelType::TYPE_UNSIGNED_BYTE, pixels);
+		PixelTransferFormat::k_rgba,
+		PixelType::k_unsigned_byte, pixels);
 	//if (m_params.AutoGenMipMaps())
 	//	GenerateMipMaps();
 }
@@ -334,15 +352,15 @@ void Texture::WriteFacePixelsAtLevel(cubemap_face_index face, int mipmapLevel,
 	int width, int height, const Color* pixels)
 {
 	WriteFacePixelsAtLevel(face, mipmapLevel, width, height,
-		PixelTransferFormat::RGBA,
-		PixelType::TYPE_UNSIGNED_BYTE, pixels);
+		PixelTransferFormat::k_rgba,
+		PixelType::k_unsigned_byte, pixels);
 }
 
 void Texture::WriteFacePixelsAtLevel(cubemap_face_index face, int mipmapLevel,
 	int width, int height, PixelTransferFormat format, PixelType type,
 	const void* pixelData)
 {
-	//CMG_ASSERT(m_params.GetTarget() == TextureTarget::TEXTURE_CUBE_MAP,
+	//CMG_ASSERT(m_params.GetTarget() == TextureTarget::k_texture_cube_map,
 	//"Texture must be a cubemap to modify face pixels.");
 	//CMG_ASSERT(width == height, "Cube map face images must have a square size");
 
@@ -367,8 +385,8 @@ void Texture::WriteFacePixelsAtLevel(cubemap_face_index face, int mipmapLevel,
 
 void Texture::WritePixels1D(int width, const Color* pixels)
 {
-	WritePixelsAtLevel1D(0, width, PixelTransferFormat::RGBA,
-		PixelType::TYPE_UNSIGNED_BYTE, pixels);
+	WritePixelsAtLevel1D(0, width, PixelTransferFormat::k_rgba,
+		PixelType::k_unsigned_byte, pixels);
 	if (m_params.AutoGenMipMaps())
 		GenerateMipMaps();
 }
@@ -384,14 +402,14 @@ void Texture::WritePixels1D(int width, PixelTransferFormat format,
 void Texture::WritePixelsAtLevel1D(int mipmapLevel, int width,
 	const Color* pixels)
 {
-	WritePixelsAtLevel1D(mipmapLevel, width, PixelTransferFormat::RGBA,
-		PixelType::TYPE_UNSIGNED_BYTE, pixels);
+	WritePixelsAtLevel1D(mipmapLevel, width, PixelTransferFormat::k_rgba,
+		PixelType::k_unsigned_byte, pixels);
 }
 
 void Texture::WritePixelsAtLevel1D(int mipmapLevel, int width,
 	PixelTransferFormat format, PixelType type, const void* pixelData)
 {
-	//CMG_ASSERT(m_params.GetTarget() == TextureTarget::TEXTURE_1D,
+	//CMG_ASSERT(m_params.GetTarget() == TextureTarget::k_texture_1d,
 	//"Texture target must be 1D to modify pixels like this.");
 
 	if (mipmapLevel == 0)
@@ -413,8 +431,8 @@ void Texture::WritePixelsAtLevel1D(int mipmapLevel, int width,
 
 void Texture::WritePixels2D(int width, int height, const Color* pixels)
 {
-	WritePixelsAtLevel2D(0, width, height, PixelTransferFormat::RGBA,
-		PixelType::TYPE_UNSIGNED_BYTE, pixels);
+	WritePixelsAtLevel2D(0, width, height, PixelTransferFormat::k_rgba,
+		PixelType::k_unsigned_byte, pixels);
 	if (m_params.AutoGenMipMaps())
 		GenerateMipMaps();
 }
@@ -431,13 +449,13 @@ void Texture::WritePixelsAtLevel2D(int mipmapLevel, int width, int height,
 	const Color* pixels)
 {
 	WritePixelsAtLevel2D(mipmapLevel, width, height,
-		PixelTransferFormat::RGBA, PixelType::TYPE_UNSIGNED_BYTE, pixels);
+		PixelTransferFormat::k_rgba, PixelType::k_unsigned_byte, pixels);
 }
 
 void Texture::WritePixelsAtLevel2D(int mipmapLevel, int width, int height,
 	PixelTransferFormat format, PixelType type, const void* pixelData)
 {
-	//CMG_ASSERT(m_params.GetTarget() == TextureTarget::TEXTURE_2D,
+	//CMG_ASSERT(m_params.GetTarget() == TextureTarget::k_texture_2d,
 	//"Texture target must be 2D to modify pixels like this.");
 
 	if (mipmapLevel == 0)
@@ -461,8 +479,8 @@ void Texture::WritePixelsAtLevel2D(int mipmapLevel, int width, int height,
 void Texture::WritePixels3D(int width, int height, int depth, const Color* pixels)
 {
 	WritePixelsAtLevel3D(0, width, height, depth,
-		PixelTransferFormat::RGBA,
-		PixelType::TYPE_UNSIGNED_BYTE, pixels);
+		PixelTransferFormat::k_rgba,
+		PixelType::k_unsigned_byte, pixels);
 	if (m_params.AutoGenMipMaps())
 		GenerateMipMaps();
 }
@@ -479,15 +497,15 @@ void Texture::WritePixelsAtLevel3D(int mipmapLevel, int width, int height,
 	int depth, const Color* pixels)
 {
 	WritePixelsAtLevel3D(mipmapLevel, width, height, depth,
-		PixelTransferFormat::RGBA,
-		PixelType::TYPE_UNSIGNED_BYTE, pixels);
+		PixelTransferFormat::k_rgba,
+		PixelType::k_unsigned_byte, pixels);
 }
 
 void Texture::WritePixelsAtLevel3D(int mipmapLevel, int width, int height,
 	int depth, PixelTransferFormat format, PixelType type,
 	const void* pixelData)
 {
-	//CMG_ASSERT(m_params.GetTarget() == TextureTarget::TEXTURE_3D,
+	//CMG_ASSERT(m_params.GetTarget() == TextureTarget::k_texture_3d,
 	//"Texture target must be 3D to modify pixels like this.");
 
 	if (mipmapLevel == 0)
@@ -634,11 +652,40 @@ Error Texture::LoadTexture(Texture*& outTexture, const Path& path, const Texture
 
 	// Create the texture
 	TextureParams texParams = params;
-	texParams.SetTarget(TextureTarget::TEXTURE_2D);
+	texParams.SetTarget(TextureTarget::k_texture_2d);
 	outTexture = new Texture(glId);
 	outTexture->SetParams(texParams);
 	outTexture->GenerateMipMaps();
 
+	return CMG_ERROR_SUCCESS;
+}
+
+Error Texture::LoadCubeMapTexture(Texture*& outTexture,
+	const Path& pathPosX, const Path& pathNegX, const Path& pathPosY,
+	const Path& pathNegY, const Path& pathPosZ, const Path& pathNegZ,
+	TextureParams params)
+{
+	// Load an image file directly as a new OpenGL texture
+	GLuint glId = SOIL_load_OGL_cubemap(
+		pathPosX.c_str(),
+		pathNegX.c_str(),
+		pathPosY.c_str(),
+		pathNegY.c_str(),
+		pathPosZ.c_str(),
+		pathNegZ.c_str(),
+		SOIL_LOAD_RGBA,
+		SOIL_CREATE_NEW_ID,
+		SOIL_FLAG_COMPRESS_TO_DXT);
+	if (glId == 0)
+		return CMG_ERROR(CommonErrorTypes::k_file_corrupt);
+	
+	// Create the texture
+	params.SetTarget(TextureTarget::k_texture_cube_map);
+	params.SetFiltering(TextureFilter::k_trilinear);
+	params.SetWrap(TextureWrap::k_clamp_to_edge);
+	outTexture = new Texture(glId);
+	outTexture->SetParams(params);
+	outTexture->GenerateMipMaps();
 	return CMG_ERROR_SUCCESS;
 }
 
@@ -652,7 +699,7 @@ Error Texture::LoadTexture(Texture*& outTexture, const Array<uint8>& data, const
 
 	// Create the texture
 	TextureParams texParams = params;
-	texParams.SetTarget(TextureTarget::TEXTURE_2D);
+	texParams.SetTarget(TextureTarget::k_texture_2d);
 	outTexture = new Texture(glId);
 	outTexture->SetParams(texParams);
 	outTexture->GenerateMipMaps();
@@ -686,20 +733,20 @@ Error Texture::DecodeImage(DecodedImageData& outImage, const Array<uint8>& data)
 Error Texture::SaveTexture(const Texture* texture, const Path& path,
 	int mipmapLevel)
 {
-	ImageEncodingFormat format = ImageEncodingFormat::PNG;
+	ImageEncodingFormat format = ImageEncodingFormat::k_png;
 
 	// Determine the image format by its extension
 	String extension = cmg::string::ToLower(path.GetExtension());
 	if (extension == "png")
-		format = ImageEncodingFormat::PNG;
+		format = ImageEncodingFormat::k_png;
 	else if (extension == "jpg" || extension == "jpeg")
-		format = ImageEncodingFormat::JPEG;
+		format = ImageEncodingFormat::k_jpeg;
 	else if (extension == "dds")
-		format = ImageEncodingFormat::DDS;
+		format = ImageEncodingFormat::k_dds;
 	else if (extension == "bmp")
-		format = ImageEncodingFormat::BMP;
+		format = ImageEncodingFormat::k_bmp;
 	else if (extension == "tga")
-		format = ImageEncodingFormat::TGA;
+		format = ImageEncodingFormat::k_tga;
 
 	return SaveTexture(texture, path, format, mipmapLevel);
 }
@@ -718,32 +765,32 @@ Error Texture::SaveTexture(const Texture* texture, const Path& path,
 	// Retreive the pixel data
 	Array<uint8> data;
 	data.resize(width * height * 4);
-	texture->ReadPixels(mipmapLevel, PixelTransferFormat::RGBA,
-		PixelType::TYPE_UNSIGNED_BYTE, data.data());
+	texture->ReadPixels(mipmapLevel, PixelTransferFormat::k_rgba,
+		PixelType::k_unsigned_byte, data.data());
 
 	// Encode/save the image data to file
-	if (format == ImageEncodingFormat::PNG)
+	if (format == ImageEncodingFormat::k_png)
 	{
 		unsigned int error = lodepng::encode(
 			path, data, (unsigned int) width, (unsigned int) height);
 		if (error != 0)
 			return CMG_ERROR_FAILURE;
 	}
-	else if (format == ImageEncodingFormat::BMP)
+	else if (format == ImageEncodingFormat::k_bmp)
 	{
 		int error = SOIL_save_image(path.c_str(), SOIL_SAVE_TYPE_BMP,
 			(int) width, (int) height, 4, data.data());
 		if (error == 0)
 			return CMG_ERROR_FAILURE;
 	}
-	else if (format == ImageEncodingFormat::TGA)
+	else if (format == ImageEncodingFormat::k_tga)
 	{
 		int error = SOIL_save_image(path.c_str(), SOIL_SAVE_TYPE_TGA,
 			(int) width, (int) height, 4, data.data());
 		if (error == 0)
 			return CMG_ERROR_FAILURE;
 	}
-	else if (format == ImageEncodingFormat::DDS)
+	else if (format == ImageEncodingFormat::k_dds)
 	{
 		int error = SOIL_save_image(path.c_str(), SOIL_SAVE_TYPE_DDS,
 			(int) width, (int) height, 4, data.data());
@@ -790,7 +837,7 @@ Error Texture::LoadImpl(const TextureParams& params)
 
 	// Set the texture params
 	TextureParams texParams = params;
-	texParams.SetTarget(TextureTarget::TEXTURE_2D);
+	texParams.SetTarget(TextureTarget::k_texture_2d);
 	SetParams(texParams);
 
 	GenerateMipMaps();

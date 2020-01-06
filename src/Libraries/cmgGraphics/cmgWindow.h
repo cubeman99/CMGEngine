@@ -59,8 +59,8 @@ struct WindowFlags
 		k_window_buttons	= 0x4,
 		k_fullscreen		= 0x8,
 		k_fake_fullscreen	= 0x10,
-		//k_maximized			= 0x20,
-		//k_minimized			= 0x40,
+		//k_maximized		= 0x20,
+		//k_minimized		= 0x40,
 	};
 
 	typedef int value_type;

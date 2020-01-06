@@ -16,6 +16,17 @@ namespace cmg {
 	{
 	}
 
+	Texture::sptr ResourceManager::LoadCubeMapTexture(Path paths[6])
+	{
+		TextureParams params(TextureTarget::k_texture_cube_map);
+		Texture::sptr texture = cmg::make_shared<Texture>(params);
+		for (uint32 face = 0; face < 6; face++)
+		{
+			//paths[face];
+		}
+		return texture;
+	}
+
 	Error ResourceManager::LoadShader(resource_ptr<Shader>& outShader,
 		const String& name, const Path& vertexPath, const Path& fragmentPath)
 	{

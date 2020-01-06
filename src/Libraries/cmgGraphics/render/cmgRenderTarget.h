@@ -4,38 +4,62 @@
 #include <cmgCore/cmgBase.h>
 #include <cmgGraphics/cmgTexture.h>
 
-
+// A frame buffer
 class RenderTarget
 {
-	friend class OpenGLRenderDevice;
+public:
+	using sptr = cmg::shared_ptr<RenderTarget>;
 
 public:
-	static const uint32 MAX_ATTACHMENTS = 16;
+	static constexpr uint32 MAX_ATTACHMENTS = 16;
 
-	RenderTarget(OpenGLRenderDevice* device);
-	~RenderTarget();
+	RenderTarget(uint32 width, uint32 height);
+	virtual ~RenderTarget();
 	
 	// Getters
 	uint32 GetWidth() const;
 	uint32 GetHeight() const;
+	Texture::sptr GetColorAttachment(uint32 location);
+	Texture::sptr GetDepthAttachment();
+	Texture::sptr GetStencilAttachment();
+	Texture::sptr GetDepthStencilAttachment();
 	
-	void AddColorAttachment(uint32 location, Texture* texture);
-	void AddColorAttachment(uint32 location, uint32 width, uint32 height, const TextureParams& params);
+	// Attachment modifiers
+	void AddColorAttachment(uint32 location, Texture::sptr texture);
+	void AddDepthAttachment(Texture::sptr texture);
+	Texture::sptr CreateColorAttachment(uint32 location);
+	Texture::sptr CreateColorAttachment(uint32 location, const TextureParams& params);
+	Texture::sptr CreateCubeMapColorAttachments(uint32 firstLocation);
+	Texture::sptr CreateCubeMapColorAttachments(uint32 firstLocation, TextureParams params);
+	Texture::sptr CreateDepthAttachment(
+		PixelInternalFormat format = PixelInternalFormat::k_depth_32f);
+	Texture::sptr CreateStencilAttachment(
+		PixelInternalFormat format = PixelInternalFormat::k_stencil_index);
+	Texture::sptr CreateDepthStencilAttachment(
+		PixelInternalFormat format = PixelInternalFormat::k_depth24_stencil8);
 
-	inline Texture* GetColorAttachment(uint32 location)
-	{
-		return m_colorAttachments[location];
-	}
+	void SetColorTargets(const Array<uint32>& colorTargets);
 
 private:
+	// Auto set draw-targets to all color attachments sequentually
 	void UpdateDrawBuffers();
 
 public:
-	OpenGLRenderDevice* m_device;
-	uint32 m_glFrameBufferId;
+	// Prevent copying
+	RenderTarget(const RenderTarget& other) {}
+	void operator=(const RenderTarget& other) {}
+
 	uint32 m_width;
 	uint32 m_height;
-	Texture* m_colorAttachments[MAX_ATTACHMENTS];
+
+	Texture::sptr m_colorAttachments[MAX_ATTACHMENTS];
+
+	// If using a single depth-stencil attachment, then both depth and
+	// stencil will point to the same texture
+	Texture::sptr m_depthAttachment;
+	Texture::sptr m_stencilAttachment;
+
+	uint32 m_glFrameBufferId;
 };
 
 

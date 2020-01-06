@@ -93,7 +93,7 @@ Error::~Error()
 		cmg::core::console::SetConsoleColor(
 			cmg::core::console::p_color::light_gray,
 			cmg::core::console::p_color::black);
-		CMG_DEBUGGER_BREAK();
+			CMG_DEBUGGER_BREAK();
 	}
 }
 

@@ -101,10 +101,11 @@ void CollisionDetector::GenerateContactsEPA(
 
 
 
-void CollisionDetector::DetectCollision(CollisionPrimitive* one, CollisionPrimitive* two, CollisionData* collisionData)
+void CollisionDetector::DetectCollision(
+	CollisionPrimitive* one, CollisionPrimitive* two, CollisionData* collisionData)
 {
-	CollisionPrimitiveType::value_type typeOne = one->GetType();
-	CollisionPrimitiveType::value_type typeTwo = two->GetType();
+	CollisionPrimitiveType typeOne = one->GetType();
+	CollisionPrimitiveType typeTwo = two->GetType();
 
 	// Call the correct collision detection function for the pair of primitives.
 	if (typeOne == CollisionPrimitiveType::k_sphere &&

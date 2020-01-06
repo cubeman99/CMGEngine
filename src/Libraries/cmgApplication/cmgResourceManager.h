@@ -20,6 +20,7 @@ public:
 	virtual ~ResourceManager();
 
 	// Loading functions
+	Texture::sptr LoadCubeMapTexture(Path paths[6]);
 	Error LoadShader(resource_ptr<Shader>& outShader, const String& name,
 		const Path& vertexPath, const Path& fragmentPath);
 	Error LoadComputeShader(resource_ptr<Shader>& outShader, const Path& path);

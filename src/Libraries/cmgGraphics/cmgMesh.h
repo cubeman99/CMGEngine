@@ -31,7 +31,7 @@ public:
 	inline int GetFirstIndex() const { return m_firstIndex; }
 	inline int GetNumIndices() const { return m_numIndices; }
 	//inline const Bounds& GetBounds() const { return m_bounds; }
-	inline VertexPrimitiveType::value_type GetPrimitiveType() const { return m_primitiveType; }
+	inline VertexPrimitiveType GetPrimitiveType() const { return m_primitiveType; }
 
 	inline VertexData* GetVertexData() { return &m_vertexData; }
 	inline IndexData* GetIndexData() { return &m_indexData; }
@@ -41,7 +41,7 @@ public:
 	// Mutators
 	inline void SetIndices(int firstIndex, int numIndices) { m_firstIndex = firstIndex; m_numIndices = numIndices; }
 	//inline void SetBounds(const Bounds& bounds) { m_bounds =  bounds; }
-	inline void SetPrimitiveType(VertexPrimitiveType::value_type type) { m_primitiveType = type; }
+	inline void SetPrimitiveType(VertexPrimitiveType type) { m_primitiveType = type; }
 
 	// Static methods
 	static Error Load(const Path& path, Mesh*& outMesh, MeshLoadOptions::value_type options = MeshLoadOptions::k_none);
@@ -73,7 +73,7 @@ private:
 
 	Array<String> m_jointNames;
 
-	VertexPrimitiveType::value_type m_primitiveType; // How the index buffer is organized into primitives.
+	VertexPrimitiveType m_primitiveType; // How the index buffer is organized into primitives.
 };
 
 

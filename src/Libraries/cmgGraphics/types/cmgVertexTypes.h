@@ -15,24 +15,19 @@
 
 // The format in which vertex lists or vertex element arrays are organized
 // into primitives.
-struct VertexPrimitiveType
+enum class VertexPrimitiveType
 { 
-	typedef int value_type;
-
-	enum
-	{
-		k_points = 0,
-		k_lines,
-		k_line_strip,
-		k_line_loop,		// a single line loop
-		k_triangles,
-		k_triangle_strip,
-		k_triangle_fan,
-		k_quads,
-		k_quad_strip,
-		k_polygon,			// this is a *single* polygon
-		k_count
-	};
+	k_points = 0,
+	k_lines,
+	k_line_strip,
+	k_line_loop,		// a single line loop
+	k_triangles,
+	k_triangle_strip,
+	k_triangle_fan,
+	k_quads,
+	k_quad_strip,
+	k_polygon,			// this is a *single* polygon
+	k_count
 };
 
 struct PrimitiveList
