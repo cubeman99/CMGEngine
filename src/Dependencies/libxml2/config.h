@@ -7,9 +7,6 @@
 #define HAVE_ERRNO_H
 #define SEND_ARG2_CAST
 #define GETHOSTBYNAME_ARG_CAST
-#if _MSC_VER >= 1600
-#define HAVE_STDINT_H
-#endif
 
 #if defined(_WIN32_WCE)
 #undef HAVE_ERRNO_H
@@ -122,3 +119,4 @@ static int isnan (double d) {
 #endif
 
 #endif /* __LIBXML_WIN32_CONFIG__ */
+
