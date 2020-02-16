@@ -9,18 +9,13 @@ class InputManager;
 //-----------------------------------------------------------------------------
 // Enum for device types.
 //-----------------------------------------------------------------------------
-struct InputDeviceType
+enum class InputDeviceType
 {
-	enum
-	{
-		k_keyboard = 0,
-		k_mouse,
-		k_joystick,
-		k_touch_surface,
-		k_count
-	};
-
-	typedef int value_type;
+	k_keyboard = 0,
+	k_mouse,
+	k_joystick,
+	k_touch_surface,
+	k_count
 };
 	
 

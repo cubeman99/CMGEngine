@@ -1,5 +1,5 @@
-#ifndef _APPLICATION_H_
-#define _APPLICATION_H_
+#ifndef _CMG_APPLICATION_H_
+#define _CMG_APPLICATION_H_
 
 #include <cmgCore/cmg_core.h>
 #include <cmgGraphics/cmg_graphics.h>
@@ -7,7 +7,7 @@
 #include <cmgApplication/cmgResourceManager.h>
 
 
-class Application
+class Application : public cmg::EventSubscriber
 {
 public:
 	Application();
@@ -50,4 +50,4 @@ private:
 };
 
 
-#endif // _APPLICATION_H_
+#endif // _CMG_APPLICATION_H_

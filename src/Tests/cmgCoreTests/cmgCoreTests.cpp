@@ -63,27 +63,62 @@ TEST(String, Trim)
 	cmg::string::TrimRightIP(str);
 	EXPECT_EQ(str, "  word");
 
-	EXPECT_EQ(cmg::string::Trim("hello"), "hello");
-	EXPECT_EQ(cmg::string::Trim(" hello"), "hello");
-	EXPECT_EQ(cmg::string::Trim("   hello     "), "hello");
-	EXPECT_EQ(cmg::string::Trim("    hello "), "hello");
+	EXPECT_EQ(cmg::string::Trim(String("hello")), "hello");
+	EXPECT_EQ(cmg::string::Trim(String(" hello")), "hello");
+	EXPECT_EQ(cmg::string::Trim(String("   hello     ")), "hello");
+	EXPECT_EQ(cmg::string::Trim(String("    hello ")), "hello");
 
-	EXPECT_EQ(cmg::string::TrimLeft("hello"), "hello");
-	EXPECT_EQ(cmg::string::TrimLeft(" hello"), "hello");
-	EXPECT_EQ(cmg::string::TrimLeft("   hello     "), "hello     ");
-	EXPECT_EQ(cmg::string::TrimLeft("    hello "), "hello ");
+	EXPECT_EQ(cmg::string::TrimLeft(String("hello")), "hello");
+	EXPECT_EQ(cmg::string::TrimLeft(String(" hello")), "hello");
+	EXPECT_EQ(cmg::string::TrimLeft(String("   hello     ")), "hello     ");
+	EXPECT_EQ(cmg::string::TrimLeft(String("    hello ")), "hello ");
 
-	EXPECT_EQ(cmg::string::TrimRight("hello"), "hello");
-	EXPECT_EQ(cmg::string::TrimRight(" hello"), " hello");
-	EXPECT_EQ(cmg::string::TrimRight("   hello     "), "   hello");
-	EXPECT_EQ(cmg::string::TrimRight("    hello "), "    hello");
+	EXPECT_EQ(cmg::string::TrimRight(String("hello")), "hello");
+	EXPECT_EQ(cmg::string::TrimRight(String(" hello")), " hello");
+	EXPECT_EQ(cmg::string::TrimRight(String("   hello     ")), "   hello");
+	EXPECT_EQ(cmg::string::TrimRight(String("    hello ")), "    hello");
+}
 
-	EXPECT_EQ(cmg::string::ToLower("Hello"), "hello");
-	EXPECT_EQ(cmg::string::ToLower("HELLO"), "hello");
-	EXPECT_EQ(cmg::string::ToLower("hello"), "hello");
-	EXPECT_EQ(cmg::string::ToUpper("Hello"), "HELLO");
-	EXPECT_EQ(cmg::string::ToUpper("HELLO"), "HELLO");
-	EXPECT_EQ(cmg::string::ToUpper("hello"), "HELLO");
+TEST(String, ToLower)
+{
+	EXPECT_EQ(cmg::string::ToLower(String("Hello")), "hello");
+	EXPECT_EQ(cmg::string::ToLower(String("HELLO")), "hello");
+	EXPECT_EQ(cmg::string::ToLower(String("hello")), "hello");
+	EXPECT_EQ(cmg::string::ToLower(std::u16string(u"HELLO")), u"hello");
+}
+
+TEST(String, ToUpper)
+{
+	EXPECT_EQ(cmg::string::ToUpper(String("Hello")), "HELLO");
+	EXPECT_EQ(cmg::string::ToUpper(String("HELLO")), "HELLO");
+	EXPECT_EQ(cmg::string::ToUpper(String("hello")), "HELLO");
+	EXPECT_EQ(cmg::string::ToUpper(std::u16string(u"hello")), u"HELLO");
+}
+
+TEST(String, EndsWith)
+{
+	String str = "hello";
+	EXPECT_TRUE(cmg::string::EndsWith<String>(str, "hello"));
+	EXPECT_TRUE(cmg::string::EndsWith<String>(str, "ello"));
+	EXPECT_TRUE(cmg::string::EndsWith<String>(str, "llo"));
+	EXPECT_TRUE(cmg::string::EndsWith<String>(str, "o"));
+	EXPECT_FALSE(cmg::string::EndsWith<String>(str, "hell"));
+	EXPECT_FALSE(cmg::string::EndsWith<String>(str, "ahello"));
+	EXPECT_TRUE(cmg::string::EndsWith<std::u16string>(u"hello", u"llo"));
+	EXPECT_FALSE(cmg::string::EndsWith<std::u16string>(u"hello", u"hell"));
+}
+
+TEST(String, BeginsWith)
+{
+	String str = "hello";
+	EXPECT_TRUE(cmg::string::BeginsWith<String>(str, "hello"));
+	EXPECT_TRUE(cmg::string::BeginsWith<String>(str, "hell"));
+	EXPECT_TRUE(cmg::string::BeginsWith<String>(str, "he"));
+	EXPECT_TRUE(cmg::string::BeginsWith<String>(str, "h"));
+	EXPECT_FALSE(cmg::string::BeginsWith<String>(str, "hello world"));
+	EXPECT_FALSE(cmg::string::BeginsWith<String>(str, "what"));
+	EXPECT_TRUE(cmg::string::BeginsWith<std::u16string>(u"hello", u"hell"));
+	EXPECT_FALSE(cmg::string::BeginsWith<std::u16string>(u"hello", u"llo"));
 }
 
 

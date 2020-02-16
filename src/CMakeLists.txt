@@ -8,6 +8,10 @@ set(SOLUTION_DEPENDENCY_PROJECTS
 	WinSDK
 	Catch
 	SOIL
+	rapidjson
+	zlib
+	libiconv
+	libxml2
 )
 
 set(SOLUTION_LIBRARY_PROJECTS
@@ -37,12 +41,22 @@ else()
 endif()
 
 #------------------------------------------------------------------------------
-# Install function for dependencies.
+# Install function for dependencies
 
+# Adds a dependency project that only has header files
+#   target_name: Name of the project
+#   include_dir: path to the directory to copy into the install's include root
+function(cmg_install_header_dependency target_name include_dir)
+	message (STATUS " * Installing header dependency [${target_name}]")
+	add_library(${target_name} INTERFACE)
+	install(DIRECTORY ${include_dir} DESTINATION "include")
+endfunction()
+
+# Adds a dependency project as a static library
 function(cmg_install_dependency target_name target_source_files)
-	message (STATUS " * Installing dependency [${target_name}]")
+	message (STATUS " * Installing library dependency [${target_name}]")
 	
-	# Add the library project.
+	# Add the library project
 	add_library(${target_name} STATIC
 		${target_source_files})
 	
@@ -109,6 +123,7 @@ function(cmg_install_library target_name target_source_files)
 	include_directories(
 		"../../${SOLUTION_DEPENDENCY_PROJECTS_FOLDER}"
 		"../../${SOLUTION_DEPENDENCY_PROJECTS_FOLDER}/FreeType/include"
+		"../../${SOLUTION_DEPENDENCY_PROJECTS_FOLDER}/libiconv/include"
 		"../"
 		"./"
 		 ${OPENGL_INCLUDE_DIRS}

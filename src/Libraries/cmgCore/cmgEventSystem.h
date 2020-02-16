@@ -14,6 +14,7 @@ namespace cmg {
 
 class EventSubscriber;
 
+
 struct Event
 {
 };
@@ -23,15 +24,18 @@ struct Event
 class HandlerFunctionBase
 {
 public:
-	// Call the member function
-	void Exec(Event* evnt)
-	{
-		Call(evnt);
-	}
+	HandlerFunctionBase(EventSubscriber* subscriber);
+
 	virtual void* GetInstance() = 0;
+	EventSubscriber* GetSubscriber();
+
+	void Exec(Event* evnt);
+
 private:
 	// Implemented by MemberFunctionHandler
 	virtual void Call(Event * evnt) = 0;
+
+	EventSubscriber* m_subscriber;
 };
 
 
@@ -41,7 +45,9 @@ class MemberFunctionHandler : public HandlerFunctionBase
 public:
 	typedef void (T::*MemberFunction)(EventType*);
 
-	MemberFunctionHandler(T* instance, MemberFunction memberFunction) :
+	MemberFunctionHandler(EventSubscriber* subscriber,
+		T* instance, MemberFunction memberFunction) :
+		HandlerFunctionBase(subscriber),
 		m_instance{instance},
 		m_memberFunction{memberFunction}
 	{
@@ -72,22 +78,22 @@ class EventManager
 public:
 	using HandlerList = std::list<HandlerFunctionBase*>;
 
+	EventManager();
+	virtual ~EventManager();
+
 	template<typename T_Event>
 	void Publish(T_Event* evnt)
 	{
-		HandlerList* handlers = m_subscribers[typeid(T_Event)];
-
-		if (handlers == nullptr)
-		{
+		HandlerList* handlersPtr = m_subscribers[typeid(T_Event)];
+		if (handlersPtr == nullptr)
 			return;
-		}
 
-		for (auto& handler : *handlers)
+		// Iterate a copy of the array (in case new subscribes happen)
+		HandlerList handlers = *handlersPtr;
+		for (auto& handler : handlers)
 		{
 			if (handler != nullptr)
-			{
 				handler->Exec(evnt);
-			}
 		}
 	}
 
@@ -105,7 +111,7 @@ public:
 
 		instance->m_eventManagers.insert(this);
 		handlers->push_back(new MemberFunctionHandler<T_Instance, T_Event>(
-			static_cast<T_Instance*>(instance), memberFunction));
+			instance, static_cast<T_Instance*>(instance), memberFunction));
 	}
 
 	// Unsubscribe an instance from a single event type.
@@ -144,6 +150,7 @@ class EventSubscriber
 {
 public:
 	friend class EventManager;
+	friend class HandlerFunctionBase;
 
 	virtual ~EventSubscriber();
 

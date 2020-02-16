@@ -1,7 +1,4 @@
 #include "cmgString.h"
-#include <algorithm> 
-#include <cctype>
-#include <locale>
 
 namespace cmg { namespace string {
 	
@@ -48,50 +45,7 @@ namespace cmg { namespace string {
 		return result;
 	}
 
-	// trim from start (in place)
-	void TrimLeftIP(String& str)
-	{
-		str.erase(str.begin(), std::find_if(str.begin(), str.end(), [](int ch) {
-			return !std::isspace(ch);
-		}));
-	}
-
-	// trim from end (in place)
-	void TrimRightIP(String& str)
-	{
-		str.erase(std::find_if(str.rbegin(), str.rend(), [](int ch) {
-			return !std::isspace(ch);
-		}).base(), str.end());
-	}
-
-	// trim from both ends (in place)
-	void TrimIP(String& str)
-	{
-		TrimLeftIP(str);
-		TrimRightIP(str);
-	}
-
-	// trim from start (copying)
-	String TrimLeft(String str)
-	{
-		TrimLeftIP(str);
-		return str;
-	}
-
-	// trim from end (copying)
-	String TrimRight(String str)
-	{
-		TrimRightIP(str);
-		return str;
-	}
-
-	// trim from both ends (copying)
-	String Trim(String str)
-	{
-		TrimIP(str);
-		return str;
-	}
-
+	/*
 	void ToLowerIP(String& str)
 	{
 		std::transform(str.begin(), str.end(), str.begin(), ::tolower);
@@ -113,6 +67,6 @@ namespace cmg { namespace string {
 		ToUpperIP(str);
 		return str;
 	}
-
+	*/
 }}
 

@@ -2,6 +2,7 @@
 #define _CMG_INPUT_JOYSTICK_H_
 
 #include <cmgCore/containers/cmgArray.h>
+#include <cmgCore/string/cmgString.h>
 #include <cmgInput/cmgInputDevice.h>
 #include <cmgInput/cmgDirectInputIncludes.h>
 #include <cmgMath/types/cmgVector2f.h>
@@ -51,10 +52,8 @@ struct XboxControllerState
 class Joystick : public InputDevice
 {
 public:
-	enum
-	{
-		k_device_type = InputDeviceType::k_joystick
-	};
+	static constexpr InputDeviceType k_device_type =
+		InputDeviceType::k_joystick;
 
 	enum class Buttons
 	{
@@ -74,77 +73,63 @@ public:
 		DPadRight,
 	};
 
-public:
-	Joystick(InputManager* inputManager, const InputDeviceInfo& deviceInfo);
-	~Joystick();
-
-	void Reset();
-	void Update();
-
-	inline bool IsButtonDown(Buttons button) const
+	struct AxisState
 	{
-		return m_xboxState.buttons[(uint32) button];
-	}
+		float position = 0.0f;
+	};
 
-	inline bool IsButtonPressed(Buttons button) const
+	struct POVState
 	{
-		return m_xboxState.buttons[(uint32) button] &&
-			!m_xboxStatePrev.buttons[(uint32) button];
-	}
+		bool centered = true;
+		float angle = 0.0f;
+	};
 
-	inline bool IsButtonReleased(Buttons button) const
+	struct ButtonState
 	{
-		return !m_xboxState.buttons[(uint32) button] &&
-			m_xboxStatePrev.buttons[(uint32) button];
-	}
-
-	inline const XboxControllerState& GetStatePrev() const
-	{
-		return m_xboxState;
-	}
-
-	inline const XboxControllerState& GetState() const
-	{
-		return m_xboxState;
-	}
+		bool down = true;
+	};
 
 	struct Axis
 	{
-		union
-		{
-			struct
-			{
-				float x; float y; float z;
-			};
-			struct
-			{
-				Vector2f xy;
-			};
-			struct
-			{
-				Vector3f xyz;
-			};
-		};
-		uint32 index;
-
-		Axis()
-		{
-
-		}
+		AxisState state;
+		uint32 index = 0;
+		uint32 offset = 0;
+		String name;
 	};
 
 	struct POV
 	{
-		bool centered;
-		float angle;
-		uint32 index;
+		POVState state;
+		uint32 index = 0;
+		String name;
 	};
 
 	struct Button
 	{
-		bool down;
-		uint32 index;
+		ButtonState state;
+		uint32 index = 0;
+		String name;
 	};
+
+public:
+	Joystick(InputManager* inputManager, const InputDeviceInfo& deviceInfo);
+	~Joystick();
+
+	bool IsButtonDown(Buttons button) const;
+	bool IsButtonPressed(Buttons button) const;
+	bool IsButtonReleased(Buttons button) const;
+	const XboxControllerState& GetStatePrev() const;
+	const XboxControllerState& GetState() const;
+	uint32 GetNumAxes() const;
+	uint32 GetNumButtons() const;
+	uint32 GetNumPOVs() const;
+	const AxisState& GetAxisState(uint32 axisIndex) const;
+	const ButtonState& GetButtonState(uint32 buttonIndex) const;
+	const POVState& GetPOVState(uint32 povIndex) const;
+	float GetAxisPosition(uint32 axisIndex) const;
+
+	void Reset();
+	void Update();
 
 private:
 	void DoInitialize(const InputDeviceInfo& deviceInfo);
@@ -153,17 +138,12 @@ private:
 	IDirectInput8* m_directInput;
 	IDirectInputDevice8* m_joystick;
 	HWND m_windowHandle;
-
-public:
-	Axis m_axisPool[16];
-	Button m_buttonPool[16];
-	POV m_povPool[4];
-
-	Array<Axis*> m_axes;
-	Array<Button*> m_buttons;
-	Array<POV*> m_povs;
+	Array<Axis> m_axes;
+	Array<Button> m_buttons;
+	Array<POV> m_povs;
 	XboxControllerState m_xboxStatePrev;
 	XboxControllerState m_xboxState;
+	DIJOYSTATE2 m_dxState;
 };
 
 

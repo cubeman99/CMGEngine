@@ -46,9 +46,7 @@ void ArcBallControlSystem::UpdateComponents(float delta, BaseECSComponent** comp
 	// Right mouse: rotate camera
 	if (m_mouse->IsButtonDown(MouseButtons::right))
 	{
-		Vector2f mouseDelta(
-			(float) (currState.x - prevState.x),
-			(float) (currState.y - prevState.y));
+		Vector2f mouseDelta(currState.location.xy - prevState.location.xy);
 		transform->transform.rotation.Rotate(
 			m_upAxis, -mouseDelta.x * control->sensitivity);
 		transform->transform.rotation.Rotate(
@@ -56,7 +54,7 @@ void ArcBallControlSystem::UpdateComponents(float delta, BaseECSComponent** comp
 			mouseDelta.y * control->sensitivity);
 	}
 
-	int scroll = currState.z - prevState.z;
+	int scroll = currState.location.z - prevState.location.z;
 	if (scroll != 0)
 		control->distance *= Math::Pow(0.8f, (float) scroll);
 

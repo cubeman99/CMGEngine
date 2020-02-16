@@ -74,6 +74,7 @@ cmg_install_library(cmgGraphics "${CMG_GRAPHICS_SOURCE_FILES}")
 
 target_link_libraries(cmgGraphics
 	cmgCore
+	cmgInput
 	cmgMath
 	FreeType
 	SOIL

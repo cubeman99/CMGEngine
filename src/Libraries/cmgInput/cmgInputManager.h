@@ -27,28 +27,31 @@ struct InputDeviceInfo
 class InputManager
 {
 public:
-	typedef InputDeviceType::value_type device_type;
-
-public:
 	InputManager();
 	~InputManager();
 
 	bool Initialize(Window* window);
-	void Reset(device_type type);
-	void Update(device_type type);
+	void Reset(InputDeviceType type);
+	void Update(InputDeviceType type);
 		
 	void ResetAll();
 	void UpdateAll();
 
-	InputDevice* AddDevice(device_type type);
-	InputDevice* GetDevice(device_type type, int index = 0);
-	int GetDeviceCount(device_type type);
+	InputDevice* AddDevice(InputDeviceType type);
+	InputDevice* AddDevice(InputDeviceType type, const String& name);
+	InputDevice* GetDevice(InputDeviceType type, int index = 0);
+	InputDevice* GetDevice(InputDeviceType type, const String& name);
+	int GetDeviceCount(InputDeviceType type);
 		
 	template <typename T_InputDevice>
 	T_InputDevice* AddDevice();
+	template <typename T_InputDevice>
+	T_InputDevice* AddDevice(const String& name);
 
 	template <typename T_InputDevice>
 	T_InputDevice* GetDevice(int index = 0);
+	template <typename T_InputDevice>
+	T_InputDevice* GetDevice(const String& name);
 
 	template <typename T_InputDevice>
 	int GetDeviceCount();
@@ -56,13 +59,15 @@ public:
 
 
 private:
-	static BOOL CALLBACK	DoEnumerateCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef);
-	void					DoEnumerateDevices();
-		
-	IDirectInput8*			m_directInput;
-	HWND					m_windowHandle;
+	InputDevice* CreateDevice(InputDeviceType type, InputDeviceInfo& deviceInfo);
 
-	std::vector<InputDeviceInfo> m_winInputDevices[InputDeviceType::k_count];
+	static BOOL CALLBACK DoEnumerateCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef);
+	void DoEnumerateDevices();
+		
+	IDirectInput8* m_directInput;
+	HWND m_windowHandle;
+
+	std::vector<InputDeviceInfo> m_winInputDevices[(int32) InputDeviceType::k_count];
 
 	HWND GetWindowHandle() const { return m_windowHandle; }
 	IDirectInput8* GetDirectInput() const { return m_directInput; }

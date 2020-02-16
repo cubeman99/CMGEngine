@@ -61,7 +61,15 @@ public:
 
 	// Choose random element from a list
 	template <typename T>
-	inline static T Choose(Array<T>& list)
+	inline static const T& Choose(const Array<T>& list)
+	{
+		CMG_ASSERT(list.size() > 0);
+		return list[NextInt(list.size())];
+	}
+
+	// Choose random element from a list
+	template <typename T>
+	inline static T& Choose(Array<T>& list)
 	{
 		CMG_ASSERT(list.size() > 0);
 		return list[NextInt(list.size())];

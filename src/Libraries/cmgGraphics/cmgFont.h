@@ -49,6 +49,8 @@ class Glyph
 	friend class Font;
 
 public:
+	Glyph() {}
+
 	inline bool HasImage() const { return (m_width > 0 && m_height > 0); }
 	inline int32 GetAdvance() const { return m_advance; }
 	inline int32 GetMinX() const { return m_minX; }
@@ -61,14 +63,13 @@ public:
 	inline int32 GetSourceY() const { return m_sourceY; }
 
 private:
-	Glyph() {}
 	void Init(void* ftGlyphPtr);
 
 	int32 m_advance; // Amount to move the pen position horizontally after drawing this glyph
 	int32 m_minX = 0; // Image x-draw-offset from pen position
 	int32 m_minY = 0;  // Image y-draw-offset from pen position
-	int32 m_width; // Width of glyph image
-	int32 m_height; // Height of glyph image
+	int32 m_width = 0; // Width of glyph image
+	int32 m_height = 0; // Height of glyph image
 	int32 m_sourceX = 0; // Image X-offset in the font's glyph atlas texture
 	int32 m_sourceY = 0; // Image Y-offset in the font's glyph atlas texture
 };
@@ -130,9 +131,9 @@ private:
 	String m_familyName = "";
 	String m_styleName = "";
 	int32 m_size = 1;
-	Glyph* m_glyphs = nullptr;
 	Texture* m_glyphAtlasTexture = nullptr;
 	CharacterRegion m_charRegion;
+	Map<uint32, Glyph> m_glyphMap;
 };
 
 

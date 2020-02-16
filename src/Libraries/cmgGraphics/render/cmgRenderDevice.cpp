@@ -77,6 +77,7 @@ namespace
 		else if (frontFace == FrontFace::k_clockwise)
 			return GL_CW;
 		CMG_ASSERT_FALSE("Invalid front face");
+		return 0;
 	}
 
 	GLenum TranslateCullFace(CullFace cullFace)
@@ -88,6 +89,7 @@ namespace
 		else if (cullFace == CullFace::k_front_and_back)
 			return GL_FRONT_AND_BACK;
 		CMG_ASSERT_FALSE("Invalid cull face");
+		return 0;
 	}
 
 	GLenum TranslatePolygonMode(PolygonMode polygonMode)
@@ -99,6 +101,7 @@ namespace
 		else if (polygonMode == PolygonMode::k_point)
 			return GL_POINT;
 		CMG_ASSERT_FALSE("Invalid polygon mode");
+		return 0;
 	}
 
 	GLenum TranslateVertexPrimitiveType(VertexPrimitiveType primitiveType)

@@ -58,11 +58,11 @@ void Mouse::Update()
 	POINT point;
 	GetCursorPos(&point);
 	ScreenToClient(m_windowHandle, &point);
-	m_currentState.x = point.x;
-	m_currentState.y = point.y;
+	m_currentState.location.x = point.x;
+	m_currentState.location.y = point.y;
 
 	// Add to the mouse's Z-position (scroll wheel value)
-	m_currentState.z += m_mouseBuffer.lZ / 120; // TODO: magic number 120 ?
+	m_currentState.location.z += m_mouseBuffer.lZ / 120; // TODO: magic number 120 ?
 
 	// Poll the mouse buttons.
 	if (m_mouseBuffer.rgbButtons[0] & 0x80)

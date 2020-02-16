@@ -6,6 +6,25 @@
 #include <set>
 #include <map>
 
+namespace cmg { namespace container {
+
+template<class T_Array, typename T_Item>
+inline int32 GetIndex(const T_Array& container, T_Item item)
+{
+	auto it = std::find(container.begin(), container.end(), item);
+	if (it != container.end())
+		return (it - container.begin());
+	return -1;
+}
+
+template<class T_Array, typename T_Item>
+inline bool Contains(const T_Array& container, T_Item item)
+{
+	auto it = std::find(container.begin(), container.end(), item);
+	return (it != container.end());
+}
+
+};};
 
 template <typename T>
 using Set = std::set<T>;

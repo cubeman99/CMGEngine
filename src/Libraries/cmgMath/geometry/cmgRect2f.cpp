@@ -120,6 +120,13 @@ Rect2f& Rect2f::Inflate(float left, float top, float right, float bottom)
 	return *this;
 }
 
+Rect2f& Rect2f::Resize(const Vector2f& size, const Vector2f& anchor)
+{
+	this->position += anchor * (this->size - size);
+	this->size = size;
+	return *this;
+}
+
 // Expand the rectangle's edges in each direction by the given amount.
 Rect2f& Rect2f::Inflate(float horizontal, float vertical)
 {

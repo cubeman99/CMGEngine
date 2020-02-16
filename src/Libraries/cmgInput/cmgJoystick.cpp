@@ -26,6 +26,68 @@ Joystick::~Joystick()
 	}
 }
 
+bool Joystick::IsButtonDown(Buttons button) const
+{
+	return m_xboxState.buttons[(uint32) button];
+}
+
+bool Joystick::IsButtonPressed(Buttons button) const
+{
+	return m_xboxState.buttons[(uint32) button] &&
+		!m_xboxStatePrev.buttons[(uint32) button];
+}
+
+bool Joystick::IsButtonReleased(Buttons button) const
+{
+	return !m_xboxState.buttons[(uint32) button] &&
+		m_xboxStatePrev.buttons[(uint32) button];
+}
+
+const XboxControllerState& Joystick::GetStatePrev() const
+{
+	return m_xboxState;
+}
+
+const XboxControllerState& Joystick::GetState() const
+{
+	return m_xboxState;
+}
+
+uint32 Joystick::GetNumAxes() const
+{
+	return m_axes.size();
+}
+
+const Joystick::AxisState& Joystick::GetAxisState(uint32 axisIndex) const
+{
+	return m_axes[axisIndex].state;
+}
+
+float Joystick::GetAxisPosition(uint32 axisIndex) const
+{
+	return m_axes[axisIndex].state.position;
+}
+
+uint32 Joystick::GetNumButtons() const
+{
+	return m_buttons.size();
+}
+
+const Joystick::ButtonState& Joystick::GetButtonState(uint32 buttonIndex) const
+{
+	return m_buttons[buttonIndex].state;
+}
+
+uint32 Joystick::GetNumPOVs() const
+{
+	return m_povs.size();
+}
+
+const Joystick::POVState& Joystick::GetPOVState(uint32 povIndex) const
+{
+	return m_povs[povIndex].state;
+}
+
 
 //-----------------------------------------------------------------------------
 // Input Update
@@ -71,6 +133,7 @@ void Joystick::Update()
 
 	// Get the input's device state
 	result = m_joystick->GetDeviceState(sizeof(DIJOYSTATE2), &state);
+	m_dxState = state;
 
 	if (FAILED(result))
 	{
@@ -78,36 +141,36 @@ void Joystick::Update()
 		return;
 	}
 
-	using namespace std;
-
-	for (Axis* axis : m_axes)
+	for (Axis& axis : m_axes)
 	{
-		axis->x = (float) (&state.lX)[axis->index] / 1000.0f;
+		uint8* start = (uint8*) &state.lX + axis.offset;
+		LONG value = *((LONG*) start);
+		axis.state.position = (float) (value / 1000.0f);
 	}
-	for (Button* button : m_buttons)
+	for (Button& button : m_buttons)
 	{
-		button->down = (state.rgbButtons[button->index] > 0);
-		m_xboxState.buttons[button->index] = button->down;
+		button.state.down = (state.rgbButtons[button.index] > 0);
+		m_xboxState.buttons[button.index] = button.state.down;
 	}
-	for (POV* pov : m_povs)
+	for (POV& pov : m_povs)
 	{
-		DWORD value = state.rgdwPOV[pov->index];
+		DWORD value = state.rgdwPOV[pov.index];
 		if (LOWORD(value) == 0xFFFF)
 		{
-			pov->angle = 0.0f;
-			pov->centered = true;
+			pov.state.angle = 0.0f;
+			pov.state.centered = true;
 		}
 		else
 		{
-			pov->centered = false;
-			pov->angle = ((float) state.rgdwPOV[0] / (float) 36000) * Math::TWO_PI;
+			pov.state.centered = false;
+			pov.state.angle = ((float) state.rgdwPOV[0] / 36000.0f) * Math::TWO_PI;
 		}
 	}
 
 	// steering = state.lX
 	// right pedal = state.lY
 	// left pedal = state.lRz
-
+	/*
 	ZeroMemory(&m_xboxState, sizeof(XboxControllerState));
 	m_xboxState.leftStick.x = m_axisPool[0].x;
 	m_xboxState.leftStick.y = m_axisPool[1].x;
@@ -115,6 +178,7 @@ void Joystick::Update()
 	m_xboxState.rightTrigger = -m_axisPool[2].x;
 	m_xboxState.rightStick.x = m_axisPool[3].x;
 	m_xboxState.rightStick.y = m_axisPool[4].x;
+	*/
 
 	//uint32 line = 1;
 	//cout << line++ << ": " << ", " << state.lX << endl;
@@ -186,10 +250,14 @@ BOOL CALLBACK Joystick::EnumObjectsCallback(const DIDEVICEOBJECTINSTANCE* instan
 	static int nSliderCount = 0;  // Number of returned slider controls
 	static int nPOVCount = 0;     // Number of returned POV controls
 
+	DIJOYSTATE2 joystate2;
+	uint8* joystate2Begin = (uint8*) &joystate2.lX;
+
 	uint32 type = DIDFT_GETTYPE(instance->dwType);
 	uint32 instanceNumber = DIDFT_GETINSTANCE(instance->dwType);
-	printf(" - %u. TYPE = %04X, FLAGS = %X, NAME = %s\n", instanceNumber, type, instance->dwFlags, instance->tszName);
-
+	//printf(" - %u. TYPE = %04X, FLAGS = %X, offset = %u, NAME = %s\n",
+	//	instanceNumber, type, instance->dwFlags, instance->dwOfs, instance->tszName);
+	
 	// For axes that are returned, set the DIPROP_RANGE property for the
 	// enumerated axis in order to scale min/max values.
 	if (type & DIDFT_AXIS)
@@ -207,29 +275,42 @@ BOOL CALLBACK Joystick::EnumObjectsCallback(const DIDEVICEOBJECTINSTANCE* instan
 		if (FAILED(result))
 			return DIENUM_STOP;
 
-		//printf(" - AXIS DETECTED: %u, %s\n", instance->dwType, instance->tszName);
+		//printf(" - AXIS DETECTED [%u]: %s\n", instanceNumber, instance->tszName);
 
-		Axis* axis = joystick->m_axisPool + instanceNumber;
-		axis->xyz = Vector3f::ZERO;
-		axis->index = instanceNumber;
+		Axis axis;
+		axis.name = instance->tszName;
+		axis.index = instanceNumber;
+		if (instance->guidType == GUID_XAxis)
+			axis.offset = (uint8*) &joystate2.lX - joystate2Begin;
+		else if (instance->guidType == GUID_YAxis)
+			axis.offset = (uint8*) &joystate2.lY - joystate2Begin;
+		else if (instance->guidType == GUID_ZAxis)
+			axis.offset = (uint8*) &joystate2.lZ - joystate2Begin;
+		else if (instance->guidType == GUID_RxAxis)
+			axis.offset = (uint8*) &joystate2.lRx - joystate2Begin;
+		else if (instance->guidType == GUID_RyAxis)
+			axis.offset = (uint8*) &joystate2.lRy - joystate2Begin;
+		else if (instance->guidType == GUID_RzAxis)
+			axis.offset = (uint8*) &joystate2.lRz - joystate2Begin;
+		else if (instance->guidType == GUID_Slider)
+			axis.offset = (uint8*) &joystate2.rglSlider[0] - joystate2Begin;
 		joystick->m_axes.push_back(axis);
 	}
 	else if (type & DIDFT_BUTTON)
 	{
-		Button* button = joystick->m_buttonPool + instanceNumber;
-		button->down = false;
-		button->index = instanceNumber;
+		Button button;
+		button.index = instanceNumber;
+		button.name = instance->tszName;
 		joystick->m_buttons.push_back(button);
-		//printf(" - BUTTON DETECTED: %u, %s\n", instance->dwType, instance->tszName);
+		//printf(" - BUTTON DETECTED: %s\n", instance->tszName);
 	}
 	else if (type & DIDFT_POV)
 	{
-		POV* pov = joystick->m_povPool + instanceNumber;
-		pov->angle = 0.0f;
-		pov->centered = true;
-		pov->index = instanceNumber;
+		POV pov;
+		pov.index = instanceNumber;
+		pov.name = instance->tszName;
 		joystick->m_povs.push_back(pov);
-		//printf(" - POV DETECTED: %u, %s\n", instance->dwType, instance->tszName);
+		//printf(" - POV DETECTED: %s\n", instance->tszName);
 	}
 	//if (instance->dwFlags & DIDFT_FFACTUATOR || instance->dwType & DIDOI_FFEFFECTTRIGGER)
 	//{
@@ -355,8 +436,8 @@ void Joystick::DoInitialize(const InputDeviceInfo& deviceInfo)
 		fprintf(stderr, "Failure to get joystick device capabilities.");
 		return;
 	}
-	printf("JOYSTICK = %u axes, %u buttons\n", capabilities.dwAxes, capabilities.dwButtons);
-
+	//printf("JOYSTICK = %u axes, %u buttons, %u POVs\n", capabilities.dwAxes,
+	//	capabilities.dwButtons, capabilities.dwPOVs);
 
 	// values property for discovered axes
 	result = m_joystick->EnumObjects(

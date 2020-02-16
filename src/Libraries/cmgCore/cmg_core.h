@@ -17,6 +17,7 @@
 #include <cmgCore/cmgEventSystem.h>
 #include <cmgCore/resource/cmgResource.h>
 #include <cmgCore/resource/cmgResourceLoader.h>
+#include <cmgCore/os/cmgClipboard.h>
 
 
 #endif // _CMG_CORE_INCLUDE_ALL_H_

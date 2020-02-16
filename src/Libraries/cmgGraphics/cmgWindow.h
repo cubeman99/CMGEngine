@@ -1,7 +1,9 @@
-#ifndef _CMG_WINDOW_H_
-#define _CMG_WINDOW_H_
+#ifndef _CMG_GRAPHICS_WINDOW_H_
+#define _CMG_GRAPHICS_WINDOW_H_
 
 #include <cmgCore/cmg_core.h>
+#include <cmgInput/cmgKeyboard.h>
+#include <cmgInput/cmgMouse.h>
 #include <Windows.h>
 #include <string>
 #include <queue>
@@ -124,6 +126,9 @@ struct WindowEvent
 		k_destroy,
 		k_drop_file,
 		k_drop_text,
+		k_key_typed,
+		k_key_down,
+		k_key_up,
 
 		k_count,
 	};
@@ -148,10 +153,16 @@ struct WindowEvent
 
 	inline int GetWidth() const { return m_sizeX; }
 	inline int GetHeight() const { return m_sizeY; }
+	inline Keys GetKey() const { return m_key; }
+	inline int GetKeyChar() const { return m_keyChar; }
+	inline int GetKeyCharUTF32() const { return m_keyCharUTF32; }
 
 	EventType m_type;
 	int m_sizeX;
 	int m_sizeY;
+	char m_keyChar;
+	uint32 m_keyCharUTF32;
+	Keys m_key;
 
 	struct
 	{
@@ -215,11 +226,41 @@ public:
 	{
 	};
 
+	struct KeyDownEvent : public cmg::Event
+	{
+		Keys key;
+	};
+
+	struct KeyUpEvent : public cmg::Event
+	{
+		Keys key;
+	};
+
+	struct KeyTypedEvent : public cmg::Event
+	{
+		Keys key;
+		char keyChar;
+		uint32 keyCharUTF32;
+	};
+
+	struct MouseDownEvent : public cmg::Event
+	{
+		MouseButtons::value_type button;
+		Vector2i location;
+	};
+
+	struct MouseUpEvent : public cmg::Event
+	{
+		MouseButtons::value_type button;
+		Vector2i location;
+	};
+
 public:
 	Window();
 	~Window();
 		
-	void Create(const GraphicsMode& graphicsMode, const WindowSettings& windowSettings);
+	void Create(const GraphicsMode& graphicsMode,
+		const WindowSettings& windowSettings);
 	void Close();
 	void SwapBuffers();
 	
@@ -249,8 +290,8 @@ public:
 	void SetFullscreen(bool fullscreen);
 
 	
-	const GraphicsMode&		GetGraphicsMode()	const { return m_graphicsMode; }
-	const WindowSettings&	GetWindowSettings()	const { return m_windowSettings; }
+	const GraphicsMode& GetGraphicsMode() const { return m_graphicsMode; }
+	const WindowSettings& GetWindowSettings() const { return m_windowSettings; }
 
 private:
 	static LRESULT CALLBACK DoWindowProcedure(HWND handle, UINT message, WPARAM wParam, LPARAM lParam);
@@ -264,25 +305,24 @@ private:
 	void DoCleanup();
 	void GetWindowStyles(WindowFlags::value_type windowFlags, DWORD& windowStyle, DWORD& windowExStyle);
 
-	event_queue		m_events;
-	WindowSettings	m_windowSettings;
-	GraphicsMode	m_graphicsMode;
-	bool			m_mouseVisible;
-	bool			m_mouseConfined;
+	event_queue m_events;
+	WindowSettings m_windowSettings;
+	GraphicsMode m_graphicsMode;
+	bool m_mouseVisible;
+	bool m_mouseConfined;
 
-	window_handle	m_handle;
-	size_t			m_callbackPtr;
-	HCURSOR			m_cursor;
-	HICON			m_icon;
-	bool			m_isCursorIn;
-	HDC				m_deviceContext;
-	HGLRC			m_openGLContext;
-	RECT			m_defaultMouseClip; // Screen coordinates of the rectangular area to which the cursor is confined.
+	window_handle m_handle;
+	size_t m_callbackPtr;
+	HCURSOR m_cursor;
+	HICON m_icon;
+	bool m_isCursorIn;
+	HDC m_deviceContext;
+	HGLRC m_openGLContext;
+	RECT m_defaultMouseClip; // Screen coordinates of the rectangular area to which the cursor is confined.
 
-	WindowDropTarget	m_dropTarget;
+	WindowDropTarget m_dropTarget;
 	
-	
-	RECT			m_windowedWindowRect;
+	RECT m_windowedWindowRect;
 	
 
 protected:
@@ -299,4 +339,4 @@ protected:
 };
 
 
-#endif // _CMG_WINDOW_H_
+#endif // _CMG_GRAPHICS_WINDOW_H_

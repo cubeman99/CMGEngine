@@ -95,17 +95,8 @@ public:
 	inline LogUtility* GetLogUtility() const { return m_logUtility; }
 
 	// Text stream
-	LogStream& operator <<(char x);
-	LogStream& operator <<(unsigned char x);
-	LogStream& operator <<(short x);
-	LogStream& operator <<(unsigned short x);
-	LogStream& operator <<(int x);
-	LogStream& operator <<(unsigned int x);
-	LogStream& operator <<(long x);
-	LogStream& operator <<(unsigned long x);
-	LogStream& operator <<(float x);
-	LogStream& operator <<(double x);
-	LogStream& operator <<(const std::string& str);
+	template <typename T>
+	friend LogStream& operator <<(LogStream& logStream, const T&  value);
 
 private:
 	
@@ -121,6 +112,12 @@ private:
 	int m_lineNumber;
 };
 
+template <typename T>
+LogStream& operator <<(LogStream& logStream, const T& value)
+{
+	logStream.m_textStream << value;
+	return logStream;
+}
 
 //-----------------------------------------------------------------------------
 // Log Module

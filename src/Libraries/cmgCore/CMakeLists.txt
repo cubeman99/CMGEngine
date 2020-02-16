@@ -28,6 +28,9 @@ set(CMG_CORE_SOURCE_FILES
 	error/cmgError.h
 	error/cmgError.cpp
 
+	os/cmgClipboard.h
+	os/cmgClipboard.cpp
+
 	resource/cmgResource.h
 	resource/cmgResource.cpp
 	resource/cmgResourceLoader.h

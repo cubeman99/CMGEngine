@@ -54,6 +54,7 @@ struct Rect2f
 	Rect2f& Inset(Insets insets);
 	Rect2f& Inflate(float left, float top, float right, float bottom);
 	Rect2f& Inflate(float horizontal, float vertical);
+	Rect2f& Resize(const Vector2f& size, const Vector2f& anchor);
 	Rect2f& Translate(const Vector2f& amount);
 	Rect2f& Translate(float x, float y);
 	Rect2f& Scale(float scale);

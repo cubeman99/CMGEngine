@@ -3,14 +3,21 @@
 
 #include <cmgCore/cmgBase.h>
 #include <cmgCore/containers/cmgArray.h>
+#include <algorithm> 
+#include <cctype>
+#include <locale>
 
 using String = std::string;
-
+using StringU16 = std::u16string;
 	
 namespace cmg { namespace string {
 
 	size_t CharAsciiToWide(wchar_t* destination, const char* source, size_t size);
 
+	// Return true if a character is whitespace
+	template<class T_Char>
+	bool IsSpace(T_Char c);
+	
 	// Split string on delimiter into a given container
 	uint32 Split(Array<String>& container, const String& str, const String& delim = " ", int32 count = -1);
 
@@ -18,48 +25,179 @@ namespace cmg { namespace string {
 	Array<String> Split(const String& str, const String& delim = " ", int32 count = -1);
 
 	// trim from start (in place)
-	void TrimLeftIP(String& str);
+	template <class T_String>
+	void TrimLeftIP(T_String& str);
 
 	// trim from end (in place)
-	void TrimRightIP(String& str);
+	template <class T_String>
+	void TrimRightIP(T_String& str);
 
 	// trim from both ends (in place)
-	void TrimIP(String& str);
+	template <class T_String>
+	void TrimIP(T_String& str);
 
 	// trim from start (copying)
-	String TrimLeft(String str);
+	template <class T_String>
+	T_String TrimLeft(T_String str);
 
 	// trim from end (copying)
-	String TrimRight(String str);
+	template <class T_String>
+	T_String TrimRight(T_String str);
 
 	// trim from both ends (copying)
-	String Trim(String str);
+	template <class T_String>
+	T_String Trim(T_String str);
 
-	// Convert to lowercase/uppercase
-	void ToLowerIP(String& str);
-	String ToLower(String str);
-	void ToUpperIP(String& str);
-	String ToUpper(String str);
+	// Convert to lowercase (in place)
+	template <class T_String>
+	void ToLowerIP(T_String& str);
 
-}}
+	// Return as lowercase
+	template <class T_String>
+	T_String ToLower(T_String str);
 
-/*class String : public std::string
-{
-public:
-	String() {}
-	String(const String& copy)
-		: std::string(copy)
-	{ }
-	String(const char* cstr)
-		: std::string(cstr)
-	{ }
-	String(const std::string& str)
-		: std::string(str)
-	{ }
+	// Convert to uppercase (in place)
+	template <class T_String>
+	void ToUpperIP(T_String& str);
 
-private:
+	// Return as uppercase
+	template <class T_String>
+	T_String ToUpper(T_String str);
 
-};*/
+	template<class T_String>
+	bool EndsWith(T_String str, T_String ending);
+	template<class T_String>
+	bool BeginsWith(T_String str, T_String suffix);
+
+
+
+	// Return true if a character is whitespace
+	template<class T_Char>
+	bool IsSpace(T_Char c)
+	{
+		return (c == (T_Char) ' ' || c == (T_Char) '\t' ||
+			c == (T_Char) '\n' || c == (T_Char) '\r');
+	}
+
+	// Convert to lowercase (in place)
+	template<class T_String>
+	void ToLowerIP(T_String & str)
+	{
+		std::locale loc;
+		std::transform(str.begin(), str.end(), str.begin(), [&](int c) {
+			return std::tolower(c, loc);
+		});
+	}
+
+	// trim from start (in place)
+	template<class T_String>
+	void TrimLeftIP(T_String& str)
+	{
+		str.erase(str.begin(), std::find_if(str.begin(), str.end(),
+			[](T_String::value_type ch)
+		{
+			return !IsSpace(ch);
+		}));
+	}
+
+	// trim from end (in place)
+	template<class T_String>
+	void TrimRightIP(T_String& str)
+	{
+		str.erase(std::find_if(str.rbegin(), str.rend(),
+			[](T_String::value_type ch)
+		{
+			return !IsSpace(ch);
+		}).base(), str.end());
+	}
+
+	// trim from both ends (in place)
+	template<class T_String>
+	void TrimIP(T_String& str)
+	{
+		TrimLeftIP(str);
+		TrimRightIP(str);
+	}
+
+	// trim from start (copying)
+	template<class T_String>
+	T_String TrimLeft(T_String str)
+	{
+		TrimLeftIP(str);
+		return str;
+	}
+
+	// trim from end (copying)
+	template<class T_String>
+	T_String TrimRight(T_String str)
+	{
+		TrimRightIP(str);
+		return str;
+	}
+
+	// trim from both ends (copying)
+	template<class T_String>
+	T_String Trim(T_String str)
+	{
+		TrimIP(str);
+		return str;
+	}
+
+
+	template<class T_String>
+	T_String ToLower(T_String str)
+	{
+		ToLowerIP(str);
+		return str;
+	}
+
+	template<class T_String>
+	void ToUpperIP(T_String & str)
+	{
+		std::locale loc;
+		std::transform(str.begin(), str.end(), str.begin(), [&](int c) {
+			return std::toupper(c, loc);
+		});
+	}
+	template<class T_String>
+	T_String ToUpper(T_String str)
+	{
+		ToUpperIP(str);
+		return str;
+	}
+
+	template<class T_String>
+	bool EndsWith(T_String str, T_String ending)
+	{
+		if (ending.length() > str.length())
+			return false;
+		auto it = str.begin() + (str.length() - ending.length());
+		auto it2 = ending.begin();
+		for (; it != str.end(); ++it, ++it2)
+		{
+			if (*it != *it2)
+				return false;
+		}
+		return true;
+	}
+
+	template<class T_String>
+	bool BeginsWith(T_String str, T_String beginning)
+	{
+		if (beginning.length() > str.length())
+			return false;
+		auto it2 = str.begin();
+		for (auto it = beginning.begin(); it != beginning.end(); ++it, ++it2)
+		{
+			if (*it != *it2)
+				return false;
+		}
+		return true;
+	}
+
+}
+
+}
 
 
 #endif // _CMG_CORE_STRING_H_

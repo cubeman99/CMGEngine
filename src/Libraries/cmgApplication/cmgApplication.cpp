@@ -60,6 +60,8 @@ void Application::Run()
 	{
 		//startTime = clock();
 
+		m_inputManager.UpdateAll();
+
 		// Process window events
 		while (m_window.GetEvent(winEvent))
 		{
@@ -93,13 +95,54 @@ void Application::Run()
 				m_eventManager.Publish(&dropEvent);
 				OnDropText(winEvent.drop.text);
 			}
+			else if (winEvent.m_type == WindowEvent::k_key_typed)
+			{
+				Window::KeyTypedEvent keyTypedEvent;
+				keyTypedEvent.key = winEvent.GetKey();
+				keyTypedEvent.keyChar = winEvent.GetKeyChar();
+				keyTypedEvent.keyCharUTF32 = winEvent.GetKeyCharUTF32();
+				m_eventManager.Publish(&keyTypedEvent);
+			}
+			else if (winEvent.m_type == WindowEvent::k_key_down)
+			{
+				Window::KeyDownEvent keyDownEvent;
+				keyDownEvent.key = winEvent.GetKey();
+				m_keyboard->InjectKeyDownEvent(keyDownEvent.key);
+				m_eventManager.Publish(&keyDownEvent);
+			}
+			else if (winEvent.m_type == WindowEvent::k_key_up)
+			{
+				Window::KeyUpEvent keyUpEvent;
+				keyUpEvent.key = winEvent.GetKey();
+				m_keyboard->InjectKeyUpEvent(keyUpEvent.key);
+				m_eventManager.Publish(&keyUpEvent);
+			}
+		}
+
+		// Process input events
+		for (auto button : {MouseButtons::left, MouseButtons::right, MouseButtons::middle})
+		{
+			if (m_mouse->IsButtonPressed(button))
+			{
+				Window::MouseDownEvent mouseDownEvent;
+				mouseDownEvent.button = button;
+				mouseDownEvent.location = m_mouse->GetMouseState().location.xy;
+				m_eventManager.Publish(&mouseDownEvent);
+			}
+			else if (m_mouse->IsButtonReleased(button))
+			{
+				Window::MouseUpEvent mouseUpEvent;
+				mouseUpEvent.button = button;
+				mouseUpEvent.location = m_mouse->GetMouseState().location.xy;
+				m_eventManager.Publish(&mouseUpEvent);
+			}
 		}
 
 		if (m_isQuitRequested)
 			break;
 
 		//m_inputManager.ResetAll();
-		m_inputManager.UpdateAll();
+		//m_inputManager.UpdateAll();
 
 		float timeDelta = 0.016f;
 		OnUpdate(timeDelta);

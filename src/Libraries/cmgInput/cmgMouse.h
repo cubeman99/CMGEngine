@@ -3,7 +3,7 @@
 
 #include <cmgInput/cmgInputDevice.h>
 #include <cmgInput/cmgDirectInputIncludes.h>
-
+#include <cmgMath/types/cmgVector3.h>
 
 struct MouseButtons
 {
@@ -28,23 +28,19 @@ struct MouseState
 {
 	MouseState() :
 		buttons(0),
-		x(0),
-		y(0),
-		z(0)
+		location(0, 0, 0)
 	{ }
 
-	int x, y, z;
 	MouseButtons::value_type buttons;
+	Vector3i location;
 };
 
 
 class Mouse : public InputDevice
 {
 public:
-	enum 
-	{
-		k_device_type = InputDeviceType::k_mouse
-	};
+	static constexpr InputDeviceType k_device_type =
+		InputDeviceType::k_mouse;
 
 	typedef MouseButtons::value_type mouse_button;
 

@@ -14,4 +14,9 @@ namespace cmg { namespace core { namespace console {
 		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), combinedColor);
 	}
 
+	void EnableUnicode()
+	{
+		SetConsoleOutputCP(CP_UTF8);
+	}
+
 };};};

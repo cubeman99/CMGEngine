@@ -13,14 +13,84 @@
 
 
 
-const wchar_t	g_className[]			= L"CMG_Window";
-Window*			g_currFullScreenWindow	= nullptr;
-size_t			g_currWindowCount		= 0;
-Window*			g_currentActiveWindow	= nullptr;
+const wchar_t g_className[] = L"CMG_Window";
+Window* g_currFullScreenWindow = nullptr;
+size_t g_currWindowCount = 0;
+Window* g_currentActiveWindow = nullptr;
 
 
 namespace
 {
+	Keys TranslateKeyCode(uint32 keyCode)
+	{
+		if (keyCode >= (uint32) '0' && keyCode <= (uint32) '9')
+			return Keys((uint32) Keys::n0 + keyCode - (uint32) '0');
+		if (keyCode >= (uint32) 'A' && keyCode <= (uint32) 'Z')
+			return Keys((uint32) Keys::a + keyCode - (uint32) 'A');
+		if (keyCode >= VK_F1 && keyCode <= VK_F24)
+			return Keys((uint32) Keys::f1 + keyCode - VK_F1);
+		if (keyCode >= VK_NUMPAD0 && keyCode <= VK_NUMPAD9)
+			return Keys((uint32) Keys::num0 + keyCode - VK_NUMPAD0);
+
+		if (keyCode == VK_OEM_PLUS) return Keys::equals;
+		if (keyCode == VK_OEM_MINUS) return Keys::minus;
+		if (keyCode == VK_OEM_PERIOD) return Keys::period;
+		if (keyCode == VK_OEM_COMMA) return Keys::comma;
+		if (keyCode == VK_OEM_1) return Keys::semicolon;
+		if (keyCode == VK_OEM_2) return Keys::slash;
+		if (keyCode == VK_OEM_3) return Keys::grave;
+		if (keyCode == VK_OEM_4) return Keys::left_bracket;
+		if (keyCode == VK_OEM_5) return Keys::backslash;
+		if (keyCode == VK_OEM_6) return Keys::right_bracket;
+		if (keyCode == VK_OEM_7) return Keys::quote;
+
+		if (keyCode == VK_LEFT) return Keys::left;
+		if (keyCode == VK_RIGHT) return Keys::right;
+		if (keyCode == VK_UP) return Keys::up;
+		if (keyCode == VK_DOWN) return Keys::down;
+
+		if (keyCode == VK_SPACE) return Keys::space;
+		if (keyCode == VK_RETURN) return Keys::enter;
+		if (keyCode == VK_ESCAPE) return Keys::escape;
+		if (keyCode == VK_TAB) return Keys::tab;
+		if (keyCode == VK_BACK) return Keys::backspace;
+
+		if (keyCode == VK_SCROLL) return Keys::scroll_lock;
+		if (keyCode == VK_NUMLOCK) return Keys::numlock;
+		if (keyCode == VK_PAUSE) return Keys::pause;
+		if (keyCode == VK_CAPITAL) return Keys::capital;
+		if (keyCode == VK_SNAPSHOT) return Keys::sysrq;
+
+		if (keyCode == VK_VOLUME_DOWN) return Keys::volume_down;
+		if (keyCode == VK_VOLUME_UP) return Keys::volume_up;
+		if (keyCode == VK_VOLUME_MUTE) return Keys::mute;
+		if (keyCode == VK_MEDIA_STOP) return Keys::media_stop;
+		if (keyCode == VK_MEDIA_PLAY_PAUSE) return Keys::play_pause;
+		if (keyCode == VK_MEDIA_NEXT_TRACK) return Keys::next_track;
+		if (keyCode == VK_MEDIA_PREV_TRACK) return Keys::prev_track;
+		if (keyCode == VK_LAUNCH_APP1) return Keys::calculator;
+		if (keyCode == VK_BROWSER_HOME) return Keys::web_home;
+
+		if (keyCode == VK_INSERT) return Keys::insert;
+		if (keyCode == VK_DELETE) return Keys::k_delete;
+		if (keyCode == VK_HOME) return Keys::home;
+		if (keyCode == VK_END) return Keys::end;
+		if (keyCode == VK_PRIOR) return Keys::page_up;
+		if (keyCode == VK_NEXT) return Keys::page_down;
+
+		if (keyCode == VK_SUBTRACT) return Keys::minus_keypad;
+		if (keyCode == VK_DECIMAL) return Keys::period_keypad;
+		if (keyCode == VK_DIVIDE) return Keys::divide_keypad;
+		if (keyCode == VK_ADD) return Keys::add_keypad;
+		if (keyCode == VK_MULTIPLY) return Keys::multiply_keypad;
+
+		if (keyCode == VK_SHIFT) return Keys::left_shift;
+		if (keyCode == VK_MENU) return Keys::left_alt;
+		if (keyCode == VK_CONTROL) return Keys::left_control;
+
+		return Keys::none;
+	}
+
 	// Get the error string for the given HRESULT value.
 	// GetLastError() can be used to get that latest HRESULT.
 	String GetHResultErrorString(HRESULT hResult)
@@ -914,27 +984,66 @@ void Window::DoProcessEvent(UINT message, WPARAM wParam, LPARAM lParam)
 		}
 		case WM_SETFOCUS:
 		{
-			SendEvent(WindowEvent(WindowEvent::k_gained_focus, GetWidth(), GetHeight()));
+			SendEvent(WindowEvent(WindowEvent::k_gained_focus));
 			break;
 		}
 		case WM_KILLFOCUS:
 		{
 			DoSetMouseVisibility(true);
 			DoConfineMouse(false);
-			SendEvent(WindowEvent(WindowEvent::k_lost_focus, GetWidth(), GetHeight()));
+			SendEvent(WindowEvent(WindowEvent::k_lost_focus));
+			break;
+		}
+		case WM_DROPFILES:
+		{
+			HDROP hdrop = (HDROP) wParam;
+			SendEvent(WindowEvent(WindowEvent::k_drop_file));
 			break;
 		}
 		case WM_MOUSEMOVE:
 		{
 			break;
 		}
-		case WM_DROPFILES:
+		case WM_LBUTTONDOWN:
 		{
-			HDROP hdrop = (HDROP) wParam;
-			SendEvent(WindowEvent(WindowEvent::k_drop_file, GetWidth(), GetHeight()));
+			WindowEvent e(WindowEvent::k_key_down);
+			e.m_key = TranslateKeyCode(wParam);
+			SendEvent(e);
 			break;
 		}
-			
+		case WM_KEYDOWN:
+		{
+			WindowEvent e(WindowEvent::k_key_down);
+			e.m_key = TranslateKeyCode(wParam);
+			SendEvent(e);
+			break;
+		}
+		case WM_KEYUP:
+		{
+			WindowEvent e(WindowEvent::k_key_up);
+			e.m_key = TranslateKeyCode(wParam);
+			SendEvent(e);
+			break;
+		}
+		case WM_CHAR:
+		{
+			WindowEvent e(WindowEvent::k_key_typed);
+			e.m_key = Keys::none;
+			e.m_keyChar = (char) wParam;
+			e.m_keyCharUTF32 = (uint32) wParam;
+			if (wParam == VK_BACK)
+				e.m_key = Keys::backspace;
+			else if (wParam == 0x0A)
+				e.m_key = Keys::enter;  // line feed
+			else if (wParam == VK_ESCAPE)
+				e.m_key = Keys::escape;
+			else if (wParam == VK_TAB)
+				e.m_key = Keys::tab;
+			else if (wParam == VK_RETURN)
+				e.m_key = Keys::enter;
+			SendEvent(e);
+			break;
+		}			
 	}
 }
 	

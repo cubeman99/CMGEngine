@@ -105,13 +105,14 @@ Error Font::LoadSpriteFont(Font *& outFont, const Path & path,
 	// Create the mapping of glyphs using a grid pattern
 	outFont->m_charRegion.begin = 0;
 	outFont->m_charRegion.length = 256;
-	outFont->m_glyphs = new Glyph[outFont->m_charRegion.length];
+	outFont->m_glyphMap.clear();
 	outFont->m_size = charWidth;
 	for (uint32 i = 0; i < outFont->m_charRegion.length; i++)
 	{
+		uint32 charCode = outFont->m_charRegion.begin + i;
 		uint32 x = i % charsPerRow;
 		uint32 y = i / charsPerRow;
-		Glyph& glyph = outFont->m_glyphs[i];
+		Glyph glyph;
 		glyph.m_sourceX = x * (charWidth + charSpacing);
 		glyph.m_sourceY = y * (charHeight + charSpacing);
 		glyph.m_width = charWidth;
@@ -119,6 +120,7 @@ Error Font::LoadSpriteFont(Font *& outFont, const Path & path,
 		glyph.m_advance = charWidth;
 		glyph.m_minX = 0;
 		glyph.m_minY = -((int32) charHeight);
+		outFont->m_glyphMap[charCode] = glyph;
 	}
 
 	return CMG_ERROR_SUCCESS;
@@ -153,13 +155,13 @@ Error Font::LoadBuiltInFont(Font *& outFont, BuiltInFonts builtInFont)
 		// Create the mapping of glyphs using a grid pattern
 		outFont->m_charRegion.begin = 0;
 		outFont->m_charRegion.length = 256;
-		outFont->m_glyphs = new Glyph[outFont->m_charRegion.length];
 		outFont->m_size = FontConsoleBitmap::CHAR_WIDTH;
 		for (uint32 i = 0; i < outFont->m_charRegion.length; i++)
 		{
+			uint32 charCode = outFont->m_charRegion.begin + i;
 			uint32 x = i % FontConsoleBitmap::CHARS_PER_ROW;
 			uint32 y = i / FontConsoleBitmap::CHARS_PER_ROW;
-			Glyph& glyph = outFont->m_glyphs[i];
+			Glyph glyph;
 			glyph.m_sourceX = x * (FontConsoleBitmap::CHAR_WIDTH +
 				FontConsoleBitmap::CHAR_SPACING);
 			glyph.m_sourceY = y * (FontConsoleBitmap::CHAR_HEIGHT +
@@ -169,6 +171,7 @@ Error Font::LoadBuiltInFont(Font *& outFont, BuiltInFonts builtInFont)
 			glyph.m_advance = FontConsoleBitmap::CHAR_WIDTH;
 			glyph.m_minX = 0;
 			glyph.m_minY = -((int32) FontConsoleBitmap::CHAR_HEIGHT);
+			outFont->m_glyphMap[charCode] = glyph;
 		}
 	}
 	else
@@ -200,53 +203,66 @@ Font::Font(void* ftFace, int32 size, uint32 charRegionBegin,
 
 	m_charRegion.begin = charRegionBegin;
 	m_charRegion.length = charRegionEnd - charRegionBegin;
-	m_glyphs = new Glyph[m_charRegion.length];
 
-	uint8** glyphImageData = new uint8*[m_charRegion.length];
+	Map<uint32, uint8*> glyphImageData;
 	cmg::ShelfBinPacker rectPacker;
 	FT_Error ftError;
-	FT_ULong charCode;
-
-	FT_Get_Char_Index(pFace, static_cast<FT_ULong>(12));
+	FT_UInt charIndex;
+	uint32 charCode;
 
 	// Create the glyphs
 	for (uint32 i = 0; i < m_charRegion.length; i++)
 	{
-		charCode = static_cast<FT_ULong>(m_charRegion.begin + i);
-		ftError  = FT_Load_Char(pFace, charCode, FT_LOAD_RENDER);
+		charCode = m_charRegion.begin + i;
 
-		glyphImageData[i] = nullptr;
+		// Check if the glyph exists in this font
+		charIndex = FT_Get_Char_Index(pFace, static_cast<FT_ULong>(charCode));
+		if (charIndex == 0)
+			continue;
 
-		if (ftError == FT_Err_Ok)
+		// Load and render the glyph
+		ftError = FT_Load_Char(pFace,
+			static_cast<FT_ULong>(charCode), FT_LOAD_RENDER);
+		if (ftError != FT_Err_Ok)
+			continue;
+
+		Glyph glyph;
+		glyph.Init(pFace->glyph);
+
+		// Copy the glyph's pixels into a luminance/alpha buffer
+		if (pFace->glyph->bitmap.buffer != nullptr)
 		{
-			Glyph& glyph = m_glyphs[i];
-			glyph.Init(pFace->glyph);
-
-			int glyphArea = glyph.m_width * glyph.m_height;
-
-			if (pFace->glyph->bitmap.buffer != nullptr)
+			int32 glyphArea = glyph.m_width * glyph.m_height;
+			uint8* pixels = new uint8[glyphArea * 4];
+			for (int32 j = 0; j < glyphArea; j++)
 			{
-				// Copy the glyph's pixels into a luminance/alpha buffer.
-				glyphImageData[i] = new uint8[glyphArea * 4];
-				for (int j = 0; j < glyphArea; j++)
-				{
-					glyphImageData[i][(j * 4) + 0] = 255; // Luminence
-					glyphImageData[i][(j * 4) + 1] = 255; // Luminence
-					glyphImageData[i][(j * 4) + 2] = 255; // Luminence
-					glyphImageData[i][(j * 4) + 3] = pFace->glyph->bitmap.buffer[j]; // Alpha
-				}
-
-				rectPacker.Insert(&glyph.m_sourceX, &glyph.m_sourceY, glyph.m_width, glyph.m_height, 1);
+				pixels[(j * 4) + 0] = 255; // Luminence
+				pixels[(j * 4) + 1] = 255; // Luminence
+				pixels[(j * 4) + 2] = 255; // Luminence
+				pixels[(j * 4) + 3] = pFace->glyph->bitmap.buffer[j]; // Alpha
 			}
+			glyphImageData[charCode] = pixels;
 		}
 		else
 		{
-			std::cerr << "Error: undefined character code " << i << "" << std::endl;
+			glyph.m_width = 0;
+			glyph.m_height = 0;
 		}
+
+		m_glyphMap[charCode] = glyph;
 	}
 
-	// Pack the glyphs rectangles with the shelf bin-packing algorithm
-	int32 texWidth  = 512;
+	// Pack the glyphs into a box
+	for (auto it : m_glyphMap)
+	{
+		Glyph& glyph = m_glyphMap[it.first];
+		if (glyph.HasImage())
+		{
+			rectPacker.Insert(&glyph.m_sourceX, &glyph.m_sourceY,
+				glyph.m_width, glyph.m_height, 1);
+		}
+	}
+	int32 texWidth = 512;
 	int32 texHeight = 512;
 	rectPacker.Pack(&texWidth, &texHeight);
 
@@ -257,35 +273,31 @@ Font::Font(void* ftFace, int32 size, uint32 charRegionBegin,
 	m_glyphAtlasTexture = new Texture(params);
 	glBindTexture(GL_TEXTURE_2D, m_glyphAtlasTexture->GetGLTextureID());
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 2); // Pixel alignment defaults to 4, but we are using two 1-byte components (lum & alpha)
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (GLsizei) texWidth, (GLsizei) texHeight,
-	//	0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, nullptr);
 	m_glyphAtlasTexture->WritePixels2D(texWidth, texHeight,
 		PixelTransferFormat::k_rgba, PixelType::k_unsigned_byte, nullptr);
 
 	// Blit glyph images into the texture sheet
-	for (uint32 i = 0; i < m_charRegion.length; i++)
+	for (auto it : m_glyphMap)
 	{
-		if (glyphImageData[i] != nullptr)
+		Glyph& glyph = it.second;
+		if (glyph.HasImage())
 		{
-			Glyph& glyph = m_glyphs[i];
-
 			glTexSubImage2D(GL_TEXTURE_2D,
 				0,
 				glyph.m_sourceX,
 				glyph.m_sourceY,
 				glyph.m_width,
 				glyph.m_height,
-				//GL_LUMINANCE_ALPHA,
 				GL_RGBA,
 				GL_UNSIGNED_BYTE,
-				glyphImageData[i]);
-			delete glyphImageData[i];
+				glyphImageData[it.first]);
 		}
 	}
 
 	glBindTexture(GL_TEXTURE_2D, 0);
-	delete [] glyphImageData;
 	FT_Done_Face(pFace);
+	for (auto it : glyphImageData)
+		delete it.second;
 }
 
 Font::Font()
@@ -294,8 +306,8 @@ Font::Font()
 
 Font::~Font()
 {
-	delete [] m_glyphs;
 	delete m_glyphAtlasTexture;
+	m_glyphAtlasTexture = nullptr;
 }
 
 
@@ -314,14 +326,15 @@ const Glyph* Font::GetGlyph(char c) const
 const Glyph* Font::GetGlyph(uint32 charCode) const
 {
 	if (IsCharDefined(charCode))
-		return &m_glyphs[charCode - m_charRegion.begin];
-	return &m_glyphs[0];
+		return (const Glyph*) &m_glyphMap.at(charCode);
+	return nullptr;
 }
 
 // Is the given character code defined in the font's character regions?
 bool Font::IsCharDefined(uint32 charCode) const
 {
 	return (charCode >= m_charRegion.begin &&
-		charCode < m_charRegion.begin + m_charRegion.length);
+		charCode < m_charRegion.begin + m_charRegion.length &&
+		m_glyphMap.find(charCode) != m_glyphMap.end());
 }
 

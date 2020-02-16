@@ -29,6 +29,7 @@ namespace cmg { namespace core { namespace console {
 
 	// Set the foreground and background colors of the console.
 	void SetConsoleColor(int foreColor, int backColor);
+	void EnableUnicode();
 
 };};};
 

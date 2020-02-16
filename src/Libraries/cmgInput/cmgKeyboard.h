@@ -9,33 +9,19 @@ enum class Keys
 {
 	none = 0, // unsupported key was pressed
 
-	escape,
+	space, enter, escape, tab, backspace,
+	right_shift, left_shift, right_control, left_control, right_alt, left_alt,
+	capital, numlock, scroll_lock, sysrq, pause,
+	left, right, up, down,
+	insert, k_delete, home, end, page_up, page_down,
 	n1, n2, n3, n4, n5, n6, n7, n8, n9, n0, // digits
-	minus, equals, backspace, tab,
-	q, w, e, r, t, y, u, i, o, p,
-	left_bracket, right_bracket,
-	enter,
-	left_control,
-	a, s, d, f, g, h, j, k, l,
-	semicolon, apostrophe, grave, left_shift, backslash,
-	z, x, c, v, b, n, m,
-	comma, period, slash, right_shift,
-	multiply_keypad, left_alt, space, capital,
-	f1, f2, f3, f4, f5, f6, f7, f8, f9, f10,
-	numlock, scroll_lock,
-	num7, num8, num9, minus_keypad,
-	num4, num5, num6, add_keypad,
-	num1, num2, num3, num0, period_keypad,
-	f11, f12, f13, f14, f15,
-	prev_track, next_track,
-	enter_keypad,
-	right_control, mute, calculator, play_pause, media_stop,
-	volume_down, volume_up, web_home,
-	divide_keypad, slash_keypad,
-	sysrq, right_alt, pause, home,
-	up, page_up, left, right, end, down, page_down, insert, k_delete,
+	a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z,
+	f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15, f16, f17, f18, f19, f20, f21, f22, f23, f24,
+	minus, equals, left_bracket, right_bracket, semicolon, quote, grave, backslash, comma, period, slash,
+	num0, num1, num2, num3, num4, num5, num6, num7, num8, num9,
+	multiply_keypad, minus_keypad, add_keypad, period_keypad, divide_keypad, slash_keypad, enter_keypad,
+	prev_track, next_track, play_pause, media_stop, volume_down, volume_up, mute, web_home, calculator, 
 	left_sys, right_sys, power_sys, sleep_sys, wake_sys,
-
 	count,
 };
 
@@ -49,10 +35,8 @@ public:
 class Keyboard : public InputDevice
 {
 public:
-	enum 
-	{
-		k_device_type = InputDeviceType::k_keyboard
-	};
+	static constexpr InputDeviceType k_device_type =
+		InputDeviceType::k_keyboard;
 
 public:
 	Keyboard(InputManager* inputManager);
@@ -66,6 +50,9 @@ public:
 
 	void AddEventHandler(IKeyboardEventHandler* handler);
 		
+	void InjectKeyDownEvent(Keys key);
+	void InjectKeyUpEvent(Keys key);
+
 private:
 	void DoInitialize();
 

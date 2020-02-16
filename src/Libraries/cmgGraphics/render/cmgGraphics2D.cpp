@@ -94,6 +94,10 @@ Graphics2D::Graphics2D(Window* window) :
 	glLoadMatrixf(projection.data());
 }
 
+Graphics2D::~Graphics2D()
+{
+}
+
 void Graphics2D::SetWindowOrthoProjection()
 {
 	Matrix4f projection = Matrix4f::CreateOrthographic(
@@ -125,6 +129,16 @@ void Graphics2D::SetRenderTarget(RenderTarget* renderTarget)
 	}
 	else
 		SetWindowOrthoProjection();
+}
+
+RenderTarget* Graphics2D::GetRenderTarget()
+{
+	return m_renderTarget;
+}
+
+const Matrix4f& Graphics2D::GetTransformation() const
+{
+	return m_transformation;
 }
 
 void Graphics2D::Clear(const Color& clearColor)
@@ -220,7 +234,7 @@ void Graphics2D::DrawTexture(Texture* texture, const Rect2f& source, const Rect2
 //-----------------------------------------------------------------------------
 // Strings
 //-----------------------------------------------------------------------------
-
+/*
 Rect2f Graphics2D::MeasureString(const Font* font, const String& string)
 {
 	const Glyph* glyph;
@@ -247,84 +261,7 @@ Rect2f Graphics2D::MeasureString(const Font* font, const String& string)
 	return Rect2f((float) mins.x, (float) mins.y,
 		(float) (maxs.x - mins.x), (float) (maxs.y - mins.y));
 }
-
-void Graphics2D::DrawString(Font* font, const String& string,
-	const Vector2f& position, const Color& color, TextAlign align)
-{
-	Texture* texture = font->GetGlyphTexture();
-	const Glyph* glyph;
-	float dx1, dy1, dx2, dy2;
-	float sx1, sy1, sx2, sy2;
-
-	Vector2f penPosition = position;
-	float lineSpacing = font->GetSize() * 2.0f;
-
-	if (align != TextAlign::BOTTOM_LEFT)
-	{
-		Rect2f bounds = MeasureString(font, string);
-		if ((int) align & (int) TextAlign::RIGHT)
-			penPosition.x -= bounds.GetRight();
-		else if (!((int) align & (int) TextAlign::LEFT))
-			penPosition.x -= bounds.GetRight() -
-			(float) ((int) bounds.GetWidth() / 2);
-		if ((int) align & (int) TextAlign::TOP)
-			penPosition.y -= bounds.GetTop();
-		else if (!((int) align & (int) TextAlign::BOTTOM))
-			penPosition.y -= bounds.GetTop() +
-			(float) ((int) bounds.GetHeight() / 2);
-	}
-
-	Vector2f penPositionStart = penPosition;
-
-	ActivateRenderTarget();
-	gl_Transform(m_transformation);
-	glBindTexture(GL_TEXTURE_2D, texture->GetGLTextureID());
-	glBegin(GL_QUADS);
-	glColor4ubv(color.data());
-
-	// Draw each glyph in the string of characters
-	for (uint32 i = 0; i < string.length(); i++)
-	{
-		glyph = font->GetGlyph(string[i]);
-
-		char c = string[i];
-
-		if (c == '\n')
-		{
-			penPosition.x = penPositionStart.x;
-			penPosition.y += lineSpacing;
-		}
-		else if (glyph->HasImage())
-		{
-			// Determine texture coordinates and draw destination rect
-			sx1 = glyph->GetSourceX() / (float) texture->GetWidth();
-			sy1 = glyph->GetSourceY() / (float) texture->GetHeight();
-			sx2 = (glyph->GetSourceX() + glyph->GetWidth()) / (float) texture->GetWidth();
-			sy2 = (glyph->GetSourceY() + glyph->GetHeight()) / (float) texture->GetHeight();
-			dx1 = penPosition.x + glyph->GetMinX();
-			dy1 = penPosition.y + glyph->GetMinY();
-			dx2 = penPosition.x + glyph->GetMaxX();
-			dy2 = penPosition.y + glyph->GetMaxY();
-
-			// Draw the glyph image
-			glTexCoord2f(sx1, sy1); // Top left corner
-			glVertex2f(dx1, dy1);
-			glTexCoord2f(sx2, sy1); // Top right corner
-			glVertex2f(dx2, dy1);
-			glTexCoord2f(sx2, sy2); // Bottom right corner
-			glVertex2f(dx2, dy2);
-			glTexCoord2f(sx1, sy2); // Bottom left corner
-			glVertex2f(dx1, dy2);
-		}
-
-		// Advance the pen position
-		penPosition.x += glyph->GetAdvance();
-	}
-
-	glEnd();
-	glBindTexture(GL_TEXTURE_2D, 0);
-}
-
+*/
 
 //-----------------------------------------------------------------------------
 // Rectangles
@@ -334,6 +271,7 @@ void Graphics2D::DrawRect(float x, float y, float width, float height, const Col
 {
 	ActivateRenderTarget();
 	gl_Transform(m_transformation);
+	glLineWidth(1.0f);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBegin(GL_LINE_LOOP);
 	gl_Color(color);
@@ -348,6 +286,7 @@ void Graphics2D::DrawRect(const Rect2f& rect, const Color& color)
 {
 	ActivateRenderTarget();
 	gl_Transform(m_transformation);
+	glLineWidth(1.0f);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBegin(GL_LINE_LOOP);
 	gl_Color(color);
@@ -398,6 +337,7 @@ void Graphics2D::DrawCircle(const Vector2f& center, float radius, const Color& c
 {
 	ActivateRenderTarget();
 	gl_Transform(m_transformation);
+	glLineWidth(1.0f);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBegin(GL_LINE_LOOP);
 	gl_Color(color);
@@ -434,6 +374,51 @@ void Graphics2D::FillCircle(const Vector2f& center, float radius, const Color& c
 //-----------------------------------------------------------------------------
 // Static Methods
 //-----------------------------------------------------------------------------
+
+void Graphics2D::BeginDraw(Texture* texture)
+{
+	ActivateRenderTarget();
+	gl_Transform(m_transformation);
+	if (texture)
+		glBindTexture(GL_TEXTURE_2D, texture->GetGLTextureID());
+	else
+		glBindTexture(GL_TEXTURE_2D, 0);
+	glBegin(GL_QUADS);
+}
+
+void Graphics2D::EndDraw()
+{
+	glEnd();
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void Graphics2D::DrawGlyph(Texture* texture, const Glyph& glyph,
+	const Vector2f& position, const Color& color)
+{
+	if (glyph.HasImage())
+	{
+		// Determine texture coordinates and draw destination rect
+		float sx1 = glyph.GetSourceX() / (float) texture->GetWidth();
+		float sy1 = glyph.GetSourceY() / (float) texture->GetHeight();
+		float sx2 = (glyph.GetSourceX() + glyph.GetWidth()) / (float) texture->GetWidth();
+		float sy2 = (glyph.GetSourceY() + glyph.GetHeight()) / (float) texture->GetHeight();
+		float dx1 = position.x + glyph.GetMinX();
+		float dy1 = position.y + glyph.GetMinY();
+		float dx2 = position.x + glyph.GetMaxX();
+		float dy2 = position.y + glyph.GetMaxY();
+
+		// Draw the glyph image
+		glColor4ubv(color.data());
+		glTexCoord2f(sx1, sy1); // Top left corner
+		glVertex2f(dx1, dy1);
+		glTexCoord2f(sx2, sy1); // Top right corner
+		glVertex2f(dx2, dy1);
+		glTexCoord2f(sx2, sy2); // Bottom right corner
+		glVertex2f(dx2, dy2);
+		glTexCoord2f(sx1, sy2); // Bottom left corner
+		glVertex2f(dx1, dy2);
+	}
+}
 
 void Graphics2D::ActivateRenderTarget()
 {

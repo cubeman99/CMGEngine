@@ -49,7 +49,7 @@ Keys TranslateKeyCode(DWORD dwOfs)
 	case DIK_K:           return Keys::k;
 	case DIK_L:           return Keys::l;
 	case DIK_SEMICOLON:   return Keys::semicolon;
-	case DIK_APOSTROPHE:  return Keys::apostrophe;
+	case DIK_APOSTROPHE:  return Keys::quote;
 	case DIK_GRAVE:       return Keys::grave;
 	case DIK_LSHIFT:      return Keys::left_shift;
 	case DIK_BACKSLASH:   return Keys::backslash;
@@ -181,6 +181,16 @@ void Keyboard::AddEventHandler(IKeyboardEventHandler* handler)
 }
 
 
+void Keyboard::InjectKeyDownEvent(Keys key)
+{
+	m_buffer[(int32) key] = true;
+}
+
+void Keyboard::InjectKeyUpEvent(Keys key)
+{
+	m_buffer[(int32) key] = false;
+}
+
 //-----------------------------------------------------------------------------
 // Input Update
 //-----------------------------------------------------------------------------
@@ -194,7 +204,7 @@ void Keyboard::Reset()
 void Keyboard::Update()
 {
 	memcpy(m_bufferPrev, m_buffer, sizeof(m_buffer));
-
+	return;
 	// Check if the keyboard has lost input or isn't acquired
 	HRESULT hRes = m_keyboard->GetDeviceState(s_bufferSize, &m_rawBuffer);
 	if (hRes == DIERR_INPUTLOST || hRes == DIERR_NOTACQUIRED)
@@ -269,13 +279,13 @@ void Keyboard::DoInitialize()
 		fprintf(stderr, "Keyboard cooperative level settings error.");
 		return;
 	}
-
+	/*
 	// Now acquire the keyboard.
 	result = m_keyboard->Acquire();
 	if (FAILED(result))
 	{
 		fprintf(stderr, "Failure to acquire keyboard.");
 		return;
-	}
+	}*/
 }
 
