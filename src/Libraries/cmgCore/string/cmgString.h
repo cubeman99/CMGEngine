@@ -69,6 +69,11 @@ namespace cmg { namespace string {
 	template<class T_String>
 	bool BeginsWith(T_String str, T_String suffix);
 
+	template<class T_String, class T_Char>
+	uint32 ReplaceAll(T_String& str, const T_Char* find, const T_Char* replace);
+	template<class T_String>
+	uint32 ReplaceAll(T_String& str, const T_String& find, const T_String& replace);
+
 
 
 	// Return true if a character is whitespace
@@ -193,6 +198,36 @@ namespace cmg { namespace string {
 				return false;
 		}
 		return true;
+	}
+
+	template<class T_String, class T_Char>
+	uint32 ReplaceAll(T_String& str, const T_Char* find, const T_Char* replace)
+	{
+		return ReplaceAll(str, T_String(find), T_String(replace));
+	}
+
+	template<class T_String>
+	uint32 ReplaceAll(T_String& str, const T_String& find, const T_String& replace)
+	{
+		uint32 count = 0;
+		uint32 index = 0;
+		uint32 fromLength = find.length();
+		uint32 toLength = replace.length();
+		while (true)
+		{
+			// Locate the substring to replace
+			index = str.find(find, index);
+			if (index == std::string::npos)
+				break;
+
+			// Make the replacement
+			str.replace(index, fromLength, replace);
+
+			// Advance index forward so the next iteration doesn't pick it up
+			index += toLength;
+			count++;
+		}
+		return count;
 	}
 
 }

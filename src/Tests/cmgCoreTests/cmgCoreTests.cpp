@@ -121,6 +121,21 @@ TEST(String, BeginsWith)
 	EXPECT_FALSE(cmg::string::BeginsWith<std::u16string>(u"hello", u"llo"));
 }
 
+TEST(Path, Path)
+{
+	Path path("hello/world");
+	EXPECT_EQ(Path("hello"), path.GetParent());
+	EXPECT_EQ("world", path.GetName());
+	EXPECT_EQ("world", path.GetNameWithoutExtension());
+}
+
+TEST(Path, PathU16)
+{
+	PathU16 path(u"hello/world");
+	EXPECT_EQ(PathU16(u"hello"), path.GetParent());
+	EXPECT_EQ(u"world", path.GetName());
+	EXPECT_EQ(u"world", path.GetNameWithoutExtension());
+}
 
 struct TestEvent : public cmg::Event
 {

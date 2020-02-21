@@ -36,15 +36,9 @@ File::~File()
 	
 Error File::Open(const Path& path, FileAccess access, FileType type)
 {
-	m_path = path;
-	return Open(access, type);
-}
-
-Error File::Open(FileAccess access, FileType type)
-{
 	if (type != FileType::BINARY && type != FileType::TEXT)
 		CMG_ASSERT_FALSE("Invalid file type (must be binary or text)");
-				
+
 	// Determine the open mode string.
 	const char* mode;
 	if (access == FileAccess::READ)
@@ -61,9 +55,46 @@ Error File::Open(FileAccess access, FileType type)
 		mode = (type == FileType::BINARY ? "a+b" : "a+");
 	else
 		CMG_ASSERT_FALSE("Invalid file access mode");
-		
-	// Open the file.
-	errno_t fopenError = fopen_s(&m_file, m_path.c_str(), mode);
+
+	// Open the file
+	errno_t fopenError = fopen_s(&m_file, path.c_str(), mode);
+
+	m_fileType = type;
+	m_accessMode = access;
+
+	if (fopenError == ENOENT)
+		return CMG_ERROR_FILE_NOT_FOUND;
+	else if (fopenError == EISDIR)
+		return CMG_ERROR(CommonErrorTypes::k_path_incorrect);
+	else if (fopenError != 0)
+		return CMG_ERROR_FAILURE;
+	return CMG_ERROR_SUCCESS;
+}
+
+Error File::Open(const PathU16& path, FileAccess access, FileType type)
+{
+	if (type != FileType::BINARY && type != FileType::TEXT)
+		CMG_ASSERT_FALSE("Invalid file type (must be binary or text)");
+
+	// Determine the open mode string.
+	const wchar_t* mode;
+	if (access == FileAccess::READ)
+		mode = (type == FileType::BINARY ? L"rb" : L"r");
+	else if (access == FileAccess::WRITE)
+		mode = (type == FileType::BINARY ? L"wb" : L"w");
+	else if (access == FileAccess::APPEND)
+		mode = (type == FileType::BINARY ? L"ab" : L"a");
+	else if (access == FileAccess::READ_AND_WRITE)
+		mode = (type == FileType::BINARY ? L"r+b" : L"r+");
+	else if (access == FileAccess::READ_AND_WRITE_EMPTY)
+		mode = (type == FileType::BINARY ? L"w+b" : L"w+");
+	else if (access == FileAccess::READ_AND_APPEND)
+		mode = (type == FileType::BINARY ? L"a+b" : L"a+");
+	else
+		CMG_ASSERT_FALSE("Invalid file access mode");
+
+	// Open the file
+	errno_t fopenError = _wfopen_s(&m_file, (const wchar_t*) path.c_str(), mode);
 
 	m_fileType = type;
 	m_accessMode = access;
@@ -71,6 +102,11 @@ Error File::Open(FileAccess access, FileType type)
 	if (fopenError != 0)
 		return CMG_ERROR_FAILURE;
 	return CMG_ERROR_SUCCESS;
+}
+
+Error File::Open(FileAccess access, FileType type)
+{
+	return Open(m_path, access, type);
 }
 	
 bool File::IsOpen() const
@@ -251,3 +287,17 @@ Error File::OpenAndWriteContents(const Path & path, const uint8 * data, size_t c
 	return file.Write(data, count);
 }
 	
+
+template<>
+errno_t File::DoOpen<Path>(FILE** file, const Path& path, const char* mode)
+{
+	return fopen_s(file, path.c_str(), mode);
+}
+
+template<>
+errno_t File::DoOpen<PathU16>(FILE** file, const PathU16& path, const char* mode)
+{
+	std::string modeStr(mode);
+	std::wstring modeWStr(modeStr.begin(), modeStr.end());
+	return _wfopen_s(file, (const wchar_t*) path.c_str(), modeWStr.c_str());
+}
