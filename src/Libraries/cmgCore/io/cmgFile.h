@@ -44,6 +44,7 @@ public:
 	Error Close();
 
 	// Read & write
+	FILE* GetFile();
 	uint32 Tell();
 	Error SeekFromEnd(uint32 offset);
 	Error SeekFromStart(uint32 offset);

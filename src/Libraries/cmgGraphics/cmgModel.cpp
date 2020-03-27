@@ -141,7 +141,7 @@ Error Model::Decode(File& file)
 	// Read the header
 	file.Read(&contents.header, sizeof(contents.header));
 	if (memcmp(contents.header.magic, CMGModelFile::MAGIC, 8) != 0)
-		return CMG_ERROR(CommonErrorTypes::k_file_corrupt);
+		return CMG_ERROR(Error::k_file_corrupt);
 
 	m_meshes.resize(contents.header.meshCount);
 	m_materials.resize(contents.header.meshCount);

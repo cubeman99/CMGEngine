@@ -117,7 +117,7 @@ void Mouse::DoInitialize()
 		GUID_SysMouse, &m_mouse, CMG_NULL);
 	if (FAILED(result))
 	{
-		fprintf(stderr, "Failure to initialize mouse.\n");
+		CMG_LOG_ERROR() << "Failure to initialize mouse";
 		return;
 	}
 
@@ -126,7 +126,7 @@ void Mouse::DoInitialize()
 		m_windowHandle, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);//DISCL_FOREGROUND | DISCL_EXCLUSIVE);
 	if (FAILED(result))
 	{
-		fprintf(stderr, "Mouse cooperative level settings error.\n");
+		CMG_LOG_ERROR() << "Mouse cooperative level settings error";
 		return;
 	}
 
@@ -134,7 +134,7 @@ void Mouse::DoInitialize()
 	result = m_mouse->SetDataFormat(&c_dfDIMouse2);
 	if (FAILED(result))
 	{
-		fprintf(stderr, "Could not set mouse device format.\n");
+		CMG_LOG_ERROR() << "Could not set mouse device format";
 		return;
 	}
 
@@ -142,7 +142,7 @@ void Mouse::DoInitialize()
 	result = m_mouse->Acquire();
 	if (FAILED(result) && result != DIERR_OTHERAPPHASPRIO)
 	{
-		fprintf(stderr, "Failure to acquire mouse.\n");
+		CMG_LOG_ERROR() << "Failure to acquire mouse";
 		return;
 	}
 }

@@ -2,6 +2,7 @@
 #define _CMG_CORE_OS_CLIPBOARD_H_
 
 #include <cmgCore/io/cmgPath.h>
+#include <cmgCore/error/cmgError.h>
 
 namespace cmg { namespace os {
 
@@ -13,6 +14,9 @@ void SetClipboardText(const String& text);
 void SetClipboardText(const StringU16& text);
 String GetClipboardText();
 StringU16 GetClipboardUnicodeText();
+
+Error RemoveFile(const Path& url);
+Error RemoveFile(const PathU16& url);
 
 }}
 

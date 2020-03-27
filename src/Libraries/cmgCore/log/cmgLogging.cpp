@@ -1,4 +1,5 @@
 #include "cmgLogging.h"
+#include <cmgCore/cmgConsole.h>
 #include <iostream>
 
 const LogLevel LogUtility::DEFAULT_LOG_LEVEL = LogLevel::ALL;
@@ -24,8 +25,52 @@ void LogUtility::HandleLogMessage(const LogMessage& message)
 {
 	if (message.level <= m_level)
 	{
-		// TODO: format the message
-		std::cout << message.text << std::endl;
+		const char* levelName = "";
+		uint32 color = cmg::core::console::p_color::light_gray;
+		if (message.level == LogLevel::DEBUG)
+		{
+			levelName = "DEBUG";
+		}
+		else if (message.level == LogLevel::INFO)
+		{
+			levelName = "INFO";
+		}
+		else if (message.level == LogLevel::NOTICE)
+		{
+			levelName = "NOTICE";
+		}
+		else if (message.level == LogLevel::WARN)
+		{
+			levelName = "WARN";
+			color = cmg::core::console::p_color::yellow;
+		}
+		else if (message.level == LogLevel::ERR)
+		{
+			levelName = "ERR";
+			color = cmg::core::console::p_color::red;
+		}
+		else if (message.level == LogLevel::FATAL)
+		{
+			levelName = "FATAL";
+			color = cmg::core::console::p_color::red;
+		}
+
+		// Format the timestamp
+		char timestamp[256];
+		time_t rawtime;
+		struct tm timeinfo;
+		time (&rawtime);
+		localtime_s(&timeinfo, &rawtime);
+		strftime(timestamp, sizeof(timestamp), "%H:%M:%S", &timeinfo);
+
+		cmg::core::console::SetConsoleColor(
+			color, cmg::core::console::p_color::black);
+
+		std::cout << levelName << " : " << timestamp << " : " << message.text << std::endl;
+
+		cmg::core::console::SetConsoleColor(
+			cmg::core::console::p_color::light_gray,
+			cmg::core::console::p_color::black);
 
 		// Invoke the callback
 		if (m_callback != nullptr)

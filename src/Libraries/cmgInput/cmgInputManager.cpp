@@ -252,7 +252,7 @@ InputDevice* InputManager::CreateDevice(InputDeviceType type, InputDeviceInfo& d
 
 	if (device != nullptr)
 	{
-		printf("Added input device: %s\n", deviceInfo.m_deviceName.c_str());
+		CMG_LOG_DEBUG() << "Added input device: " << deviceInfo.m_deviceName.c_str();
 	}
 
 	deviceInfo.m_inUse = true;
@@ -289,7 +289,8 @@ BOOL InputManager::DoEnumerateCallback(LPCDIDEVICEINSTANCE instance, LPVOID pvRe
 	else if (deviceType == DI8DEVTYPE_DEVICECTRL)
 		typeName = "Device Controller";
 
-	printf("Device: %s (%s)\n", instance->tszInstanceName, typeName.c_str());
+	CMG_LOG_DEBUG() << "Detected input device: " <<
+		instance->tszInstanceName << " (" << typeName.c_str() << ")";
 		
 	if (deviceType == DI8DEVTYPE_KEYBOARD)
 	{

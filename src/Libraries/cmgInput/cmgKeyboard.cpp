@@ -258,7 +258,7 @@ void Keyboard::DoInitialize()
 		GUID_SysKeyboard, &m_keyboard, CMG_NULL);
 	if (FAILED(result))
 	{
-		fprintf(stderr, "Failure to initialize keyboard.");
+		CMG_LOG_ERROR() << "Failure to initialize keyboard";
 		return;
 	}
 
@@ -267,7 +267,7 @@ void Keyboard::DoInitialize()
 	result = m_keyboard->SetDataFormat(&c_dfDIKeyboard);
 	if (FAILED(result))
 	{
-		fprintf(stderr, "Could not set keyboard device format.");
+		CMG_LOG_ERROR() << "Could not set keyboard device format";
 		return;
 	}
 
@@ -276,7 +276,7 @@ void Keyboard::DoInitialize()
 		m_windowHandle, DISCL_FOREGROUND | DISCL_EXCLUSIVE);
 	if (FAILED(result))
 	{
-		fprintf(stderr, "Keyboard cooperative level settings error.");
+		CMG_LOG_ERROR() << "Keyboard cooperative level settings error";
 		return;
 	}
 	/*
@@ -284,7 +284,7 @@ void Keyboard::DoInitialize()
 	result = m_keyboard->Acquire();
 	if (FAILED(result))
 	{
-		fprintf(stderr, "Failure to acquire keyboard.");
+		CMG_LOG_ERROR() << "Failure to acquire keyboard";
 		return;
 	}*/
 }

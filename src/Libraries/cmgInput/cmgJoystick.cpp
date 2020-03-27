@@ -403,7 +403,7 @@ void Joystick::DoInitialize(const InputDeviceInfo& deviceInfo)
 		deviceInfo.m_deviceGuid, &m_joystick, nullptr);
 	if (FAILED(result))
 	{
-		fprintf(stderr, "Failure to initialize joystick device.");
+		CMG_LOG_WARN() << "Failure to initialize joystick device";
 		return;
 	}
 
@@ -412,7 +412,7 @@ void Joystick::DoInitialize(const InputDeviceInfo& deviceInfo)
 	result = m_joystick->SetDataFormat(&c_dfDIJoystick2);
 	if (FAILED(result))
 	{
-		fprintf(stderr, "Could not set joystick device format.");
+		CMG_LOG_ERROR() << "Could not set joystick device format";
 		return;
 	}
 
@@ -422,7 +422,7 @@ void Joystick::DoInitialize(const InputDeviceInfo& deviceInfo)
 		m_windowHandle, DISCL_FOREGROUND | DISCL_EXCLUSIVE);
 	if (FAILED(result))
 	{
-		fprintf(stderr, "Joystick device cooperative level settings error.");
+		CMG_LOG_ERROR() << "Joystick device cooperative level settings error";
 		return;
 	}
 
@@ -433,7 +433,7 @@ void Joystick::DoInitialize(const InputDeviceInfo& deviceInfo)
 	result = m_joystick->GetCapabilities(&capabilities);
 	if (FAILED(result))
 	{
-		fprintf(stderr, "Failure to get joystick device capabilities.");
+		CMG_LOG_ERROR() << "Failure to get joystick device capabilities";
 		return;
 	}
 	//printf("JOYSTICK = %u axes, %u buttons, %u POVs\n", capabilities.dwAxes,
@@ -444,7 +444,7 @@ void Joystick::DoInitialize(const InputDeviceInfo& deviceInfo)
 		Joystick::EnumObjectsCallback, (void*) this, DIDFT_ALL);
 	if (FAILED(result))
 	{
-		fprintf(stderr, "Failure to enumerate joystick objects.");
+		CMG_LOG_ERROR() << "Failure to enumerate joystick objects";
 		return;
 	}
 
@@ -452,7 +452,7 @@ void Joystick::DoInitialize(const InputDeviceInfo& deviceInfo)
 	result = m_joystick->Acquire();
 	if (FAILED(result))
 	{
-		fprintf(stderr, "Failure to acquire joystick device.");
+		CMG_LOG_ERROR() << "Failure to acquire joystick device";
 		return;
 	}
 }

@@ -10,7 +10,7 @@ void OpenInWebBrowser(const String& url)
 
 void OpenInWebBrowser(const StringU16& url)
 {
-	ShellExecuteW(0, 0, (wchar_t*) url.c_str(), 0, 0, SW_SHOW);
+	ShellExecuteW(0, 0, (const wchar_t*) url.c_str(), 0, 0, SW_SHOW);
 }
 
 void OpenDirectoryExplorer(const Path& path)
@@ -21,7 +21,7 @@ void OpenDirectoryExplorer(const Path& path)
 
 void OpenDirectoryExplorer(const StringU16& path)
 {
-	ShellExecuteW(NULL, NULL, (wchar_t*) path.c_str(),
+	ShellExecuteW(NULL, NULL, (const wchar_t*) path.c_str(),
 		NULL, NULL, SW_SHOWNORMAL);
 }
 
@@ -148,6 +148,18 @@ StringU16 GetClipboardUnicodeText()
 	// Release the clipboard
 	CloseClipboard();
 	return text;
+}
+
+Error RemoveFile(const Path& path)
+{
+	int result = remove(path.c_str());
+	return CMG_ERROR_FROM_ERRNO(result);
+}
+
+Error RemoveFile(const PathU16& path)
+{
+	int result = _wremove((const wchar_t*) path.c_str());
+	return CMG_ERROR_FROM_ERRNO(result);
 }
 
 

@@ -24,6 +24,18 @@ inline bool Contains(const T_Array& container, T_Item item)
 	return (it != container.end());
 }
 
+template<class T_Array, typename T_Item>
+inline bool EraseIfFound(T_Array& container, T_Item item)
+{
+	auto it = std::find(container.begin(), container.end(), item);
+	if (it != container.end())
+	{
+		container.erase(it);
+		return true;
+	}
+	return false;
+}
+
 };};
 
 template <typename T>

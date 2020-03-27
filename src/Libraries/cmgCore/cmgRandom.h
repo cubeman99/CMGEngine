@@ -85,6 +85,27 @@ public:
 		std::advance(it, index);
 		return *it;
 	}
+
+	// Choose a random element from an array, weighted
+	template <typename T_Item, typename T_Weight>
+	inline static T_Item& ChooseWeighted(Array<T_Item>& items, const Array<T_Weight>& weights)
+	{
+		T_Weight weightSum = T_Weight(0);
+		for (const T_Weight& weight : weights)
+			weightSum += weight;
+		if (weightSum == T_Weight(0))
+			return Random::Choose(items);
+		float choice = Random::NextFloat(0.0f, weightSum);
+		weightSum = 0;
+		for (uint32 i = 0; i < weights.size(); i++)
+		{
+			weightSum += weights[i];
+			if (choice < (float) weightSum)
+				return items[i];
+		}
+		return items.back();
+	}
+
 };
 
 

@@ -8,23 +8,51 @@ namespace
 	{
 		switch (errorType)
 		{
-			case CommonErrorTypes::k_success:				return "success";
-			case CommonErrorTypes::k_failure:				return "failure";
-			case CommonErrorTypes::k_null_pointer:			return "null pointer";
-			case CommonErrorTypes::k_initialize:			return "initialize";
-			case CommonErrorTypes::k_already_initialized:	return "already initialized";
-			case CommonErrorTypes::k_no_data:				return "no data";
-			case CommonErrorTypes::k_corrupt_data:			return "corrupt data";
-			case CommonErrorTypes::k_size_mismatch:			return "size mismatch";
-			case CommonErrorTypes::k_path_incorrect:		return "path incorrect";
-			case CommonErrorTypes::k_file_not_found:		return "file not found";
-			case CommonErrorTypes::k_file_corrupt:			return "file corrupt";
-			case CommonErrorTypes::k_file_read:				return "file read";
-			case CommonErrorTypes::k_file_write:			return "file write";
-			case CommonErrorTypes::k_invalid_handle:		return "invalid handle";
-			case CommonErrorTypes::k_not_implemented:		return "not implemented";
-			default: return "";
-		};
+			case Error::kSuccess:
+				return "success";
+			case Error::kFailure:
+				return "failure";
+			case Error::kNullPointer:
+				return "null pointer";
+			case Error::kInitialize:
+				return "initialize";
+			case Error::kAlreadyInitialized:
+				return "already initialized";
+			case Error::kNoData:
+				return "no data";
+			case Error::kCorruptData:
+				return "corrupt data";
+			case Error::kSizeMismatch:
+				return "size mismatch";
+			case Error::kPathIncorrect:
+				return "path incorrect";
+			case Error::kAccessDenied:
+				return "access denied";
+			case Error::kOperationNotPermitted:
+				return "operation not permitted";
+			case Error::kFileNotFound:
+				return "file not found";
+			case Error::kNotAdirectory:
+				return "not a directory";
+			case Error::kIsAdirectory:
+				return "is a directory";
+			case Error::kFileExists:
+				return "file exists";
+			case Error::kFileCorrupt:
+				return "file corrupt";
+			case Error::kFileRead:
+				return "file read";
+			case Error::kFileWrite:
+				return "file write";
+			case Error::kInvalidIandle:
+				return "invalid handle";
+			case Error::kNotImplemented:
+				return "not implemented";
+			case Error::kOutOfMemory:
+				return "out of memory";
+			default:
+				return "unknown error type";
+		}
 	}
 };
 
@@ -33,28 +61,26 @@ namespace
 // Constructors & Destructor
 //-----------------------------------------------------------------------------
 
-Error::Error() :
-	m_error(CommonErrorTypes::k_success),
-	m_line(0),
-	m_file(""),
-	m_message(""),
-	m_errorCheckedByUser(false)
+Error::Error()
 {
 }
 
-Error::Error(int errorType, int line, const char* file) :
+Error::Error(error_code_type errorType, const char* fileName,
+	const char* functionName, int lineNumber) :
 	m_error(errorType),
-	m_line(line),
-	m_file(file),
-	m_errorCheckedByUser(false)
+	m_lineNumber(lineNumber),
+	m_fileName(fileName),
+	m_functionName(functionName)
 {
 	m_message = GetCommonErrorTypeName(errorType);
 }
 
-Error::Error(int errorType, const String& message, int line, const char* file) :
+Error::Error(error_code_type errorType, const String& message, 
+	const char* fileName, const char* functionName, int lineNumber) :
 	m_error(errorType),
-	m_line(line),
-	m_file(file),
+	m_lineNumber(lineNumber),
+	m_fileName(fileName),
+	m_functionName(functionName),
 	m_message(message),
 	m_errorCheckedByUser(false)
 {
@@ -62,8 +88,9 @@ Error::Error(int errorType, const String& message, int line, const char* file) :
 
 Error::Error(const Error& other) :
 	m_error(other.m_error),
-	m_line(other.m_line),
-	m_file(other.m_file),
+	m_fileName(other.m_fileName),
+	m_functionName(other.m_functionName),
+	m_lineNumber(other.m_lineNumber),
 	m_message(other.m_message),
 	m_errorCheckedByUser(other.m_errorCheckedByUser)
 {
@@ -73,8 +100,9 @@ Error::Error(const Error& other) :
 Error& Error::operator =(Error& copy)
 {
 	m_error = copy.m_error;
-	m_line = copy.m_line;
-	m_file = copy.m_file;
+	m_lineNumber = copy.m_lineNumber;
+	m_fileName = copy.m_fileName;
+	m_functionName = copy.m_functionName;
 	m_message = copy.m_message;
 	m_errorCheckedByUser = copy.m_errorCheckedByUser;
 	copy.Ignore();
@@ -83,17 +111,9 @@ Error& Error::operator =(Error& copy)
 
 Error::~Error()
 {
-	if (!m_errorCheckedByUser && m_error != CommonErrorTypes::k_success)
+	if (!m_errorCheckedByUser && m_error != Error::kSuccess)
 	{
-		cmg::core::console::SetConsoleColor(
-			cmg::core::console::p_color::red,
-			cmg::core::console::p_color::black);
-		printf("An error went unchecked at %s, line %d\n", m_file, m_line);
-		printf("Error reason: %s\n", m_message.c_str());
-		cmg::core::console::SetConsoleColor(
-			cmg::core::console::p_color::light_gray,
-			cmg::core::console::p_color::black);
-			CMG_DEBUGGER_BREAK();
+		HandleUncheckedError(*this);
 	}
 }
 
@@ -102,22 +122,16 @@ Error::~Error()
 // Error Checking
 //-----------------------------------------------------------------------------
 
-bool Error::Succeeded() const
-{
-	m_errorCheckedByUser = true;
-	return (m_error == CommonErrorTypes::k_success);
-}
-
 bool Error::Passed() const
 {
 	m_errorCheckedByUser = true;
-	return (m_error == CommonErrorTypes::k_success);
+	return (m_error == Error::kSuccess);
 }
 
 bool Error::Failed() const
 {
 	m_errorCheckedByUser = true;
-	return (m_error != CommonErrorTypes::k_success);
+	return (m_error != Error::kSuccess);
 }
 
 const Error& Error::Ignore() const
@@ -150,17 +164,54 @@ const String& Error::GetText() const
 			
 int Error::GetLineNumber() const
 {
-	return m_line;
+	return m_lineNumber;
 }
 
 const char* Error::GetFileName() const
 {
-	return m_file;
+	return m_fileName;
 }
 
-error_code_type Error::GetErrorCode() const
+const char* Error::GetFunctionName() const
+{
+	return m_functionName;
+}
+
+Error::error_code_type Error::GetErrorCode() const
 {
 	return m_error;
+}
+
+Error::error_code_type Error::ErrnoToErrorCode(errno_t error)
+{
+	switch (error)
+	{
+		case 0: return Error::kSuccess;
+		case EPERM: return Error::kOperationNotPermitted;
+		case ENOENT: return Error::kFileNotFound;
+		case ENOMEM: return Error::kOutOfMemory;
+		case EACCES: return Error::kAccessDenied;
+		case EEXIST: return Error::kFileExists;
+		case ENOTDIR: return Error::kNotAdirectory;
+		case EISDIR: return Error::kIsAdirectory;
+		case ENOSPC: return Error::kOutOfMemory;
+		case EROFS: return Error::kAccessDenied;
+		case EIO: return Error::kFileRead;
+		default: return Error::kFailure;
+	}
+}
+
+void Error::HandleUncheckedError(const Error& error)
+{
+	cmg::core::console::SetConsoleColor(
+		cmg::core::console::p_color::red,
+		cmg::core::console::p_color::black);
+	printf("An error went unchecked at %s, line %d\n", error.m_fileName, error.m_lineNumber);
+	printf("Error reason: %s\n", error.m_message.c_str());
+	cmg::core::console::SetConsoleColor(
+		cmg::core::console::p_color::light_gray,
+		cmg::core::console::p_color::black);
+	CMG_DEBUGGER_BREAK();
 }
 
 

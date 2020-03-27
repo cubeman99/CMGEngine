@@ -648,7 +648,7 @@ Error Texture::LoadTexture(Texture*& outTexture, const Path& path, const Texture
 		path.c_str(), SOIL_LOAD_AUTO,
 		SOIL_CREATE_NEW_ID, SOIL_FLAG_COMPRESS_TO_DXT);
 	if (glId == 0)
-		return CMG_ERROR(CommonErrorTypes::k_file_corrupt);
+		return CMG_ERROR(Error::k_file_corrupt);
 
 	// Create the texture
 	TextureParams texParams = params;
@@ -677,7 +677,7 @@ Error Texture::LoadCubeMapTexture(Texture*& outTexture,
 		SOIL_CREATE_NEW_ID,
 		SOIL_FLAG_COMPRESS_TO_DXT);
 	if (glId == 0)
-		return CMG_ERROR(CommonErrorTypes::k_file_corrupt);
+		return CMG_ERROR(Error::k_file_corrupt);
 	
 	// Create the texture
 	params.SetTarget(TextureTarget::k_texture_cube_map);
@@ -695,7 +695,7 @@ Error Texture::LoadTexture(Texture*& outTexture, const Array<uint8>& data, const
 		data.data(), data.size(), SOIL_LOAD_AUTO,
 		SOIL_CREATE_NEW_ID, SOIL_FLAG_COMPRESS_TO_DXT);
 	if (glId == 0)
-		return CMG_ERROR(CommonErrorTypes::k_corrupt_data);
+		return CMG_ERROR(Error::k_corrupt_data);
 
 	// Create the texture
 	TextureParams texParams = params;
@@ -713,7 +713,7 @@ Error Texture::DecodeImage(DecodedImageData & outImage, const Path & path)
 		path.c_str(), &outImage.width, &outImage.height,
 		&outImage.channels, 4);
 	if (outImage.data == nullptr)
-		return CMG_ERROR(CommonErrorTypes::k_corrupt_data);
+		return CMG_ERROR(Error::k_corrupt_data);
 	outImage.channels = 4;
 	return CMG_ERROR_SUCCESS;
 }
@@ -725,7 +725,7 @@ Error Texture::DecodeImage(DecodedImageData& outImage, const Array<uint8>& data)
 		data.data(), data.size(), &outImage.width, &outImage.height,
 		&outImage.channels, 4);
 	if (outImage.data == nullptr)
-		return CMG_ERROR(CommonErrorTypes::k_corrupt_data);
+		return CMG_ERROR(Error::k_corrupt_data);
 	outImage.channels = 4;
 	return CMG_ERROR_SUCCESS;
 }
@@ -833,7 +833,7 @@ Error Texture::LoadImpl(const TextureParams& params)
 		data.data(), data.size(), SOIL_LOAD_AUTO,
 		SOIL_CREATE_NEW_ID, SOIL_FLAG_COMPRESS_TO_DXT);
 	if (m_glTextureId == 0)
-		return CMG_ERROR(CommonErrorTypes::k_corrupt_data);
+		return CMG_ERROR(Error::k_corrupt_data);
 
 	// Set the texture params
 	TextureParams texParams = params;

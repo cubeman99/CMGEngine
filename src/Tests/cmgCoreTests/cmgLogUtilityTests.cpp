@@ -285,3 +285,13 @@ TEST(LogModule, LogMacros_MessageData)
 }
 
 
+TEST(LogModule, LogMacros_Logging)
+{
+	cmg::log::SetLogUtilityToDefault();
+	CMG_LOG_DEBUG() << "Debug log";
+	CMG_LOG_INFO() << "Info log";
+	CMG_LOG_NOTICE() << "Notice log";
+	CMG_LOG_WARN() << "Warning log";
+	CMG_LOG_ERROR() << "Error log";
+	CMG_LOG_FATAL() << "Fatal log";
+}

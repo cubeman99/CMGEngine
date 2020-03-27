@@ -135,7 +135,7 @@ Error Mesh::DecodeCMG(File& file)
 	uint32 offset = file.Tell();
 	file.Read(&contents.header, sizeof(contents.header));
 	if (memcmp(contents.header.magic, CMGMeshFile::MAGIC, 8) != 0)
-		return CMG_ERROR(CommonErrorTypes::k_file_corrupt);
+		return CMG_ERROR(Error::k_file_corrupt);
 
 	// Read the vertex data
 	file.SeekFromStart(offset + contents.header.vertexStartOffset);

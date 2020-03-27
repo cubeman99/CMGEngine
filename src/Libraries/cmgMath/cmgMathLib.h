@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <utility>
 #include <assert.h>
 #include <cmgCore/cmgAssert.h>
 
@@ -46,8 +47,12 @@ public:
 	template <class T>
 	static T Clamp(T value, T minValue, T maxValue);
 
+
 	template <class T>
 	static T Lerp(T from, T to, T t);
+
+	template <typename X, typename Y>
+	static Y PolyLerp(X x, std::initializer_list<std::pair<X, Y>> points);
 
 
 	template <typename T>
@@ -170,6 +175,32 @@ template <class T>
 T Math::Lerp(T from, T to, T t)
 {
 	return (from + (t * (to - from)));
+}
+
+template <typename X, typename Y>
+Y Math::PolyLerp(X x, std::initializer_list<std::pair<X, Y>> points)
+{
+	CMG_ASSERT(points.size() > 0);
+	uint32 i = 0;
+	std::pair<X, Y> pointPrev;
+	for (const std::pair<X, Y>& point : points)
+	{
+		if (x <= point.first)
+		{
+			if (i == 0)
+			{
+				return point.second;
+			}
+			else
+			{
+				X t = (x - pointPrev.first) / (point.first - pointPrev.first);
+				return (pointPrev.second + (t * (point.second - pointPrev.second)));
+			}
+		}
+		pointPrev = point;
+		i++;
+	}
+	return pointPrev.second;
 }
 
 template <typename T>
