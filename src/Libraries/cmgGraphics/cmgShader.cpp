@@ -362,7 +362,7 @@ Error Shader::Compile(const Array<Path>& paths)
 				errorMessage += "\n";
 			errorMessage += compileErrors[i];
 		}
-		return CMG_ERROR_MSG(Error::k_failure, errorMessage);
+		return CMG_ERROR_MSG(Error::kFailure, errorMessage);
 	}
 
 	return CMG_ERROR_SUCCESS;
@@ -457,7 +457,7 @@ Error Shader::CompileStage(ShaderStage& stage)
 		}
 		errorMessage.erase(errorMessage.begin());
 
-		return CMG_ERROR_MSG(Error::k_failure, errorMessage);
+		return CMG_ERROR_MSG(Error::kFailure, errorMessage);
 	}
 
 	return CMG_ERROR_SUCCESS;
@@ -477,7 +477,7 @@ Error Shader::Link()
 		GLchar errorMsg[1024] = { 0 };
 		glGetProgramInfoLog(m_glProgram, sizeof(errorMsg), NULL, errorMsg);
 		String errorMessage = "Error linking shader:\n\n" + String(errorMsg) + "\n";
-		return CMG_ERROR_MSG(Error::k_failure, errorMessage);
+		return CMG_ERROR_MSG(Error::kFailure, errorMessage);
 	}
 
 	return CMG_ERROR_SUCCESS;
@@ -497,7 +497,7 @@ Error Shader::Validate()
 		GLchar errorMsg[1024] = { 0 };
 		glGetProgramInfoLog(m_glProgram, sizeof(errorMsg), NULL, errorMsg);
 		String errorMessage = "Error validation failed:\n\n" + String(errorMsg) + "\n";
-		return CMG_ERROR_MSG(Error::k_failure, errorMessage);
+		return CMG_ERROR_MSG(Error::kFailure, errorMessage);
 	}
 
 	return CMG_ERROR_SUCCESS;

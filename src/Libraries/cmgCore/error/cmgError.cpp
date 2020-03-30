@@ -81,8 +81,7 @@ Error::Error(error_code_type errorType, const String& message,
 	m_lineNumber(lineNumber),
 	m_fileName(fileName),
 	m_functionName(functionName),
-	m_message(message),
-	m_errorCheckedByUser(false)
+	m_message(message)
 {
 }
 
@@ -92,7 +91,8 @@ Error::Error(const Error& other) :
 	m_functionName(other.m_functionName),
 	m_lineNumber(other.m_lineNumber),
 	m_message(other.m_message),
-	m_errorCheckedByUser(other.m_errorCheckedByUser)
+	m_errorCheckedByUser(other.m_errorCheckedByUser),
+	m_isHandled(other.m_isHandled)
 {
 	other.Ignore();
 }
@@ -105,14 +105,16 @@ Error& Error::operator =(Error& copy)
 	m_functionName = copy.m_functionName;
 	m_message = copy.m_message;
 	m_errorCheckedByUser = copy.m_errorCheckedByUser;
+	m_isHandled = copy.m_isHandled;
 	copy.Ignore();
 	return *this;
 }
 
 Error::~Error()
 {
-	if (!m_errorCheckedByUser && m_error != Error::kSuccess)
+	if (m_error != Error::kSuccess && !m_errorCheckedByUser && !m_isHandled)
 	{
+		m_isHandled = true;
 		HandleUncheckedError(*this);
 	}
 }
@@ -206,8 +208,9 @@ void Error::HandleUncheckedError(const Error& error)
 	cmg::core::console::SetConsoleColor(
 		cmg::core::console::p_color::red,
 		cmg::core::console::p_color::black);
-	printf("An error went unchecked at %s, line %d\n", error.m_fileName, error.m_lineNumber);
-	printf("Error reason: %s\n", error.m_message.c_str());
+	printf("An error went unchecked in %s, function %s, at line %d\n",
+		error.m_fileName, error.m_functionName, error.m_lineNumber);
+	printf("Error message: %s\n", error.m_message.c_str());
 	cmg::core::console::SetConsoleColor(
 		cmg::core::console::p_color::light_gray,
 		cmg::core::console::p_color::black);

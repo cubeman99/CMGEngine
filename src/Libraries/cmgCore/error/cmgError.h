@@ -67,6 +67,7 @@ private:
 	String m_message;
 
 	mutable bool m_errorCheckedByUser = false;
+	mutable bool m_isHandled = false;
 };
 
 #define CMG_ERROR_MSG(_errorCode_, _message)\

@@ -62,13 +62,7 @@ Error File::Open(const Path& path, FileAccess access, FileType type)
 	m_fileType = type;
 	m_accessMode = access;
 
-	if (fopenError == ENOENT)
-		return CMG_ERROR_FILE_NOT_FOUND;
-	else if (fopenError == EISDIR)
-		return CMG_ERROR(Error::k_path_incorrect);
-	else if (fopenError != 0)
-		return CMG_ERROR_FAILURE;
-	return CMG_ERROR_SUCCESS;
+	return CMG_ERROR_FROM_ERRNO(fopenError);
 }
 
 Error File::Open(const PathU16& path, FileAccess access, FileType type)
@@ -173,7 +167,7 @@ Error File::Read(void* destination, uint32 size)
 	CMG_ASSERT_MSG(IsOpen(), "Attempting to read a file that is not open");
 
 	if (fread((uint8*) destination, 1, size, m_file) != size)
-		return CMG_ERROR(Error::k_file_read);
+		return CMG_ERROR(Error::kFileRead);
 
 	return CMG_ERROR_SUCCESS;
 }
@@ -183,7 +177,7 @@ Error File::Write(const void* data, uint32 size)
 	CMG_ASSERT_MSG(IsOpen(), "Attempting to write/append to a file that is not open");
 
 	if (fwrite((uint8*) data, 1, size, m_file) != size)
-		return CMG_ERROR(Error::k_file_write);
+		return CMG_ERROR(Error::kFileWrite);
 
 	return CMG_ERROR_SUCCESS;
 }
